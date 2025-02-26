@@ -7,11 +7,13 @@ import {
   ChevronLeft,
   ChevronRight,
   LayoutDashboard,
-  Box,
-  Filter,
-  Wrench,
-  FileText,
-  RotateCcw,
+  Users,
+  Building2,
+  ClipboardList,
+  BarChart3,
+  Calendar,
+  Mail,
+  Settings,
   ChevronDown,
 } from "lucide-react";
 import {
@@ -30,20 +32,22 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
-  { label: "Registro de Equipos", icon: Box, path: "/registro" },
-  { label: "Trazabilidad", icon: Filter, path: "/trazabilidad" },
+  { label: "Clientes", icon: Users, path: "/clientes" },
+  { label: "Empresas", icon: Building2, path: "/empresas" },
   {
-    label: "Mantenimientos",
-    icon: Wrench,
-    path: "/mantenimientos",
+    label: "Ventas",
+    icon: ClipboardList,
+    path: "/ventas",
     subItems: [
-      { label: "Programación", path: "/mantenimientos/programacion" },
-      { label: "Consultar", path: "/mantenimientos/consultar" },
-      { label: "Historial", path: "/mantenimientos/historial" },
+      { label: "Oportunidades", path: "/ventas/oportunidades" },
+      { label: "Cotizaciones", path: "/ventas/cotizaciones" },
+      { label: "Contratos", path: "/ventas/contratos" },
     ],
   },
-  { label: "Consulta de Actas", icon: FileText, path: "/actas" },
-  { label: "Devolución de Equipos", icon: RotateCcw, path: "/devoluciones" },
+  { label: "Reportes", icon: BarChart3, path: "/reportes" },
+  { label: "Calendario", icon: Calendar, path: "/calendario" },
+  { label: "Comunicaciones", icon: Mail, path: "/comunicaciones" },
+  { label: "Configuración", icon: Settings, path: "/configuracion" },
 ];
 
 export const Navbar = () => {
@@ -94,7 +98,7 @@ export const Navbar = () => {
             "text-xl font-semibold text-white transition-all duration-300",
             !isExpanded && "hidden"
           )}>
-            Logo
+            CRM
           </span>
         </div>
 

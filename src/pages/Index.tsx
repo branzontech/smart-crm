@@ -9,8 +9,8 @@ const Index = () => {
         <div className="max-w-4xl mx-auto">
           <h1 className="text-4xl font-semibold text-gray-900 mb-6">Dashboard</h1>
           <p className="text-gray-600">
-            Bienvenido al panel de administración. Selecciona una opción del menú
-            para comenzar.
+            Bienvenido a tu CRM. Gestiona tus clientes, ventas y relaciones comerciales
+            desde un solo lugar.
           </p>
         </div>
       </main>

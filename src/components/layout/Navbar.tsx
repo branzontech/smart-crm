@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -9,6 +8,7 @@ import {
   LayoutDashboard,
   Users,
   Building2,
+  Coins,
   ClipboardList,
   BarChart3,
   Calendar,
@@ -34,6 +34,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Clientes", icon: Users, path: "/clientes" },
   { label: "Empresas", icon: Building2, path: "/empresas" },
+  { label: "Recaudos", icon: Coins, path: "/recaudos" },
   {
     label: "Ventas",
     icon: ClipboardList,

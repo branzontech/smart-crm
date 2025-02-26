@@ -20,9 +20,13 @@ export default {
     },
     extend: {
       colors: {
+        'mint': '#B7DBC8',
+        'lemon': '#E1DF66',
+        'teal': '#285D66',
+        'sage': '#6DA095',
         primary: {
-          DEFAULT: "#57abc4",
-          hover: "#4a91a6",
+          DEFAULT: "hsl(var(--primary))",
+          hover: "hsl(var(--primary-hover))",
         },
         border: "hsl(var(--border))",
         input: "hsl(var(--input))",

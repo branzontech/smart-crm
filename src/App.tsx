@@ -14,6 +14,7 @@ import VentasIndex from "./pages/ventas/index";
 import OportunidadesIndex from "./pages/ventas/oportunidades/index";
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import CotizacionesIndex from "./pages/ventas/cotizaciones/index";
+import NuevaCotizacion from "./pages/ventas/cotizaciones/nueva";
 import ContratosIndex from "./pages/ventas/contratos/index";
 import ReportesIndex from "./pages/reportes/index";
 import CalendarioIndex from "./pages/calendario/index";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/ventas/oportunidades" element={<OportunidadesIndex />} />
           <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />
           <Route path="/ventas/cotizaciones" element={<CotizacionesIndex />} />
+          <Route path="/ventas/cotizaciones/nueva" element={<NuevaCotizacion />} />
           <Route path="/ventas/contratos" element={<ContratosIndex />} />
           <Route path="/reportes" element={<ReportesIndex />} />
           <Route path="/calendario" element={<CalendarioIndex />} />

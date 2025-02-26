@@ -5,6 +5,8 @@ import { z } from "zod";
 import { Navbar } from "@/components/layout/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { ArrowLeft } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -59,6 +61,7 @@ const sectores = [
 ];
 
 export default function NuevoCliente() {
+  const navigate = useNavigate();
   const form = useForm<ClienteForm>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
@@ -83,6 +86,16 @@ export default function NuevoCliente() {
       <Navbar />
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
+              onClick={() => navigate("/clientes")}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver al listado
+            </Button>
+          </div>
           <Card>
             <CardHeader>
               <CardTitle className="text-2xl font-semibold text-gray-900">

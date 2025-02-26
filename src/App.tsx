@@ -9,7 +9,10 @@ import NotFound from "./pages/NotFound";
 import NuevoCliente from "./pages/clientes/nuevo";
 import ClientesIndex from "./pages/clientes/index";
 import EmpresasIndex from "./pages/empresas/index";
+import NuevaEmpresa from "./pages/empresas/nuevo";
 import VentasIndex from "./pages/ventas/index";
+import OportunidadesIndex from "./pages/ventas/oportunidades/index";
+import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import ReportesIndex from "./pages/reportes/index";
 import CalendarioIndex from "./pages/calendario/index";
 import ComunicacionesIndex from "./pages/comunicaciones/index";
@@ -28,7 +31,10 @@ const App = () => (
           <Route path="/clientes" element={<ClientesIndex />} />
           <Route path="/clientes/nuevo" element={<NuevoCliente />} />
           <Route path="/empresas" element={<EmpresasIndex />} />
+          <Route path="/empresas/nuevo" element={<NuevaEmpresa />} />
           <Route path="/ventas" element={<VentasIndex />} />
+          <Route path="/ventas/oportunidades" element={<OportunidadesIndex />} />
+          <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />
           <Route path="/reportes" element={<ReportesIndex />} />
           <Route path="/calendario" element={<CalendarioIndex />} />
           <Route path="/comunicaciones" element={<ComunicacionesIndex />} />

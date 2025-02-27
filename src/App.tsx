@@ -13,6 +13,7 @@ import NuevaEmpresa from "./pages/empresas/nuevo";
 import ProveedoresIndex from "./pages/proveedores/index";
 import NuevoProveedor from "./pages/proveedores/nuevo";
 import RecaudosIndex from "./pages/recaudos/index";
+import NuevoRecaudo from "./pages/recaudos/nuevo";
 import VentasIndex from "./pages/ventas/index";
 import OportunidadesIndex from "./pages/ventas/oportunidades/index";
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
@@ -41,6 +42,7 @@ const App = () => (
           <Route path="/proveedores" element={<ProveedoresIndex />} />
           <Route path="/proveedores/nuevo" element={<NuevoProveedor />} />
           <Route path="/recaudos" element={<RecaudosIndex />} />
+          <Route path="/recaudos/nuevo" element={<NuevoRecaudo />} />
           <Route path="/ventas" element={<VentasIndex />} />
           <Route path="/ventas/oportunidades" element={<OportunidadesIndex />} />
           <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />

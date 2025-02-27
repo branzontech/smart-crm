@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, React } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,7 +104,8 @@ export default function SeguimientoRecaudos() {
   const clientesUnicos = Array.from(new Set(recaudosData.map(r => r.cliente)));
   const proveedoresUnicos = Array.from(new Set(recaudosData.map(r => r.proveedor)));
 
-  const handleFiltrar = () => {
+  // Efecto para aplicar los filtros automáticamente cuando cambien
+  React.useEffect(() => {
     let recaudosFiltrados = [...recaudosData];
 
     if (filtros.fechaInicial) {
@@ -146,7 +147,7 @@ export default function SeguimientoRecaudos() {
     }
 
     setRecaudos(recaudosFiltrados);
-  };
+  }, [filtros]); // Se ejecuta cada vez que cambian los filtros
 
   const handleDescargar = () => {
     const datosCSV = recaudos.map(r => ({
@@ -426,12 +427,6 @@ export default function SeguimientoRecaudos() {
                   </SelectContent>
                 </Select>
               </div>
-            </div>
-            <div className="mt-4 flex justify-end">
-              <Button onClick={handleFiltrar}>
-                <Filter className="h-4 w-4 mr-2" />
-                Aplicar Filtros
-              </Button>
             </div>
           </div>
 
@@ -786,9 +781,8 @@ export default function SeguimientoRecaudos() {
                 ))}
               </div>
             </TabsContent>
-          </Tabs>
-        </div>
-      </main>
-    </div>
-  );
-}
+            <TabsContent value="vencidos">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recaudos.filter(r => r.estado === "Vencido").map((recaudo) => (
+                  <Card key={recaudo.id} className="relative">
+                    {recaudo

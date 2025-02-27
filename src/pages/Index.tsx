@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -15,14 +14,45 @@ import {
   BarChart3,
   ArrowUp,
   ArrowDown,
-  DollarSign
+  DollarSign,
+  Cake,
+  PartyPopper,
+  Gift
 } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
 
 const Index = () => {
   const navigate = useNavigate();
 
-  // Datos de ejemplo para las métricas
+  // Datos de ejemplo para cumpleaños
+  const cumpleanos = {
+    hoy: [
+      { id: 1, nombre: "Carlos Ruiz", empresa: "Tech Solutions", fecha: new Date() },
+      { id: 2, nombre: "Ana López", empresa: "Green Energy", fecha: new Date() }
+    ],
+    proximos: [
+      { 
+        id: 3, 
+        nombre: "María García", 
+        empresa: "Global Logistics", 
+        fecha: new Date(new Date().setDate(new Date().getDate() + 2))
+      },
+      { 
+        id: 4, 
+        nombre: "Juan Pérez", 
+        empresa: "Digital Systems", 
+        fecha: new Date(new Date().setDate(new Date().getDate() + 3))
+      },
+      { 
+        id: 5, 
+        nombre: "Laura Torres", 
+        empresa: "Smart Solutions", 
+        fecha: new Date(new Date().setDate(new Date().getDate() + 5))
+      }
+    ]
+  };
+
+  // Datos para las métricas
   const metricas = [
     {
       titulo: "Total Clientes",
@@ -96,6 +126,76 @@ const Index = () => {
               Ver Reportes Completos
             </Button>
           </div>
+
+          {/* Card de Cumpleaños */}
+          <Card className="bg-gradient-to-br from-teal-50 to-mint-50">
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <CardTitle className="text-xl font-semibold text-teal flex items-center gap-2">
+                  <Cake className="h-6 w-6" />
+                  Cumpleaños
+                </CardTitle>
+                <PartyPopper className="h-6 w-6 text-teal animate-bounce" />
+              </div>
+            </CardHeader>
+            <CardContent>
+              <div className="grid md:grid-cols-2 gap-6">
+                {/* Cumpleaños de Hoy */}
+                <div>
+                  <h3 className="text-lg font-semibold text-teal mb-4 flex items-center gap-2">
+                    <Gift className="h-5 w-5" />
+                    Cumpleaños de Hoy
+                  </h3>
+                  {cumpleanos.hoy.length > 0 ? (
+                    <div className="space-y-3">
+                      {cumpleanos.hoy.map((persona) => (
+                        <div
+                          key={persona.id}
+                          className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-teal/10 hover:border-teal/20 transition-colors"
+                        >
+                          <div className="flex-1">
+                            <p className="font-medium text-gray-900">{persona.nombre}</p>
+                            <p className="text-sm text-gray-500">{persona.empresa}</p>
+                          </div>
+                          <Cake className="h-5 w-5 text-teal ml-4" />
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <p className="text-gray-500 text-sm italic">No hay cumpleaños hoy</p>
+                  )}
+                </div>
+
+                {/* Próximos Cumpleaños */}
+                <div>
+                  <h3 className="text-lg font-semibold text-teal mb-4 flex items-center gap-2">
+                    <Gift className="h-5 w-5" />
+                    Próximos Cumpleaños
+                  </h3>
+                  <div className="space-y-3">
+                    {cumpleanos.proximos.map((persona) => (
+                      <div
+                        key={persona.id}
+                        className="flex items-center p-3 bg-white rounded-lg shadow-sm border border-teal/10 hover:border-teal/20 transition-colors"
+                      >
+                        <div className="flex-1">
+                          <p className="font-medium text-gray-900">{persona.nombre}</p>
+                          <p className="text-sm text-gray-500">{persona.empresa}</p>
+                          <p className="text-xs text-teal mt-1">
+                            {persona.fecha.toLocaleDateString('es-ES', {
+                              day: 'numeric',
+                              month: 'long'
+                            })}
+                          </p>
+                        </div>
+                        <PartyPopper className="h-5 w-5 text-teal ml-4" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
 
           {/* Métricas principales */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -200,4 +300,3 @@ const Index = () => {
 };
 
 export default Index;
-

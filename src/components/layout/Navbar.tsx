@@ -36,7 +36,15 @@ const navItems: NavItem[] = [
   { label: "Clientes", icon: Users, path: "/clientes" },
   { label: "Empresas", icon: Building2, path: "/empresas" },
   { label: "Proveedores", icon: Store, path: "/proveedores" },
-  { label: "Recaudos", icon: Coins, path: "/recaudos" },
+  {
+    label: "Recaudos",
+    icon: Coins,
+    path: "/recaudos",
+    subItems: [
+      { label: "Nuevo", path: "/recaudos/nuevo" },
+      { label: "Seguimiento", path: "/recaudos/seguimiento" },
+    ],
+  },
   {
     label: "Ventas",
     icon: ClipboardList,

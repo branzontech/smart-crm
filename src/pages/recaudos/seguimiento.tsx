@@ -95,8 +95,8 @@ export default function SeguimientoRecaudos() {
   const [filtros, setFiltros] = useState({
     fechaInicial: "",
     fechaFinal: "",
-    cliente: "",
-    proveedor: "",
+    cliente: "todos",
+    proveedor: "todos",
     periodo: "todo",
   });
   const { toast } = useToast();
@@ -119,13 +119,13 @@ export default function SeguimientoRecaudos() {
       );
     }
 
-    if (filtros.cliente) {
+    if (filtros.cliente && filtros.cliente !== "todos") {
       recaudosFiltrados = recaudosFiltrados.filter(
         r => r.cliente === filtros.cliente
       );
     }
 
-    if (filtros.proveedor) {
+    if (filtros.proveedor && filtros.proveedor !== "todos") {
       recaudosFiltrados = recaudosFiltrados.filter(
         r => r.proveedor === filtros.proveedor
       );
@@ -382,7 +382,7 @@ export default function SeguimientoRecaudos() {
                     <SelectValue placeholder="Seleccionar cliente" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     {clientesUnicos.map((cliente) => (
                       <SelectItem key={cliente} value={cliente}>
                         {cliente}
@@ -401,7 +401,7 @@ export default function SeguimientoRecaudos() {
                     <SelectValue placeholder="Seleccionar proveedor" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">Todos</SelectItem>
+                    <SelectItem value="todos">Todos</SelectItem>
                     {proveedoresUnicos.map((proveedor) => (
                       <SelectItem key={proveedor} value={proveedor}>
                         {proveedor}

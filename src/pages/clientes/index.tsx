@@ -3,6 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
 import { Users, UserPlus } from "lucide-react";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { SeguimientoMenu } from "@/components/clientes/SeguimientoMenu";
 
 const ClientesIndex = () => {
   const navigate = useNavigate();
@@ -33,55 +35,68 @@ const ClientesIndex = () => {
             </Button>
           </div>
 
-          <div className="bg-white shadow-md rounded-lg overflow-hidden">
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-mint/20">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
-                      Nombre
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
-                      Empresa
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
-                      Email
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
-                      Acciones
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {clientes.map((cliente) => (
-                    <tr
-                      key={cliente.id}
-                      className="hover:bg-gray-50 transition-colors duration-150"
-                    >
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {cliente.nombre}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {cliente.empresa}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {cliente.email}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        <Button
-                          variant="ghost"
-                          className="text-teal hover:text-sage hover:bg-mint/20"
-                          onClick={() => navigate(`/clientes/${cliente.id}`)}
+          <Tabs defaultValue="lista" className="space-y-4">
+            <TabsList>
+              <TabsTrigger value="lista">Lista de Clientes</TabsTrigger>
+              <TabsTrigger value="seguimiento">Seguimiento</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="lista">
+              <div className="bg-white shadow-md rounded-lg overflow-hidden">
+                <div className="overflow-x-auto">
+                  <table className="w-full">
+                    <thead className="bg-mint/20">
+                      <tr>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
+                          Nombre
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
+                          Empresa
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
+                          Email
+                        </th>
+                        <th className="px-6 py-3 text-left text-xs font-medium text-teal uppercase tracking-wider">
+                          Acciones
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody className="bg-white divide-y divide-gray-200">
+                      {clientes.map((cliente) => (
+                        <tr
+                          key={cliente.id}
+                          className="hover:bg-gray-50 transition-colors duration-150"
                         >
-                          Ver detalles
-                        </Button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </div>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {cliente.nombre}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {cliente.empresa}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            {cliente.email}
+                          </td>
+                          <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                            <Button
+                              variant="ghost"
+                              className="text-teal hover:text-sage hover:bg-mint/20"
+                              onClick={() => navigate(`/clientes/${cliente.id}`)}
+                            >
+                              Ver detalles
+                            </Button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            </TabsContent>
+
+            <TabsContent value="seguimiento">
+              <SeguimientoMenu />
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

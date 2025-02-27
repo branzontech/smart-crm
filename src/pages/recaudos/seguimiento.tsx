@@ -3,7 +3,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Grid, List, MessageCircle, Calendar, DollarSign, AlertCircle, Info, User, Check, X } from "lucide-react";
+import { Eye, Grid, List, MessageCircle, Calendar, DollarSign, AlertCircle, Info, User, Check, X, Package, ShoppingCart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 import {
@@ -14,6 +14,11 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 type EstadoRecaudo = "Pendiente" | "En Proceso" | "Pagado" | "Vencido" | "Cancelado";
+
+type Articulo = {
+  nombre: string;
+  cantidad: number;
+};
 
 type Recaudo = {
   id: number;
@@ -30,6 +35,8 @@ type Recaudo = {
   ultimaObservacion?: string;
   metodoPago?: string;
   historialContacto?: Array<{ fecha: string; nota: string }>;
+  proveedor: string;
+  articulos: Articulo[];
 };
 
 const recaudosData: Recaudo[] = [
@@ -50,6 +57,11 @@ const recaudosData: Recaudo[] = [
     historialContacto: [
       { fecha: "2024-03-18", nota: "Primera llamada realizada" },
       { fecha: "2024-03-20", nota: "Cliente solicitó prórroga" }
+    ],
+    proveedor: "Suministros Express",
+    articulos: [
+      { nombre: "Laptop Dell XPS", cantidad: 5 },
+      { nombre: "Monitor 27'", cantidad: 10 }
     ]
   },
   {
@@ -60,7 +72,11 @@ const recaudosData: Recaudo[] = [
     estado: "Pagado",
     monto: 15000,
     fechaCreacion: "2024-03-10",
-    fechaVencimiento: "2024-04-10"
+    fechaVencimiento: "2024-04-10",
+    proveedor: "TechPro Solutions",
+    articulos: [
+      { nombre: "Impresora HP", cantidad: 3 }
+    ]
   }
 ];
 
@@ -303,8 +319,8 @@ export default function SeguimientoRecaudos() {
                   {recaudos.map((recaudo) => (
                     <Card key={recaudo.id}>
                       <CardContent className="p-4">
-                        <div className="flex items-center justify-between">
-                          <div className="space-y-1">
+                        <div className="grid grid-cols-12 gap-4 items-center">
+                          <div className="col-span-2">
                             <div className="flex items-center gap-2">
                               {recaudo.prioridad === "Alta" && (
                                 <AlertCircle className="h-4 w-4 text-red-500" />
@@ -312,70 +328,107 @@ export default function SeguimientoRecaudos() {
                               <p className="text-sm font-medium">{recaudo.numeroRecaudo}</p>
                             </div>
                             <p className="text-sm text-muted-foreground">{recaudo.cliente}</p>
-                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                              <Calendar className="h-4 w-4" />
-                              <span>Vence: {recaudo.fechaVencimiento}</span>
+                          </div>
+                          <div className="col-span-2">
+                            <div className="flex items-center gap-2">
+                              <Package className="h-4 w-4 text-gray-500" />
+                              <span className="text-sm">{recaudo.proveedor}</span>
                             </div>
                           </div>
-                          <div className="text-right space-y-1">
-                            <div className="flex items-center justify-end gap-1">
+                          <div className="col-span-3">
+                            <div className="flex items-center gap-2">
+                              <ShoppingCart className="h-4 w-4 text-gray-500" />
+                              <div className="text-sm">
+                                {recaudo.articulos.map((articulo, index) => (
+                                  <div key={index}>
+                                    {articulo.nombre} ({articulo.cantidad} unidades)
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          </div>
+                          <div className="col-span-1">
+                            <div className="flex items-center gap-1">
                               <DollarSign className="h-4 w-4" />
                               <p className="text-sm font-medium">{recaudo.monto.toLocaleString()}</p>
                             </div>
-                            <span className={`text-sm px-2 py-0.5 rounded-full ${
-                              recaudo.estado === "Pagado" 
-                                ? "bg-green-100 text-green-800" 
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}>
-                              {recaudo.estado}
-                            </span>
-                            <div className="flex gap-2 mt-2">
-                              <Dialog>
-                                <DialogTrigger asChild>
-                                  <Button variant="ghost" size="sm">
-                                    <Eye className="h-4 w-4" />
-                                  </Button>
-                                </DialogTrigger>
-                                <DialogContent>
-                                  <DialogHeader>
-                                    <DialogTitle>Detalles del Recaudo</DialogTitle>
-                                  </DialogHeader>
-                                  <div className="space-y-4">
-                                    <div className="grid grid-cols-2 gap-4">
-                                      <div>
-                                        <h4 className="font-semibold">Historial de Contacto</h4>
-                                        {recaudo.historialContacto?.map((contacto, index) => (
-                                          <div key={index} className="text-sm mt-2">
-                                            <p className="font-medium">{contacto.fecha}</p>
-                                            <p className="text-gray-600">{contacto.nota}</p>
-                                          </div>
-                                        ))}
-                                      </div>
-                                      <div>
-                                        <h4 className="font-semibold">Información Adicional</h4>
-                                        <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
-                                        <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
-                                        <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
-                                      </div>
+                          </div>
+                          <div className="col-span-2">
+                            <div className="flex items-center gap-2">
+                              <Calendar className="h-4 w-4" />
+                              <span className="text-sm">{recaudo.fechaVencimiento}</span>
+                            </div>
+                          </div>
+                          <div className="col-span-2 flex items-center justify-end gap-2">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className={renderEstadoBadge(recaudo.estado)}>
+                                  {recaudo.estado}
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent>
+                                <DropdownMenuItem onClick={() => handleCambiarEstado(recaudo.id, "Pendiente")}>
+                                  Pendiente
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleCambiarEstado(recaudo.id, "En Proceso")}>
+                                  En Proceso
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleCambiarEstado(recaudo.id, "Pagado")}>
+                                  Pagado
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleCambiarEstado(recaudo.id, "Vencido")}>
+                                  Vencido
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => handleCambiarEstado(recaudo.id, "Cancelado")}>
+                                  Cancelado
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                            <Dialog>
+                              <DialogTrigger asChild>
+                                <Button variant="ghost" size="sm">
+                                  <Eye className="h-4 w-4" />
+                                </Button>
+                              </DialogTrigger>
+                              <DialogContent>
+                                <DialogHeader>
+                                  <DialogTitle>Detalles del Recaudo</DialogTitle>
+                                </DialogHeader>
+                                <div className="space-y-4">
+                                  <div className="grid grid-cols-2 gap-4">
+                                    <div>
+                                      <h4 className="font-semibold">Historial de Contacto</h4>
+                                      {recaudo.historialContacto?.map((contacto, index) => (
+                                        <div key={index} className="text-sm mt-2">
+                                          <p className="font-medium">{contacto.fecha}</p>
+                                          <p className="text-gray-600">{contacto.nota}</p>
+                                        </div>
+                                      ))}
+                                    </div>
+                                    <div>
+                                      <h4 className="font-semibold">Información Adicional</h4>
+                                      <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                      <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                      <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
                                     </div>
                                   </div>
-                                </DialogContent>
-                              </Dialog>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleEnviarMensaje(recaudo.id)}
-                              >
-                                <MessageCircle className="h-4 w-4" />
-                              </Button>
-                              <Button 
-                                variant="ghost" 
-                                size="sm"
-                                onClick={() => handleMarcarGestion(recaudo.id)}
-                              >
-                                <Check className="h-4 w-4" />
-                              </Button>
-                            </div>
+                                </div>
+                              </DialogContent>
+                            </Dialog>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleEnviarMensaje(recaudo.id)}
+                            >
+                              <MessageCircle className="h-4 w-4" />
+                            </Button>
+                            <Button 
+                              variant="ghost" 
+                              size="sm"
+                              onClick={() => handleMarcarGestion(recaudo.id)}
+                            >
+                              <Check className="h-4 w-4" />
+                            </Button>
                           </div>
                         </div>
                       </CardContent>

@@ -6,7 +6,7 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Plus, Save, Trash2 } from "lucide-react";
+import { ArrowLeft, Plus, Save, Trash2, Search } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -61,8 +61,17 @@ type RecaudoForm = z.infer<typeof recaudoSchema>;
 
 export default function NuevoRecaudo() {
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-  const [openProveedor, setOpenProveedor] = useState<number | null>(null);
+  const [clienteSearch, setClienteSearch] = useState("");
+  const [proveedorSearches, setProveedorSearches] = useState<{ [key: number]: string }>({});
+
+  const filteredClientes = clientes.filter(cliente =>
+    cliente.nombre.toLowerCase().includes(clienteSearch.toLowerCase())
+  );
+
+  const getFilteredProveedores = (search: string) =>
+    proveedores.filter(proveedor =>
+      proveedor.nombre.toLowerCase().includes(search.toLowerCase())
+    );
 
   const form = useForm<RecaudoForm>({
     resolver: zodResolver(recaudoSchema),
@@ -150,46 +159,34 @@ export default function NuevoRecaudo() {
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
                         <FormLabel>Cliente</FormLabel>
-                        <Popover open={open} onOpenChange={setOpen}>
-                          <PopoverTrigger asChild>
-                            <FormControl>
-                              <Button
-                                variant="outline"
-                                role="combobox"
-                                aria-expanded={open}
-                                className="justify-between"
-                              >
-                                {field.value
-                                  ? clientes.find((cliente) => cliente.id === field.value)
-                                      ?.nombre
-                                  : "Seleccionar cliente..."}
-                              </Button>
-                            </FormControl>
-                          </PopoverTrigger>
-                          <PopoverContent className="p-0">
-                            <Command>
-                              <CommandInput
-                                placeholder="Buscar cliente..."
-                                className="h-9"
-                              />
-                              <CommandEmpty>No se encontraron clientes.</CommandEmpty>
-                              <CommandGroup>
-                                {clientes.map((cliente) => (
-                                  <CommandItem
+                        <div className="relative">
+                          <Input
+                            placeholder="Buscar cliente..."
+                            value={clienteSearch}
+                            onChange={(e) => setClienteSearch(e.target.value)}
+                            className="w-full pr-10"
+                          />
+                          <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                          {clienteSearch && filteredClientes.length > 0 && (
+                            <Card className="absolute z-10 w-full mt-1">
+                              <CardContent className="p-2">
+                                {filteredClientes.map((cliente) => (
+                                  <Button
                                     key={cliente.id}
-                                    value={cliente.nombre}
-                                    onSelect={() => {
+                                    variant="ghost"
+                                    className="w-full justify-start text-left"
+                                    onClick={() => {
                                       form.setValue("clienteId", cliente.id);
-                                      setOpen(false);
+                                      setClienteSearch(cliente.nombre);
                                     }}
                                   >
                                     {cliente.nombre}
-                                  </CommandItem>
+                                  </Button>
                                 ))}
-                              </CommandGroup>
-                            </Command>
-                          </PopoverContent>
-                        </Popover>
+                              </CardContent>
+                            </Card>
+                          )}
+                        </div>
                         <FormMessage />
                       </FormItem>
                     )}
@@ -259,57 +256,42 @@ export default function NuevoRecaudo() {
                             render={({ field }) => (
                               <FormItem className="flex flex-col">
                                 <FormLabel>Proveedor</FormLabel>
-                                <Popover
-                                  open={openProveedor === index}
-                                  onOpenChange={(isOpen) =>
-                                    setOpenProveedor(isOpen ? index : null)
-                                  }
-                                >
-                                  <PopoverTrigger asChild>
-                                    <FormControl>
-                                      <Button
-                                        variant="outline"
-                                        role="combobox"
-                                        className="justify-between"
-                                      >
-                                        {field.value
-                                          ? proveedores.find(
-                                              (proveedor) =>
-                                                proveedor.id === field.value
-                                            )?.nombre
-                                          : "Seleccionar proveedor..."}
-                                      </Button>
-                                    </FormControl>
-                                  </PopoverTrigger>
-                                  <PopoverContent className="p-0">
-                                    <Command>
-                                      <CommandInput
-                                        placeholder="Buscar proveedor..."
-                                        className="h-9"
-                                      />
-                                      <CommandEmpty>
-                                        No se encontraron proveedores.
-                                      </CommandEmpty>
-                                      <CommandGroup>
-                                        {proveedores.map((proveedor) => (
-                                          <CommandItem
+                                <div className="relative">
+                                  <Input
+                                    placeholder="Buscar proveedor..."
+                                    value={proveedorSearches[index] || ""}
+                                    onChange={(e) => {
+                                      setProveedorSearches({
+                                        ...proveedorSearches,
+                                        [index]: e.target.value,
+                                      });
+                                    }}
+                                    className="w-full pr-10"
+                                  />
+                                  <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                                  {proveedorSearches[index] && getFilteredProveedores(proveedorSearches[index]).length > 0 && (
+                                    <Card className="absolute z-10 w-full mt-1">
+                                      <CardContent className="p-2">
+                                        {getFilteredProveedores(proveedorSearches[index]).map((proveedor) => (
+                                          <Button
                                             key={proveedor.id}
-                                            value={proveedor.nombre}
-                                            onSelect={() => {
-                                              form.setValue(
-                                                `articulos.${index}.proveedorId`,
-                                                proveedor.id
-                                              );
-                                              setOpenProveedor(null);
+                                            variant="ghost"
+                                            className="w-full justify-start text-left"
+                                            onClick={() => {
+                                              form.setValue(`articulos.${index}.proveedorId`, proveedor.id);
+                                              setProveedorSearches({
+                                                ...proveedorSearches,
+                                                [index]: proveedor.nombre,
+                                              });
                                             }}
                                           >
                                             {proveedor.nombre}
-                                          </CommandItem>
+                                          </Button>
                                         ))}
-                                      </CommandGroup>
-                                    </Command>
-                                  </PopoverContent>
-                                </Popover>
+                                      </CardContent>
+                                    </Card>
+                                  )}
+                                </div>
                                 <FormMessage />
                               </FormItem>
                             )}

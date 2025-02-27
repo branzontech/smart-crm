@@ -163,7 +163,7 @@ export default function NuevoRecaudo() {
           <div className="flex justify-between items-center mb-6">
             <Button
               variant="ghost"
-              className="text-soft-blue hover:text-soft-purple hover:bg-soft-purple/20"
+              className="text-teal hover:bg-[#FEF7CD] hover:text-teal"
               onClick={() => navigate("/recaudos")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -177,7 +177,7 @@ export default function NuevoRecaudo() {
                 setClienteSearch("");
                 setProveedorSearch("");
               }}
-              className="bg-soft-blue hover:bg-soft-purple text-white"
+              className="bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal"
             >
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Recaudo
@@ -357,7 +357,7 @@ export default function NuevoRecaudo() {
                     )}
                   />
 
-                  <Button type="submit" className="w-full bg-soft-purple hover:bg-soft-pink text-gray-700">
+                  <Button type="submit" className="w-full bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal">
                     <Plus className="mr-2 h-4 w-4" />
                     Agregar Artículo
                   </Button>
@@ -394,7 +394,7 @@ export default function NuevoRecaudo() {
                         <Button
                           type="button"
                           variant="ghost"
-                          className="text-soft-pink hover:text-red-700 hover:bg-soft-pink/20"
+                          className="text-red-600 hover:bg-red-50"
                           onClick={() => handleEliminarArticulo(index)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -404,7 +404,7 @@ export default function NuevoRecaudo() {
                   ))}
 
                   <div className="text-right">
-                    <p className="text-xl font-bold text-soft-blue">
+                    <p className="text-xl font-bold text-teal">
                       Total General: ${calcularTotal().toLocaleString()}
                     </p>
                   </div>
@@ -415,7 +415,7 @@ export default function NuevoRecaudo() {
 
           <Form {...recaudoForm}>
             <form onSubmit={onSubmit}>
-              <Button type="submit" className="w-full bg-soft-blue hover:bg-soft-purple text-white shadow-lg">
+              <Button type="submit" className="w-full bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal shadow-lg">
                 <Save className="mr-2 h-4 w-4" />
                 Guardar Recaudo
               </Button>

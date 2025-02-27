@@ -74,6 +74,7 @@ const recaudoSchema = z.object({
   estado: z.string().default("pendiente"),
   fechaVencimiento: z.string().min(1, "La fecha de vencimiento es requerida"),
   articulos: z.array(articuloSchema).min(1, "Debe agregar al menos un artículo"),
+  observaciones: z.string().optional(),
 });
 
 type RecaudoForm = z.infer<typeof recaudoSchema>;
@@ -518,6 +519,34 @@ export default function NuevoRecaudo() {
           )}
 
           <FileUpload onFilesChange={handleFilesChange} />
+
+          <Card className="mb-6 bg-white/50 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle>Observaciones</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Form {...recaudoForm}>
+                <form className="space-y-4">
+                  <FormField
+                    control={recaudoForm.control}
+                    name="observaciones"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormControl>
+                          <textarea
+                            {...field}
+                            className="w-full min-h-[100px] p-3 rounded-md border border-input bg-background text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+                            placeholder="Ingrese aquí cualquier observación o nota adicional sobre el recaudo..."
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
 
           <Form {...recaudoForm}>
             <form onSubmit={onSubmit}>

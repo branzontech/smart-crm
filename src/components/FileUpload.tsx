@@ -1,8 +1,8 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, X, File } from "lucide-react";
+import { Upload, X, File, Image } from "lucide-react";
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -15,12 +15,27 @@ interface FileUploadProps {
 export function FileUpload({ onFilesChange }: FileUploadProps) {
   const [files, setFiles] = useState<FileWithPreview[]>([]);
 
+  // Crear URLs de previsualización cuando se seleccionen nuevos archivos
+  useEffect(() => {
+    // Limpiar las URLs de previsualización anteriores
+    return () => files.forEach(file => {
+      if (file.preview) {
+        URL.revokeObjectURL(file.preview);
+      }
+    });
+  }, []);
+
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files) as FileWithPreview[];
       
       // Validar tamaño de archivos (2MB = 2 * 1024 * 1024 bytes)
-      const validFiles = newFiles.filter(file => file.size <= 2 * 1024 * 1024);
+      const validFiles = newFiles.filter(file => file.size <= 2 * 1024 * 1024).map(file => {
+        // Crear URL de previsualización para cada archivo
+        return Object.assign(file, {
+          preview: URL.createObjectURL(file)
+        });
+      });
       
       if (validFiles.length !== newFiles.length) {
         alert("Algunos archivos exceden el límite de 2MB y no serán incluidos.");
@@ -32,6 +47,10 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
   };
 
   const removeFile = (index: number) => {
+    const fileToRemove = files[index];
+    if (fileToRemove.preview) {
+      URL.revokeObjectURL(fileToRemove.preview);
+    }
     const updatedFiles = files.filter((_, i) => i !== index);
     setFiles(updatedFiles);
     onFilesChange(updatedFiles);
@@ -64,29 +83,43 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
           </div>
 
           {files.length > 0 && (
-            <div className="space-y-2">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {files.map((file, index) => (
                 <div 
                   key={index}
-                  className="flex items-center justify-between p-3 bg-white rounded-lg border border-gray-200"
+                  className="relative group bg-white rounded-lg border border-gray-200 overflow-hidden"
                 >
-                  <div className="flex items-center space-x-3">
-                    <File className="w-5 h-5 text-teal" />
-                    <div>
-                      <p className="text-sm font-medium">{file.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {(file.size / 1024 / 1024).toFixed(2)} MB
-                      </p>
+                  {file.preview ? (
+                    <div className="relative aspect-video">
+                      <img
+                        src={file.preview}
+                        alt={file.name}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center aspect-video bg-gray-100">
+                      <Image className="w-8 h-8 text-gray-400" />
+                    </div>
+                  )}
+                  <div className="p-3">
+                    <div className="flex items-center justify-between">
+                      <div className="truncate">
+                        <p className="text-sm font-medium truncate">{file.name}</p>
+                        <p className="text-xs text-gray-500">
+                          {(file.size / 1024 / 1024).toFixed(2)} MB
+                        </p>
+                      </div>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        className="text-red-600 hover:bg-red-50 p-1 h-auto ml-2"
+                        onClick={() => removeFile(index)}
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
                     </div>
                   </div>
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    className="text-red-600 hover:bg-red-50 p-1 h-auto"
-                    onClick={() => removeFile(index)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
                 </div>
               ))}
             </div>

@@ -18,8 +18,16 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files) as FileWithPreview[];
-      setFiles(prev => [...prev, ...newFiles]);
-      onFilesChange([...files, ...newFiles]);
+      
+      // Validar tamaño de archivos (2MB = 2 * 1024 * 1024 bytes)
+      const validFiles = newFiles.filter(file => file.size <= 2 * 1024 * 1024);
+      
+      if (validFiles.length !== newFiles.length) {
+        alert("Algunos archivos exceden el límite de 2MB y no serán incluidos.");
+      }
+
+      setFiles(prev => [...prev, ...validFiles]);
+      onFilesChange([...files, ...validFiles]);
     }
   };
 
@@ -32,7 +40,7 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
   return (
     <Card className="mb-6 bg-white/50 backdrop-blur-sm">
       <CardHeader>
-        <CardTitle>Soportes del Recaudo</CardTitle>
+        <CardTitle>Archivos Adjuntos</CardTitle>
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
@@ -43,14 +51,14 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
                 <p className="mb-2 text-sm text-gray-500">
                   <span className="font-semibold text-teal">Haga clic para cargar</span> o arrastre y suelte
                 </p>
-                <p className="text-xs text-gray-500">Documentos, imágenes o PDFs</p>
+                <p className="text-xs text-gray-500">Imágenes (máx. 2MB)</p>
               </div>
               <input 
                 type="file" 
                 className="hidden" 
                 multiple 
                 onChange={handleFileChange}
-                accept=".pdf,.doc,.docx,.png,.jpg,.jpeg"
+                accept="image/*"
               />
             </label>
           </div>

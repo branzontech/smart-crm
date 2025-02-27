@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { FileUpload } from "@/components/FileUpload";
 import {
   Users,
   User,
@@ -41,6 +41,7 @@ export const SeguimientoMenu = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [sortBy, setSortBy] = useState<"nombre" | "empresa">("nombre");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const itemsPerPage = 10;
 
   const handleSelectCliente = (id: number) => {
@@ -109,6 +110,7 @@ export const SeguimientoMenu = () => {
     });
     setMensaje("");
     setAsunto("");
+    setSelectedFiles([]);
   };
 
   return (
@@ -118,13 +120,15 @@ export const SeguimientoMenu = () => {
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <h3 className="text-lg font-semibold">Selección de Clientes</h3>
             <div className="flex items-center gap-2">
-              <Input
-                placeholder="Buscar clientes..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-64"
-                leftIcon={<Search className="h-4 w-4 text-gray-400" />}
-              />
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Buscar clientes..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-9 w-64"
+                />
+              </div>
               <Button
                 variant="outline"
                 onClick={handleSelectVisible}
@@ -243,6 +247,7 @@ export const SeguimientoMenu = () => {
                   placeholder="Escribe el mensaje del recordatorio..."
                 />
               </div>
+              <FileUpload onFilesChange={setSelectedFiles} />
               <Button 
                 className="w-full bg-teal hover:bg-sage"
                 onClick={() => handleEnviarComunicacion("recordatorio")}

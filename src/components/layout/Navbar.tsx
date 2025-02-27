@@ -63,7 +63,7 @@ const navItems: NavItem[] = [
 ];
 
 export const Navbar = () => {
-  const [isExpanded, setIsExpanded] = useState(true);
+  const [isExpanded, setIsExpanded] = useState(false); // Estado inicial colapsado
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -89,9 +89,18 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative overflow-y-auto",
-        isExpanded ? "w-64" : "w-20"
+        "h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative",
+        isExpanded ? "w-64" : "w-20",
+        // Clase personalizada para el scrollbar
+        "scrollbar-custom",
+        // Ocultar scrollbar cuando está colapsado
+        !isExpanded && "scrollbar-hidden"
       )}
+      style={{
+        overflowY: 'auto',
+        msOverflowStyle: 'none', // Para IE y Edge
+        scrollbarWidth: 'thin', // Para Firefox
+      }}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}

@@ -43,6 +43,12 @@ const clientes = [
   { id: 3, nombre: "Carlos López" },
 ];
 
+const agentes = [
+  { id: 1, nombre: "Ana Martínez" },
+  { id: 2, nombre: "Pedro Rodríguez" },
+  { id: 3, nombre: "Laura González" },
+];
+
 const proveedores = [
   { id: 1, nombre: "Suministros Industriales S.A." },
   { id: 2, nombre: "Juan Pérez Distribuciones" },
@@ -71,6 +77,10 @@ const recaudoSchema = z.object({
     required_error: "Debe seleccionar un cliente",
     invalid_type_error: "Debe seleccionar un cliente",
   }).min(1, "Debe seleccionar un cliente"),
+  agenteId: z.number({
+    required_error: "Debe seleccionar un agente",
+    invalid_type_error: "Debe seleccionar un agente",
+  }).min(1, "Debe seleccionar un agente"),
   estado: z.string().default("pendiente"),
   fechaVencimiento: z.string().min(1, "La fecha de vencimiento es requerida"),
   articulos: z.array(articuloSchema).min(1, "Debe agregar al menos un artículo"),
@@ -83,12 +93,17 @@ type ArticuloForm = z.infer<typeof articuloSchema>;
 export default function NuevoRecaudo() {
   const navigate = useNavigate();
   const [clienteSearch, setClienteSearch] = useState("");
+  const [agenteSearch, setAgenteSearch] = useState("");
   const [proveedorSearch, setProveedorSearch] = useState("");
   const [articulos, setArticulos] = useState<ArticuloForm[]>([]);
   const [archivos, setArchivos] = useState<File[]>([]);
 
   const filteredClientes = clientes.filter(cliente =>
     cliente.nombre.toLowerCase().includes(clienteSearch.toLowerCase())
+  );
+
+  const filteredAgentes = agentes.filter(agente =>
+    agente.nombre.toLowerCase().includes(agenteSearch.toLowerCase())
   );
 
   const filteredProveedores = proveedores.filter(proveedor =>
@@ -100,6 +115,7 @@ export default function NuevoRecaudo() {
     defaultValues: {
       numeroRecaudo: "0001",
       clienteId: 0,
+      agenteId: 0,
       estado: "pendiente",
       fechaVencimiento: "",
       articulos: [],
@@ -120,6 +136,11 @@ export default function NuevoRecaudo() {
   const handleSelectCliente = (cliente: typeof clientes[0]) => {
     recaudoForm.setValue("clienteId", cliente.id);
     setClienteSearch(cliente.nombre);
+  };
+
+  const handleSelectAgente = (agente: typeof agentes[0]) => {
+    recaudoForm.setValue("agenteId", agente.id);
+    setAgenteSearch(agente.nombre);
   };
 
   const handleSelectProveedor = (proveedor: typeof proveedores[0]) => {
@@ -215,6 +236,7 @@ export default function NuevoRecaudo() {
                 articuloForm.reset();
                 setArticulos([]);
                 setClienteSearch("");
+                setAgenteSearch("");
                 setProveedorSearch("");
               }}
               className="bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal"
@@ -327,6 +349,48 @@ export default function NuevoRecaudo() {
                               {...field}
                             />
                           </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={recaudoForm.control}
+                      name="agenteId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Agente de Recaudo</FormLabel>
+                          <div className="relative">
+                            <div className="flex-1 relative">
+                              <Input
+                                placeholder="Buscar agente..."
+                                value={agenteSearch}
+                                onChange={(e) => setAgenteSearch(e.target.value)}
+                                className="w-full pr-10"
+                              />
+                              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                            </div>
+                            {agenteSearch && filteredAgentes.length > 0 && (
+                              <Card className="absolute z-10 w-full mt-1">
+                                <CardContent className="p-2">
+                                  {filteredAgentes.map((agente) => (
+                                    <Button
+                                      type="button"
+                                      key={agente.id}
+                                      variant="ghost"
+                                      className="w-full justify-start text-left"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSelectAgente(agente);
+                                      }}
+                                    >
+                                      {agente.nombre}
+                                    </Button>
+                                  ))}
+                                </CardContent>
+                              </Card>
+                            )}
+                          </div>
                           <FormMessage />
                         </FormItem>
                       )}

@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -18,20 +17,7 @@ import {
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-} from "@/components/ui/command";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
 import { useState } from "react";
-import { cn } from "@/lib/utils";
 
 // Datos de ejemplo (en una aplicación real vendrían de una API)
 const clientes = [
@@ -47,13 +33,25 @@ const proveedores = [
 
 const recaudoSchema = z.object({
   numeroRecaudo: z.string(),
-  clienteId: z.number(),
+  clienteId: z.number({
+    required_error: "Debe seleccionar un cliente",
+    invalid_type_error: "Debe seleccionar un cliente",
+  }),
   articulos: z.array(z.object({
     descripcion: z.string().min(1, "La descripción es requerida"),
-    cantidad: z.number().min(1, "La cantidad debe ser mayor a 0"),
-    proveedorId: z.number(),
-    precio: z.number().min(0, "El precio debe ser mayor o igual a 0"),
-  })),
+    cantidad: z.number({
+      required_error: "La cantidad es requerida",
+      invalid_type_error: "La cantidad debe ser un número",
+    }).min(1, "La cantidad debe ser mayor a 0"),
+    proveedorId: z.number({
+      required_error: "Debe seleccionar un proveedor",
+      invalid_type_error: "Debe seleccionar un proveedor",
+    }).min(1, "Debe seleccionar un proveedor"),
+    precio: z.number({
+      required_error: "El precio es requerido",
+      invalid_type_error: "El precio debe ser un número",
+    }).min(0, "El precio debe ser mayor o igual a 0"),
+  })).min(1, "Debe agregar al menos un artículo"),
   aplicaIVA: z.boolean().default(false),
 });
 
@@ -76,7 +74,8 @@ export default function NuevoRecaudo() {
   const form = useForm<RecaudoForm>({
     resolver: zodResolver(recaudoSchema),
     defaultValues: {
-      numeroRecaudo: "0001", // En un caso real, esto vendría del backend
+      numeroRecaudo: "0001",
+      clienteId: 0,
       aplicaIVA: false,
       articulos: [
         {
@@ -99,7 +98,9 @@ export default function NuevoRecaudo() {
 
   const calcularSubtotal = () => {
     return watchArticulos.reduce((acc, articulo) => {
-      return acc + (articulo.cantidad * articulo.precio);
+      const cantidad = typeof articulo.cantidad === 'number' ? articulo.cantidad : 0;
+      const precio = typeof articulo.precio === 'number' ? articulo.precio : 0;
+      return acc + (cantidad * precio);
     }, 0);
   };
 
@@ -113,10 +114,35 @@ export default function NuevoRecaudo() {
 
   const onSubmit = async (data: RecaudoForm) => {
     try {
-      console.log(data);
+      // Validación adicional
+      if (data.clienteId === 0) {
+        toast.error("Debe seleccionar un cliente");
+        return;
+      }
+
+      if (!data.articulos.length) {
+        toast.error("Debe agregar al menos un artículo");
+        return;
+      }
+
+      const articulosInvalidos = data.articulos.some(
+        articulo => 
+          !articulo.descripcion ||
+          !articulo.cantidad ||
+          articulo.proveedorId === 0 ||
+          typeof articulo.precio !== 'number'
+      );
+
+      if (articulosInvalidos) {
+        toast.error("Todos los campos de los artículos son obligatorios");
+        return;
+      }
+
+      console.log("Datos del formulario:", data);
       toast.success("Recaudo creado exitosamente");
       navigate("/recaudos");
     } catch (error) {
+      console.error("Error al crear el recaudo:", error);
       toast.error("Error al crear el recaudo");
     }
   };

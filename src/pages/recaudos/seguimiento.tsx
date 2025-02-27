@@ -1,4 +1,5 @@
-import { useState, React } from "react";
+
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -104,7 +105,7 @@ export default function SeguimientoRecaudos() {
   const clientesUnicos = Array.from(new Set(recaudosData.map(r => r.cliente)));
   const proveedoresUnicos = Array.from(new Set(recaudosData.map(r => r.proveedor)));
 
-  React.useEffect(() => {
+  useEffect(() => {
     let recaudosFiltrados = [...recaudosData];
 
     if (filtros.fechaInicial) {

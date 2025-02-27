@@ -135,17 +135,17 @@ export default function NuevoRecaudo() {
 
   const handleSelectCliente = (cliente: typeof clientes[0]) => {
     recaudoForm.setValue("clienteId", cliente.id);
-    setClienteSearch(cliente.nombre);
+    setClienteSearch("");
   };
 
   const handleSelectAgente = (agente: typeof agentes[0]) => {
     recaudoForm.setValue("agenteId", agente.id);
-    setAgenteSearch(agente.nombre);
+    setAgenteSearch("");
   };
 
   const handleSelectProveedor = (proveedor: typeof proveedores[0]) => {
     articuloForm.setValue("proveedorId", proveedor.id);
-    setProveedorSearch(proveedor.nombre);
+    setProveedorSearch("");
   };
 
   const handleAgregarArticulo = articuloForm.handleSubmit((data) => {
@@ -361,14 +361,17 @@ export default function NuevoRecaudo() {
                         <FormItem className="flex flex-col">
                           <FormLabel>Agente de Recaudo</FormLabel>
                           <div className="relative">
-                            <div className="flex-1 relative">
-                              <Input
-                                placeholder="Buscar agente..."
-                                value={agenteSearch}
-                                onChange={(e) => setAgenteSearch(e.target.value)}
-                                className="w-full pr-10"
-                              />
-                              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <div className="flex gap-2">
+                              <div className="flex-1 relative">
+                                <Input
+                                  placeholder="Buscar agente..."
+                                  value={agenteSearch}
+                                  onChange={(e) => setAgenteSearch(e.target.value)}
+                                  className="w-full pr-10"
+                                />
+                                <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                              </div>
+                              <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
                             </div>
                             {agenteSearch && filteredAgentes.length > 0 && (
                               <Card className="absolute z-10 w-full mt-1">

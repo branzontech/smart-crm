@@ -1,3 +1,4 @@
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -13,6 +14,7 @@ import ProveedoresIndex from "./pages/proveedores/index";
 import NuevoProveedor from "./pages/proveedores/nuevo";
 import RecaudosIndex from "./pages/recaudos/index";
 import NuevoRecaudo from "./pages/recaudos/nuevo";
+import SeguimientoRecaudos from "./pages/recaudos/seguimiento";
 import VentasIndex from "./pages/ventas/index";
 import OportunidadesIndex from "./pages/ventas/oportunidades/index";
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";

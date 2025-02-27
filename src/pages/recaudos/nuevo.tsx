@@ -19,6 +19,8 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
+import { CreateClienteDialog } from "@/components/CreateClienteDialog";
+import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
 
 const clientes = [
   { id: 1, nombre: "Juan Pérez" },
@@ -163,6 +165,16 @@ export default function NuevoRecaudo() {
     }
   });
 
+  const handleClienteCreated = (nuevoCliente: { id: number; nombre: string }) => {
+    clientes.push(nuevoCliente);
+    handleSelectCliente(nuevoCliente);
+  };
+
+  const handleProveedorCreated = (nuevoProveedor: { id: number; nombre: string }) => {
+    proveedores.push(nuevoProveedor);
+    handleSelectProveedor(nuevoProveedor);
+  };
+
   return (
     <div className="min-h-screen flex bg-soft-gray/30">
       <Navbar />
@@ -208,13 +220,18 @@ export default function NuevoRecaudo() {
                       <FormItem className="flex flex-col">
                         <FormLabel>Cliente</FormLabel>
                         <div className="relative">
-                          <Input
-                            placeholder="Buscar cliente..."
-                            value={clienteSearch}
-                            onChange={(e) => setClienteSearch(e.target.value)}
-                            className="w-full pr-10"
-                          />
-                          <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <Input
+                                placeholder="Buscar cliente..."
+                                value={clienteSearch}
+                                onChange={(e) => setClienteSearch(e.target.value)}
+                                className="w-full pr-10"
+                              />
+                              <Search className="absolute right-[4.5rem] top-2.5 h-5 w-5 text-gray-400" />
+                            </div>
+                            <CreateClienteDialog onClienteCreated={handleClienteCreated} />
+                          </div>
                           {clienteSearch && filteredClientes.length > 0 && (
                             <Card className="absolute z-10 w-full mt-1">
                               <CardContent className="p-2">
@@ -315,13 +332,18 @@ export default function NuevoRecaudo() {
                         <FormItem className="flex flex-col">
                           <FormLabel>Proveedor</FormLabel>
                           <div className="relative">
-                            <Input
-                              placeholder="Buscar proveedor..."
-                              value={proveedorSearch}
-                              onChange={(e) => setProveedorSearch(e.target.value)}
-                              className="w-full pr-10"
-                            />
-                            <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                            <div className="flex gap-2">
+                              <div className="flex-1">
+                                <Input
+                                  placeholder="Buscar proveedor..."
+                                  value={proveedorSearch}
+                                  onChange={(e) => setProveedorSearch(e.target.value)}
+                                  className="w-full pr-10"
+                                />
+                                <Search className="absolute right-[4.5rem] top-2.5 h-5 w-5 text-gray-400" />
+                              </div>
+                              <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
+                            </div>
                             {proveedorSearch && filteredProveedores.length > 0 && (
                               <Card className="absolute z-10 w-full mt-1">
                                 <CardContent className="p-2">

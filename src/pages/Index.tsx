@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -376,7 +377,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 overflow-hidden">
         <div className="max-w-7xl mx-auto space-y-6">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
@@ -392,8 +393,11 @@ const Index = () => {
             onDragStart={handleDragStart}
             onDragEnd={handleDragEnd}
           >
-            <SortableContext items={cardsOrder} strategy={verticalListSortingStrategy}>
-              <div className="space-y-6">
+            <SortableContext 
+              items={cardsOrder} 
+              strategy={verticalListSortingStrategy}
+            >
+              <div className="space-y-6 overflow-y-auto overflow-x-hidden">
                 {renderCards()}
               </div>
             </SortableContext>

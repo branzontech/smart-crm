@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -88,7 +89,7 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "min-h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative",
+        "h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative overflow-y-auto",
         isExpanded ? "w-64" : "w-20"
       )}
     >
@@ -195,4 +196,4 @@ export const Navbar = () => {
       </div>
     </nav>
   );
-}
+};

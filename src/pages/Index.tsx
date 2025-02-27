@@ -1,5 +1,5 @@
-
 import { Navbar } from "@/components/layout/Navbar";
+import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -377,33 +377,36 @@ const Index = () => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8 overflow-hidden">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
-            <Button onClick={() => navigate("/reportes")} className="bg-teal hover:bg-sage">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Ver Reportes Completos
-            </Button>
-          </div>
+      <div className="flex-1 flex flex-col">
+        <Header />
+        <main className="flex-1 p-8 overflow-hidden">
+          <div className="max-w-7xl mx-auto space-y-6">
+            <div className="flex items-center justify-between mb-6">
+              <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
+              <Button onClick={() => navigate("/reportes")} className="bg-teal hover:bg-sage">
+                <BarChart3 className="h-4 w-4 mr-2" />
+                Ver Reportes Completos
+              </Button>
+            </div>
 
-          <DndContext
-            sensors={sensors}
-            collisionDetection={closestCenter}
-            onDragStart={handleDragStart}
-            onDragEnd={handleDragEnd}
-          >
-            <SortableContext 
-              items={cardsOrder} 
-              strategy={verticalListSortingStrategy}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragStart={handleDragStart}
+              onDragEnd={handleDragEnd}
             >
-              <div className="space-y-6 overflow-y-auto overflow-x-hidden">
-                {renderCards()}
-              </div>
-            </SortableContext>
-          </DndContext>
-        </div>
-      </main>
+              <SortableContext 
+                items={cardsOrder} 
+                strategy={verticalListSortingStrategy}
+              >
+                <div className="space-y-6 overflow-y-auto overflow-x-hidden">
+                  {renderCards()}
+                </div>
+              </SortableContext>
+            </DndContext>
+          </div>
+        </main>
+      </div>
     </div>
   );
 };

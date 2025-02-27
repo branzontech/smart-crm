@@ -15,12 +15,27 @@ import {
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 import { CreateClienteDialog } from "@/components/CreateClienteDialog";
 import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
+
+const estadosRecaudo = [
+  { value: "pendiente", label: "Pendiente de recaudo", color: "#FEF7CD" },
+  { value: "en_proceso", label: "En proceso", color: "#F2FCE2" },
+  { value: "recaudado", label: "Recaudado", color: "#D3E4FD" },
+  { value: "cancelado", label: "Cancelado", color: "#FFDEE2" },
+  { value: "vencido", label: "Vencido", color: "#FDE1D3" },
+] as const;
 
 const clientes = [
   { id: 1, nombre: "Juan Pérez" },
@@ -56,6 +71,8 @@ const recaudoSchema = z.object({
     required_error: "Debe seleccionar un cliente",
     invalid_type_error: "Debe seleccionar un cliente",
   }).min(1, "Debe seleccionar un cliente"),
+  estado: z.string().default("pendiente"),
+  fechaVencimiento: z.string().min(1, "La fecha de vencimiento es requerida"),
   articulos: z.array(articuloSchema).min(1, "Debe agregar al menos un artículo"),
 });
 
@@ -82,6 +99,8 @@ export default function NuevoRecaudo() {
     defaultValues: {
       numeroRecaudo: "0001",
       clienteId: 0,
+      estado: "pendiente",
+      fechaVencimiento: "",
       articulos: [],
     },
   });
@@ -213,50 +232,105 @@ export default function NuevoRecaudo() {
             <CardContent>
               <Form {...recaudoForm}>
                 <form onSubmit={onSubmit} className="space-y-6">
-                  <FormField
-                    control={recaudoForm.control}
-                    name="clienteId"
-                    render={({ field }) => (
-                      <FormItem className="flex flex-col">
-                        <FormLabel>Cliente</FormLabel>
-                        <div className="relative">
-                          <div className="flex gap-2">
-                            <div className="flex-1 relative">
-                              <Input
-                                placeholder="Buscar cliente..."
-                                value={clienteSearch}
-                                onChange={(e) => setClienteSearch(e.target.value)}
-                                className="w-full pr-10"
-                              />
-                              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={recaudoForm.control}
+                      name="clienteId"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Cliente</FormLabel>
+                          <div className="relative">
+                            <div className="flex gap-2">
+                              <div className="flex-1 relative">
+                                <Input
+                                  placeholder="Buscar cliente..."
+                                  value={clienteSearch}
+                                  onChange={(e) => setClienteSearch(e.target.value)}
+                                  className="w-full pr-10"
+                                />
+                                <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
+                              </div>
+                              <CreateClienteDialog onClienteCreated={handleClienteCreated} />
                             </div>
-                            <CreateClienteDialog onClienteCreated={handleClienteCreated} />
+                            {clienteSearch && filteredClientes.length > 0 && (
+                              <Card className="absolute z-10 w-full mt-1">
+                                <CardContent className="p-2">
+                                  {filteredClientes.map((cliente) => (
+                                    <Button
+                                      type="button"
+                                      key={cliente.id}
+                                      variant="ghost"
+                                      className="w-full justify-start text-left"
+                                      onClick={(e) => {
+                                        e.preventDefault();
+                                        handleSelectCliente(cliente);
+                                      }}
+                                    >
+                                      {cliente.nombre}
+                                    </Button>
+                                  ))}
+                                </CardContent>
+                              </Card>
+                            )}
                           </div>
-                          {clienteSearch && filteredClientes.length > 0 && (
-                            <Card className="absolute z-10 w-full mt-1">
-                              <CardContent className="p-2">
-                                {filteredClientes.map((cliente) => (
-                                  <Button
-                                    type="button"
-                                    key={cliente.id}
-                                    variant="ghost"
-                                    className="w-full justify-start text-left"
-                                    onClick={(e) => {
-                                      e.preventDefault();
-                                      handleSelectCliente(cliente);
-                                    }}
-                                  >
-                                    {cliente.nombre}
-                                  </Button>
-                                ))}
-                              </CardContent>
-                            </Card>
-                          )}
-                        </div>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={recaudoForm.control}
+                      name="estado"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Estado</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione un estado" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {estadosRecaudo.map((estado) => (
+                                <SelectItem
+                                  key={estado.value}
+                                  value={estado.value}
+                                  className="flex items-center gap-2"
+                                >
+                                  <div
+                                    className="w-3 h-3 rounded-full"
+                                    style={{ backgroundColor: estado.color }}
+                                  />
+                                  {estado.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={recaudoForm.control}
+                      name="fechaVencimiento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fecha de Vencimiento</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="date"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </form>
               </Form>
             </CardContent>

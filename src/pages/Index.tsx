@@ -1,3 +1,4 @@
+
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -377,7 +378,7 @@ const Index = () => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <div className="flex-1 flex flex-col">
+      <div className={`flex-1 flex flex-col ml-20 transition-all duration-300`}>
         <Header />
         <main className="flex-1 p-8 overflow-hidden">
           <div className="max-w-7xl mx-auto space-y-6">

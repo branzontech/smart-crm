@@ -89,18 +89,10 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative",
+        "fixed h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative",
         isExpanded ? "w-64" : "w-20",
-        // Clase personalizada para el scrollbar
-        "scrollbar-custom",
-        // Ocultar scrollbar cuando está colapsado
-        !isExpanded && "scrollbar-hidden"
+        "scrollbar-custom"
       )}
-      style={{
-        overflowY: 'auto',
-        msOverflowStyle: 'none', // Para IE y Edge
-        scrollbarWidth: 'thin', // Para Firefox
-      }}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -113,7 +105,16 @@ export const Navbar = () => {
         )}
       </button>
 
-      <div className="p-4 space-y-4">
+      <div 
+        className={cn(
+          "p-4 space-y-4 overflow-y-auto h-full",
+          !isExpanded && "scrollbar-hidden"
+        )}
+        style={{
+          msOverflowStyle: 'none',
+          scrollbarWidth: 'none'
+        }}
+      >
         <div className="h-16 flex items-center justify-center">
           <span
             className={cn(

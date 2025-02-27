@@ -12,11 +12,12 @@ import {
   Users,
   User,
   Mail,
-  Calendar,
-  Gift,
+  Search,
   Bell,
   Tag,
   MessageSquare,
+  ChevronLeft,
+  ChevronRight,
 } from "lucide-react";
 
 interface Cliente {
@@ -36,6 +37,11 @@ export const SeguimientoMenu = () => {
   ]);
   const [mensaje, setMensaje] = useState("");
   const [asunto, setAsunto] = useState("");
+  const [searchTerm, setSearchTerm] = useState("");
+  const [currentPage, setCurrentPage] = useState(1);
+  const [sortBy, setSortBy] = useState<"nombre" | "empresa">("nombre");
+  const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
+  const itemsPerPage = 10;
 
   const handleSelectCliente = (id: number) => {
     setClientes(clientes.map(cliente => 
@@ -43,10 +49,46 @@ export const SeguimientoMenu = () => {
     ));
   };
 
-  const handleSelectAll = () => {
-    const allSelected = clientes.every(cliente => cliente.selected);
-    setClientes(clientes.map(cliente => ({ ...cliente, selected: !allSelected })));
+  const handleSelectVisible = () => {
+    const visibleClients = filteredClientes.slice(
+      (currentPage - 1) * itemsPerPage,
+      currentPage * itemsPerPage
+    );
+    const allVisibleSelected = visibleClients.every(cliente => cliente.selected);
+    
+    setClientes(clientes.map(cliente => ({
+      ...cliente,
+      selected: visibleClients.find(c => c.id === cliente.id)
+        ? !allVisibleSelected
+        : cliente.selected,
+    })));
   };
+
+  const handleSort = (field: "nombre" | "empresa") => {
+    if (sortBy === field) {
+      setSortOrder(sortOrder === "asc" ? "desc" : "asc");
+    } else {
+      setSortBy(field);
+      setSortOrder("asc");
+    }
+  };
+
+  const filteredClientes = clientes
+    .filter(cliente =>
+      cliente.nombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.empresa.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      cliente.email.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => {
+      const compareValue = sortOrder === "asc" ? 1 : -1;
+      return a[sortBy] > b[sortBy] ? compareValue : -compareValue;
+    });
+
+  const totalPages = Math.ceil(filteredClientes.length / itemsPerPage);
+  const currentClientes = filteredClientes.slice(
+    (currentPage - 1) * itemsPerPage,
+    currentPage * itemsPerPage
+  );
 
   const getSelectedClientes = () => clientes.filter(cliente => cliente.selected);
 
@@ -73,34 +115,95 @@ export const SeguimientoMenu = () => {
     <div className="space-y-6">
       <Card className="p-4">
         <div className="space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between gap-4 flex-wrap">
             <h3 className="text-lg font-semibold">Selección de Clientes</h3>
-            <Button
-              variant="outline"
-              onClick={handleSelectAll}
-              className="flex items-center gap-2"
-            >
-              <Users className="h-4 w-4" />
-              Seleccionar Todos
-            </Button>
+            <div className="flex items-center gap-2">
+              <Input
+                placeholder="Buscar clientes..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-64"
+                leftIcon={<Search className="h-4 w-4 text-gray-400" />}
+              />
+              <Button
+                variant="outline"
+                onClick={handleSelectVisible}
+                className="flex items-center gap-2"
+              >
+                <Users className="h-4 w-4" />
+                Seleccionar Visibles
+              </Button>
+            </div>
           </div>
 
-          <div className="divide-y">
-            {clientes.map((cliente) => (
-              <div
-                key={cliente.id}
-                className="flex items-center space-x-4 py-2"
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="w-8 p-2">
+                    <Checkbox
+                      checked={currentClientes.length > 0 && currentClientes.every(c => c.selected)}
+                      onCheckedChange={handleSelectVisible}
+                    />
+                  </th>
+                  <th
+                    className="p-2 text-left cursor-pointer hover:bg-gray-50"
+                    onClick={() => handleSort("nombre")}
+                  >
+                    Nombre
+                  </th>
+                  <th
+                    className="p-2 text-left cursor-pointer hover:bg-gray-50"
+                    onClick={() => handleSort("empresa")}
+                  >
+                    Empresa
+                  </th>
+                  <th className="p-2 text-left">Email</th>
+                </tr>
+              </thead>
+              <tbody>
+                {currentClientes.map((cliente) => (
+                  <tr key={cliente.id} className="border-b">
+                    <td className="p-2">
+                      <Checkbox
+                        checked={cliente.selected}
+                        onCheckedChange={() => handleSelectCliente(cliente.id)}
+                      />
+                    </td>
+                    <td className="p-2">{cliente.nombre}</td>
+                    <td className="p-2">{cliente.empresa}</td>
+                    <td className="p-2">{cliente.email}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+
+          <div className="flex items-center justify-between mt-4">
+            <p className="text-sm text-gray-500">
+              {getSelectedClientes().length} cliente(s) seleccionado(s)
+            </p>
+            <div className="flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                disabled={currentPage === 1}
               >
-                <Checkbox
-                  checked={cliente.selected}
-                  onCheckedChange={() => handleSelectCliente(cliente.id)}
-                />
-                <div className="flex-1">
-                  <p className="font-medium">{cliente.nombre}</p>
-                  <p className="text-sm text-gray-500">{cliente.empresa}</p>
-                </div>
-              </div>
-            ))}
+                <ChevronLeft className="h-4 w-4" />
+              </Button>
+              <span className="text-sm">
+                Página {currentPage} de {totalPages}
+              </span>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                disabled={currentPage === totalPages}
+              >
+                <ChevronRight className="h-4 w-4" />
+              </Button>
+            </div>
           </div>
         </div>
       </Card>

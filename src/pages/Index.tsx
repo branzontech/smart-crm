@@ -3,26 +3,90 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { 
-  Users, 
-  Building2, 
-  Package2, 
-  Receipt, 
-  ClipboardList, 
-  FileText, 
-  FileCheck2, 
-  Mail, 
-  BarChart3,
-  ArrowUp,
-  ArrowDown,
-  DollarSign,
-  Cake,
-  PartyPopper,
-  Gift
+  Users, Building2, Package2, Receipt, ClipboardList, 
+  FileText, FileCheck2, Mail, BarChart3, ArrowUp, 
+  ArrowDown, DollarSign, Cake, PartyPopper, Gift, GripHorizontal
 } from "lucide-react";
 import { ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts';
+import {
+  DndContext,
+  DragOverlay,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragStartEvent,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+import { useState } from "react";
+
+interface SortableCardProps {
+  id: string;
+  children: React.ReactNode;
+}
+
+const SortableCard = ({ id, children }: SortableCardProps) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    zIndex: isDragging ? 2 : 1,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className={`relative ${isDragging ? 'cursor-grabbing' : ''}`}
+      {...attributes}
+    >
+      <div className="absolute top-2 right-2 cursor-grab text-gray-400 hover:text-gray-600 z-10" {...listeners}>
+        <GripHorizontal className="h-5 w-5" />
+      </div>
+      {children}
+    </div>
+  );
+};
 
 const Index = () => {
   const navigate = useNavigate();
+  const [activeId, setActiveId] = useState<string | null>(null);
+  const [cardsOrder, setCardsOrder] = useState([
+    'cumpleanos',
+    'metricas',
+    'recaudos',
+    'ventas',
+    'accesos'
+  ]);
+
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
 
   // Datos de ejemplo para cumpleaños
   const cumpleanos = {
@@ -114,20 +178,27 @@ const Index = () => {
     { titulo: "Comunicaciones", ruta: "/comunicaciones", icono: Mail, color: "bg-yellow-500" },
   ];
 
-  return (
-    <div className="min-h-screen flex bg-gray-50">
-      <Navbar />
-      <main className="flex-1 p-8">
-        <div className="max-w-7xl mx-auto space-y-6">
-          <div className="flex items-center justify-between mb-6">
-            <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
-            <Button onClick={() => navigate("/reportes")} className="bg-teal hover:bg-sage">
-              <BarChart3 className="h-4 w-4 mr-2" />
-              Ver Reportes Completos
-            </Button>
-          </div>
+  const handleDragStart = (event: DragStartEvent) => {
+    setActiveId(event.active.id as string);
+  };
 
-          {/* Card de Cumpleaños */}
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setCardsOrder((items) => {
+        const oldIndex = items.indexOf(active.id as string);
+        const newIndex = items.indexOf(over.id as string);
+        return arrayMove(items, oldIndex, newIndex);
+      });
+    }
+    setActiveId(null);
+  };
+
+  const renderCards = () => {
+    return cardsOrder.map((cardId) => {
+      const cardContent = {
+        cumpleanos: (
           <Card className="bg-gradient-to-br from-teal-50 to-mint-50">
             <CardHeader>
               <div className="flex items-center justify-between">
@@ -140,7 +211,6 @@ const Index = () => {
             </CardHeader>
             <CardContent>
               <div className="grid md:grid-cols-2 gap-6">
-                {/* Cumpleaños de Hoy */}
                 <div>
                   <h3 className="text-lg font-semibold text-teal mb-4 flex items-center gap-2">
                     <Gift className="h-5 w-5" />
@@ -165,8 +235,6 @@ const Index = () => {
                     <p className="text-gray-500 text-sm italic">No hay cumpleaños hoy</p>
                   )}
                 </div>
-
-                {/* Próximos Cumpleaños */}
                 <div>
                   <h3 className="text-lg font-semibold text-teal mb-4 flex items-center gap-2">
                     <Gift className="h-5 w-5" />
@@ -196,8 +264,8 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
-
-          {/* Métricas principales */}
+        ),
+        metricas: (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {metricas.map((metrica, index) => (
               <Card key={index}>
@@ -223,54 +291,53 @@ const Index = () => {
               </Card>
             ))}
           </div>
-
-          {/* Gráficos */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Estados de Recaudos</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Pie
-                      data={estadosRecaudos}
-                      dataKey="valor"
-                      nameKey="nombre"
-                      cx="50%"
-                      cy="50%"
-                      outerRadius={80}
-                      label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
-                    >
-                      {estadosRecaudos.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
-                      ))}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader>
-                <CardTitle>Ventas Mensuales</CardTitle>
-              </CardHeader>
-              <CardContent className="h-[300px]">
-                <ResponsiveContainer width="100%" height="100%">
-                  <BarChart data={ventasMensuales}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="mes" />
-                    <YAxis />
-                    <Tooltip />
-                    <Bar dataKey="ventas" fill="#14b8a6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </div>
-
-          {/* Accesos Rápidos */}
+        ),
+        recaudos: (
+          <Card>
+            <CardHeader>
+              <CardTitle>Estados de Recaudos</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={estadosRecaudos}
+                    dataKey="valor"
+                    nameKey="nombre"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={80}
+                    label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                  >
+                    {estadosRecaudos.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip />
+                </PieChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        ),
+        ventas: (
+          <Card>
+            <CardHeader>
+              <CardTitle>Ventas Mensuales</CardTitle>
+            </CardHeader>
+            <CardContent className="h-[300px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={ventasMensuales}>
+                  <CartesianGrid strokeDasharray="3 3" />
+                  <XAxis dataKey="mes" />
+                  <YAxis />
+                  <Tooltip />
+                  <Bar dataKey="ventas" fill="#14b8a6" />
+                </BarChart>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        ),
+        accesos: (
           <Card>
             <CardHeader>
               <CardTitle>Accesos Rápidos</CardTitle>
@@ -293,6 +360,44 @@ const Index = () => {
               </div>
             </CardContent>
           </Card>
+        ),
+      }[cardId];
+
+      return (
+        <SortableCard key={cardId} id={cardId}>
+          <div className={`transition-all duration-200 ${activeId === cardId ? 'scale-[1.02]' : ''}`}>
+            {cardContent}
+          </div>
+        </SortableCard>
+      );
+    });
+  };
+
+  return (
+    <div className="min-h-screen flex bg-gray-50">
+      <Navbar />
+      <main className="flex-1 p-8">
+        <div className="max-w-7xl mx-auto space-y-6">
+          <div className="flex items-center justify-between mb-6">
+            <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
+            <Button onClick={() => navigate("/reportes")} className="bg-teal hover:bg-sage">
+              <BarChart3 className="h-4 w-4 mr-2" />
+              Ver Reportes Completos
+            </Button>
+          </div>
+
+          <DndContext
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragStart={handleDragStart}
+            onDragEnd={handleDragEnd}
+          >
+            <SortableContext items={cardsOrder} strategy={verticalListSortingStrategy}>
+              <div className="space-y-6">
+                {renderCards()}
+              </div>
+            </SortableContext>
+          </DndContext>
         </div>
       </main>
     </div>

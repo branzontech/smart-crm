@@ -3,9 +3,18 @@ import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Eye, Grid, List, MessageCircle, Calendar, DollarSign, AlertCircle, Info, User, Check, X, Package, ShoppingCart } from "lucide-react";
+import { Eye, Grid, List, MessageCircle, Calendar, DollarSign, AlertCircle, Download, Filter, User, Check, Package, ShoppingCart } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -83,7 +92,95 @@ const recaudosData: Recaudo[] = [
 export default function SeguimientoRecaudos() {
   const [vista, setVista] = useState<"grid" | "list">("grid");
   const [recaudos, setRecaudos] = useState<Recaudo[]>(recaudosData);
+  const [filtros, setFiltros] = useState({
+    fechaInicial: "",
+    fechaFinal: "",
+    cliente: "",
+    proveedor: "",
+    periodo: "todo",
+  });
   const { toast } = useToast();
+
+  const clientesUnicos = Array.from(new Set(recaudosData.map(r => r.cliente)));
+  const proveedoresUnicos = Array.from(new Set(recaudosData.map(r => r.proveedor)));
+
+  const handleFiltrar = () => {
+    let recaudosFiltrados = [...recaudosData];
+
+    if (filtros.fechaInicial) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => r.fechaCreacion >= filtros.fechaInicial
+      );
+    }
+
+    if (filtros.fechaFinal) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => r.fechaCreacion <= filtros.fechaFinal
+      );
+    }
+
+    if (filtros.cliente) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => r.cliente === filtros.cliente
+      );
+    }
+
+    if (filtros.proveedor) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => r.proveedor === filtros.proveedor
+      );
+    }
+
+    if (filtros.periodo === "semana") {
+      const hoy = new Date();
+      const inicioSemana = new Date(hoy.setDate(hoy.getDate() - hoy.getDay()));
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => new Date(r.fechaCreacion) >= inicioSemana
+      );
+    } else if (filtros.periodo === "mes") {
+      const hoy = new Date();
+      const inicioMes = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+      recaudosFiltrados = recaudosFiltrados.filter(
+        r => new Date(r.fechaCreacion) >= inicioMes
+      );
+    }
+
+    setRecaudos(recaudosFiltrados);
+  };
+
+  const handleDescargar = () => {
+    const datosCSV = recaudos.map(r => ({
+      'Número Recaudo': r.numeroRecaudo,
+      'Cliente': r.cliente,
+      'Proveedor': r.proveedor,
+      'Estado': r.estado,
+      'Monto': r.monto,
+      'Fecha Creación': r.fechaCreacion,
+      'Fecha Vencimiento': r.fechaVencimiento,
+      'Artículos': r.articulos.map(a => `${a.nombre} (${a.cantidad})`).join(', ')
+    }));
+
+    const headers = Object.keys(datosCSV[0]);
+    const csv = [
+      headers.join(','),
+      ...datosCSV.map(row => headers.map(header => JSON.stringify(row[header])).join(','))
+    ].join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.setAttribute('hidden', '');
+    a.setAttribute('href', url);
+    a.setAttribute('download', 'recaudos.csv');
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+
+    toast({
+      title: "Descarga iniciada",
+      description: "El archivo CSV se está descargando.",
+    });
+  };
 
   const handleEnviarMensaje = (recaudoId: number) => {
     toast({
@@ -232,6 +329,10 @@ export default function SeguimientoRecaudos() {
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-semibold text-gray-900">Seguimiento de Recaudos</h1>
             <div className="flex gap-2">
+              <Button variant="outline" size="sm" onClick={handleDescargar}>
+                <Download className="h-4 w-4 mr-2" />
+                Descargar CSV
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
@@ -247,6 +348,89 @@ export default function SeguimientoRecaudos() {
                 className={vista === "list" ? "bg-muted" : ""}
               >
                 <List className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-lg shadow-sm mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
+              <div>
+                <Label htmlFor="fechaInicial">Fecha Inicial</Label>
+                <Input
+                  type="date"
+                  id="fechaInicial"
+                  value={filtros.fechaInicial}
+                  onChange={(e) => setFiltros({...filtros, fechaInicial: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="fechaFinal">Fecha Final</Label>
+                <Input
+                  type="date"
+                  id="fechaFinal"
+                  value={filtros.fechaFinal}
+                  onChange={(e) => setFiltros({...filtros, fechaFinal: e.target.value})}
+                />
+              </div>
+              <div>
+                <Label htmlFor="cliente">Cliente</Label>
+                <Select
+                  value={filtros.cliente}
+                  onValueChange={(value) => setFiltros({...filtros, cliente: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar cliente" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    {clientesUnicos.map((cliente) => (
+                      <SelectItem key={cliente} value={cliente}>
+                        {cliente}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="proveedor">Proveedor</Label>
+                <Select
+                  value={filtros.proveedor}
+                  onValueChange={(value) => setFiltros({...filtros, proveedor: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar proveedor" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">Todos</SelectItem>
+                    {proveedoresUnicos.map((proveedor) => (
+                      <SelectItem key={proveedor} value={proveedor}>
+                        {proveedor}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label htmlFor="periodo">Periodo</Label>
+                <Select
+                  value={filtros.periodo}
+                  onValueChange={(value) => setFiltros({...filtros, periodo: value})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Seleccionar periodo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="todo">Todo</SelectItem>
+                    <SelectItem value="semana">Esta semana</SelectItem>
+                    <SelectItem value="mes">Este mes</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="mt-4 flex justify-end">
+              <Button onClick={handleFiltrar}>
+                <Filter className="h-4 w-4 mr-2" />
+                Aplicar Filtros
               </Button>
             </div>
           </div>

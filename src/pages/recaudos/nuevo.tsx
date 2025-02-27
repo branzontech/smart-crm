@@ -6,6 +6,7 @@ import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Plus, Save, Trash2, Search } from "lucide-react";
+import { FileUpload } from "@/components/FileUpload";
 import {
   Form,
   FormControl,
@@ -64,6 +65,7 @@ export default function NuevoRecaudo() {
   const [clienteSearch, setClienteSearch] = useState("");
   const [proveedorSearch, setProveedorSearch] = useState("");
   const [articulos, setArticulos] = useState<ArticuloForm[]>([]);
+  const [archivos, setArchivos] = useState<File[]>([]);
 
   const filteredClientes = clientes.filter(cliente =>
     cliente.nombre.toLowerCase().includes(clienteSearch.toLowerCase())
@@ -134,6 +136,10 @@ export default function NuevoRecaudo() {
     }, 0);
   };
 
+  const handleFilesChange = (files: File[]) => {
+    setArchivos(files);
+  };
+
   const onSubmit = recaudoForm.handleSubmit(async (data) => {
     try {
       if (data.clienteId === 0) {
@@ -147,6 +153,8 @@ export default function NuevoRecaudo() {
       }
 
       console.log("Datos del formulario:", data);
+      console.log("Archivos adjuntos:", archivos);
+      
       toast.success("Recaudo creado exitosamente");
       navigate("/recaudos");
     } catch (error) {
@@ -412,6 +420,8 @@ export default function NuevoRecaudo() {
               </CardContent>
             </Card>
           )}
+
+          <FileUpload onFilesChange={handleFilesChange} />
 
           <Form {...recaudoForm}>
             <form onSubmit={onSubmit}>

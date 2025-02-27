@@ -1,3 +1,4 @@
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -36,7 +37,7 @@ const recaudoSchema = z.object({
   clienteId: z.number({
     required_error: "Debe seleccionar un cliente",
     invalid_type_error: "Debe seleccionar un cliente",
-  }),
+  }).min(1, "Debe seleccionar un cliente"),
   articulos: z.array(z.object({
     descripcion: z.string().min(1, "La descripción es requerida"),
     cantidad: z.number({
@@ -112,9 +113,21 @@ export default function NuevoRecaudo() {
     return calcularSubtotal() + calcularIVA();
   };
 
+  const handleSelectCliente = (cliente: typeof clientes[0]) => {
+    form.setValue("clienteId", cliente.id);
+    setClienteSearch(cliente.nombre);
+  };
+
+  const handleSelectProveedor = (proveedor: typeof proveedores[0], index: number) => {
+    form.setValue(`articulos.${index}.proveedorId`, proveedor.id);
+    setProveedorSearches({
+      ...proveedorSearches,
+      [index]: proveedor.nombre,
+    });
+  };
+
   const onSubmit = async (data: RecaudoForm) => {
     try {
-      // Validación adicional
       if (data.clienteId === 0) {
         toast.error("Debe seleccionar un cliente");
         return;
@@ -198,12 +211,13 @@ export default function NuevoRecaudo() {
                               <CardContent className="p-2">
                                 {filteredClientes.map((cliente) => (
                                   <Button
+                                    type="button"
                                     key={cliente.id}
                                     variant="ghost"
                                     className="w-full justify-start text-left"
-                                    onClick={() => {
-                                      form.setValue("clienteId", cliente.id);
-                                      setClienteSearch(cliente.nombre);
+                                    onClick={(e) => {
+                                      e.preventDefault();
+                                      handleSelectCliente(cliente);
                                     }}
                                   >
                                     {cliente.nombre}
@@ -300,15 +314,13 @@ export default function NuevoRecaudo() {
                                       <CardContent className="p-2">
                                         {getFilteredProveedores(proveedorSearches[index]).map((proveedor) => (
                                           <Button
+                                            type="button"
                                             key={proveedor.id}
                                             variant="ghost"
                                             className="w-full justify-start text-left"
-                                            onClick={() => {
-                                              form.setValue(`articulos.${index}.proveedorId`, proveedor.id);
-                                              setProveedorSearches({
-                                                ...proveedorSearches,
-                                                [index]: proveedor.nombre,
-                                              });
+                                            onClick={(e) => {
+                                              e.preventDefault();
+                                              handleSelectProveedor(proveedor, index);
                                             }}
                                           >
                                             {proveedor.nombre}

@@ -15,6 +15,7 @@ import {
   Mail,
   Settings,
   ChevronDown,
+  Store
 } from "lucide-react";
 import {
   Tooltip,
@@ -34,6 +35,7 @@ const navItems: NavItem[] = [
   { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Clientes", icon: Users, path: "/clientes" },
   { label: "Empresas", icon: Building2, path: "/empresas" },
+  { label: "Proveedores", icon: Store, path: "/proveedores" },
   { label: "Recaudos", icon: Coins, path: "/recaudos" },
   {
     label: "Ventas",

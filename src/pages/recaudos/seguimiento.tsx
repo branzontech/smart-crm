@@ -104,7 +104,6 @@ export default function SeguimientoRecaudos() {
   const clientesUnicos = Array.from(new Set(recaudosData.map(r => r.cliente)));
   const proveedoresUnicos = Array.from(new Set(recaudosData.map(r => r.proveedor)));
 
-  // Efecto para aplicar los filtros automáticamente cuando cambien
   React.useEffect(() => {
     let recaudosFiltrados = [...recaudosData];
 
@@ -147,7 +146,7 @@ export default function SeguimientoRecaudos() {
     }
 
     setRecaudos(recaudosFiltrados);
-  }, [filtros]); // Se ejecuta cada vez que cambian los filtros
+  }, [filtros]);
 
   const handleDescargar = () => {
     const datosCSV = recaudos.map(r => ({
@@ -781,8 +780,64 @@ export default function SeguimientoRecaudos() {
                 ))}
               </div>
             </TabsContent>
-            <TabsContent value="vencidos">
+
+            <TabsContent value="vencidos" className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {recaudos.filter(r => r.estado === "Vencido").map((recaudo) => (
                   <Card key={recaudo.id} className="relative">
-                    {recaudo
+                    {recaudo.prioridad === "Alta" && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                    )}
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {recaudo.numeroRecaudo}
+                      </CardTitle>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Detalles del Recaudo</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="font-semibold">Historial de Contacto</h4>
+                                  {recaudo.historialContacto?.map((contacto, index) => (
+                                    <div key={index} className="text-sm mt-2">
+                                      <p className="font-medium">{contacto.fecha}</p>
+                                      <p className="text-gray-600">{contacto.nota}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">Información Adicional</h4>
+                                  <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                  <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                  <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      {renderCardContent(recaudo)}
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+      </main>
+    </div>
+  );
+}

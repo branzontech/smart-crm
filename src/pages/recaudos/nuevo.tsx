@@ -138,20 +138,17 @@ export default function NuevoRecaudo() {
 
   const handleSelectCliente = (cliente: typeof clientes[0]) => {
     recaudoForm.setValue("clienteId", cliente.id);
-    setClienteSeleccionado(cliente.nombre);
-    setClienteSearch("");
+    setClienteSearch(cliente.nombre);
   };
 
   const handleSelectAgente = (agente: typeof agentes[0]) => {
     recaudoForm.setValue("agenteId", agente.id);
-    setAgenteSeleccionado(agente.nombre);
-    setAgenteSearch("");
+    setAgenteSearch(agente.nombre);
   };
 
   const handleSelectProveedor = (proveedor: typeof proveedores[0]) => {
     articuloForm.setValue("proveedorId", proveedor.id);
-    setProveedorSeleccionado(proveedor.nombre);
-    setProveedorSearch("");
+    setProveedorSearch(proveedor.nombre);
   };
 
   const handleAgregarArticulo = articuloForm.handleSubmit((data) => {
@@ -271,36 +268,17 @@ export default function NuevoRecaudo() {
                           <div className="relative">
                             <div className="flex gap-2">
                               <div className="flex-1 relative">
-                                {clienteSeleccionado ? (
-                                  <div className="flex items-center justify-between w-full p-2 border rounded-md bg-background">
-                                    <span>{clienteSeleccionado}</span>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      className="h-auto p-1"
-                                      onClick={() => {
-                                        setClienteSeleccionado("");
-                                        recaudoForm.setValue("clienteId", 0);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <Input
-                                      placeholder="Buscar cliente..."
-                                      value={clienteSearch}
-                                      onChange={(e) => setClienteSearch(e.target.value)}
-                                      className="w-full pr-10"
-                                    />
-                                    <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                  </>
-                                )}
+                                <Input
+                                  placeholder="Buscar cliente..."
+                                  value={clienteSearch}
+                                  onChange={(e) => setClienteSearch(e.target.value)}
+                                  className="w-full pr-10"
+                                />
+                                <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                               </div>
                               <CreateClienteDialog onClienteCreated={handleClienteCreated} />
                             </div>
-                            {clienteSearch && filteredClientes.length > 0 && !clienteSeleccionado && (
+                            {clienteSearch && filteredClientes.length > 0 && (
                               <Card className="absolute z-10 w-full mt-1">
                                 <CardContent className="p-2">
                                   {filteredClientes.map((cliente) => (
@@ -388,36 +366,17 @@ export default function NuevoRecaudo() {
                           <div className="relative">
                             <div className="flex gap-2">
                               <div className="flex-1 relative">
-                                {agenteSeleccionado ? (
-                                  <div className="flex items-center justify-between w-full p-2 border rounded-md bg-background">
-                                    <span>{agenteSeleccionado}</span>
-                                    <Button
-                                      type="button"
-                                      variant="ghost"
-                                      className="h-auto p-1"
-                                      onClick={() => {
-                                        setAgenteSeleccionado("");
-                                        recaudoForm.setValue("agenteId", 0);
-                                      }}
-                                    >
-                                      <X className="h-4 w-4" />
-                                    </Button>
-                                  </div>
-                                ) : (
-                                  <>
-                                    <Input
-                                      placeholder="Buscar agente..."
-                                      value={agenteSearch}
-                                      onChange={(e) => setAgenteSearch(e.target.value)}
-                                      className="w-full pr-10"
-                                    />
-                                    <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
-                                  </>
-                                )}
+                                <Input
+                                  placeholder="Buscar agente..."
+                                  value={agenteSearch}
+                                  onChange={(e) => setAgenteSearch(e.target.value)}
+                                  className="w-full pr-10"
+                                />
+                                <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                               </div>
                               <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
                             </div>
-                            {agenteSearch && filteredAgentes.length > 0 && !agenteSeleccionado && (
+                            {agenteSearch && filteredAgentes.length > 0 && (
                               <Card className="absolute z-10 w-full mt-1">
                                 <CardContent className="p-2">
                                   {filteredAgentes.map((agente) => (

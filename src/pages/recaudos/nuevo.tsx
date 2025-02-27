@@ -221,14 +221,14 @@ export default function NuevoRecaudo() {
                         <FormLabel>Cliente</FormLabel>
                         <div className="relative">
                           <div className="flex gap-2">
-                            <div className="flex-1">
+                            <div className="flex-1 relative">
                               <Input
                                 placeholder="Buscar cliente..."
                                 value={clienteSearch}
                                 onChange={(e) => setClienteSearch(e.target.value)}
                                 className="w-full pr-10"
                               />
-                              <Search className="absolute right-[4.5rem] top-2.5 h-5 w-5 text-gray-400" />
+                              <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                             </div>
                             <CreateClienteDialog onClienteCreated={handleClienteCreated} />
                           </div>
@@ -333,14 +333,14 @@ export default function NuevoRecaudo() {
                           <FormLabel>Proveedor</FormLabel>
                           <div className="relative">
                             <div className="flex gap-2">
-                              <div className="flex-1">
+                              <div className="flex-1 relative">
                                 <Input
                                   placeholder="Buscar proveedor..."
                                   value={proveedorSearch}
                                   onChange={(e) => setProveedorSearch(e.target.value)}
                                   className="w-full pr-10"
                                 />
-                                <Search className="absolute right-[4.5rem] top-2.5 h-5 w-5 text-gray-400" />
+                                <Search className="absolute right-3 top-2.5 h-5 w-5 text-gray-400" />
                               </div>
                               <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
                             </div>

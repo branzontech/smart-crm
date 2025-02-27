@@ -8,6 +8,7 @@ import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import NuevoCliente from "./pages/clientes/nuevo";
 import ClientesIndex from "./pages/clientes/index";
+import ClienteDetalle from "./pages/clientes/[id]";
 import EmpresasIndex from "./pages/empresas/index";
 import NuevaEmpresa from "./pages/empresas/nuevo";
 import ProveedoresIndex from "./pages/proveedores/index";
@@ -38,6 +39,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/clientes" element={<ClientesIndex />} />
           <Route path="/clientes/nuevo" element={<NuevoCliente />} />
+          <Route path="/clientes/:id" element={<ClienteDetalle />} />
           <Route path="/empresas" element={<EmpresasIndex />} />
           <Route path="/empresas/nuevo" element={<NuevaEmpresa />} />
           <Route path="/proveedores" element={<ProveedoresIndex />} />

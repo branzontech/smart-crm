@@ -1,4 +1,3 @@
-
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { z } from "zod";
@@ -20,7 +19,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Switch } from "@/components/ui/switch";
 import { useState } from "react";
 
-// Datos de ejemplo (en una aplicación real vendrían de una API)
 const clientes = [
   { id: 1, nombre: "Juan Pérez" },
   { id: 2, nombre: "María García" },
@@ -109,7 +107,6 @@ export default function NuevoRecaudo() {
     setArticulos([...articulos, data]);
     recaudoForm.setValue("articulos", [...articulos, data]);
     
-    // Limpiar el formulario de artículo
     articuloForm.reset({
       descripcion: "",
       cantidad: 1,
@@ -159,14 +156,14 @@ export default function NuevoRecaudo() {
   });
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-soft-gray/30">
       <Navbar />
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex justify-between items-center mb-6">
             <Button
               variant="ghost"
-              className="text-teal hover:text-sage hover:bg-mint/20"
+              className="text-soft-blue hover:text-soft-purple hover:bg-soft-purple/20"
               onClick={() => navigate("/recaudos")}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -180,14 +177,14 @@ export default function NuevoRecaudo() {
                 setClienteSearch("");
                 setProveedorSearch("");
               }}
-              className="bg-teal hover:bg-sage text-white"
+              className="bg-soft-blue hover:bg-soft-purple text-white"
             >
               <Plus className="mr-2 h-4 w-4" />
               Nuevo Recaudo
             </Button>
           </div>
 
-          <Card className="mb-6">
+          <Card className="mb-6 bg-white/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle className="text-2xl">
                 Nuevo Recaudo N° {recaudoForm.getValues("numeroRecaudo")}
@@ -240,7 +237,7 @@ export default function NuevoRecaudo() {
             </CardContent>
           </Card>
 
-          <Card className="mb-6">
+          <Card className="mb-6 bg-white/50 backdrop-blur-sm">
             <CardHeader>
               <CardTitle>Agregar Artículo</CardTitle>
             </CardHeader>
@@ -360,7 +357,7 @@ export default function NuevoRecaudo() {
                     )}
                   />
 
-                  <Button type="submit" className="w-full">
+                  <Button type="submit" className="w-full bg-soft-purple hover:bg-soft-pink text-gray-700">
                     <Plus className="mr-2 h-4 w-4" />
                     Agregar Artículo
                   </Button>
@@ -370,14 +367,14 @@ export default function NuevoRecaudo() {
           </Card>
 
           {articulos.length > 0 && (
-            <Card className="mb-6">
+            <Card className="mb-6 bg-white/50 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle>Artículos Agregados</CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
                   {articulos.map((articulo, index) => (
-                    <Card key={index} className="p-4">
+                    <Card key={index} className="p-4 bg-white">
                       <div className="flex justify-between items-start">
                         <div>
                           <p className="font-medium">{articulo.descripcion}</p>
@@ -397,7 +394,7 @@ export default function NuevoRecaudo() {
                         <Button
                           type="button"
                           variant="ghost"
-                          className="text-red-600 hover:text-red-700"
+                          className="text-soft-pink hover:text-red-700 hover:bg-soft-pink/20"
                           onClick={() => handleEliminarArticulo(index)}
                         >
                           <Trash2 className="h-4 w-4" />
@@ -407,7 +404,7 @@ export default function NuevoRecaudo() {
                   ))}
 
                   <div className="text-right">
-                    <p className="text-xl font-bold text-teal">
+                    <p className="text-xl font-bold text-soft-blue">
                       Total General: ${calcularTotal().toLocaleString()}
                     </p>
                   </div>
@@ -418,7 +415,7 @@ export default function NuevoRecaudo() {
 
           <Form {...recaudoForm}>
             <form onSubmit={onSubmit}>
-              <Button type="submit" className="w-full bg-teal hover:bg-sage">
+              <Button type="submit" className="w-full bg-soft-blue hover:bg-soft-purple text-white shadow-lg">
                 <Save className="mr-2 h-4 w-4" />
                 Guardar Recaudo
               </Button>

@@ -24,6 +24,11 @@ export default {
         'lemon': '#E1DF66',
         'teal': '#285D66',
         'sage': '#6DA095',
+        'soft-purple': '#E5DEFF',
+        'soft-pink': '#FFDEE2',
+        'soft-peach': '#FDE1D3',
+        'soft-blue': '#D3E4FD',
+        'soft-gray': '#F1F0FB',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           hover: "hsl(var(--primary-hover))",

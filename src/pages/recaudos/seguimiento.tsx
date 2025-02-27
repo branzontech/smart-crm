@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -8,7 +7,24 @@ import { Eye, Grid, List, MessageCircle, Calendar, DollarSign, AlertCircle, Info
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { useToast } from "@/hooks/use-toast";
 
-const recaudos = [
+type Recaudo = {
+  id: number;
+  numeroRecaudo: string;
+  cliente: string;
+  agente: string;
+  estado: string;
+  monto: number;
+  fechaCreacion: string;
+  fechaVencimiento: string;
+  diasRestantes?: number;
+  prioridad?: string;
+  ultimaGestion?: string;
+  ultimaObservacion?: string;
+  metodoPago?: string;
+  historialContacto?: Array<{ fecha: string; nota: string }>;
+};
+
+const recaudosData: Recaudo[] = [
   {
     id: 1,
     numeroRecaudo: "REC-001",
@@ -36,12 +52,13 @@ const recaudos = [
     estado: "Pagado",
     monto: 15000,
     fechaCreacion: "2024-03-10",
-    fechaVencimiento: "2024-04-10",
-  },
+    fechaVencimiento: "2024-04-10"
+  }
 ];
 
 export default function SeguimientoRecaudos() {
   const [vista, setVista] = useState<"grid" | "list">("grid");
+  const [recaudos, setRecaudos] = useState<Recaudo[]>(recaudosData);
   const { toast } = useToast();
 
   const handleEnviarMensaje = (recaudoId: number) => {
@@ -57,6 +74,10 @@ export default function SeguimientoRecaudos() {
       description: "La gestión ha sido registrada exitosamente.",
     });
   };
+
+  if (!recaudos) {
+    return <div>Cargando recaudos...</div>;
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -123,7 +144,7 @@ export default function SeguimientoRecaudos() {
                                 <div className="grid grid-cols-2 gap-4">
                                   <div>
                                     <h4 className="font-semibold">Historial de Contacto</h4>
-                                    {recaudo.historialContacto.map((contacto, index) => (
+                                    {recaudo.historialContacto?.map((contacto, index) => (
                                       <div key={index} className="text-sm mt-2">
                                         <p className="font-medium">{contacto.fecha}</p>
                                         <p className="text-gray-600">{contacto.nota}</p>
@@ -132,9 +153,9 @@ export default function SeguimientoRecaudos() {
                                   </div>
                                   <div>
                                     <h4 className="font-semibold">Información Adicional</h4>
-                                    <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago}</p>
-                                    <p className="text-sm">Última Gestión: {recaudo.ultimaGestion}</p>
-                                    <p className="text-sm">Observación: {recaudo.ultimaObservacion}</p>
+                                    <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                    <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                    <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
                                   </div>
                                 </div>
                               </div>
@@ -179,14 +200,16 @@ export default function SeguimientoRecaudos() {
                               {recaudo.estado}
                             </span>
                           </div>
-                          <div className="flex justify-between">
-                            <span className="text-sm text-muted-foreground">Días Restantes:</span>
-                            <span className={`text-sm font-medium ${
-                              recaudo.diasRestantes <= 5 ? "text-red-600" : "text-gray-600"
-                            }`}>
-                              {recaudo.diasRestantes} días
-                            </span>
-                          </div>
+                          {recaudo.diasRestantes !== undefined && (
+                            <div className="flex justify-between">
+                              <span className="text-sm text-muted-foreground">Días Restantes:</span>
+                              <span className={`text-sm font-medium ${
+                                recaudo.diasRestantes <= 5 ? "text-red-600" : "text-gray-600"
+                              }`}>
+                                {recaudo.diasRestantes} días
+                              </span>
+                            </div>
+                          )}
                           <div className="pt-3 flex gap-2 justify-end border-t">
                             <Button 
                               variant="outline" 
@@ -240,9 +263,37 @@ export default function SeguimientoRecaudos() {
                               {recaudo.estado}
                             </span>
                             <div className="flex gap-2 mt-2">
-                              <Button variant="ghost" size="sm">
-                                <Eye className="h-4 w-4" />
-                              </Button>
+                              <Dialog>
+                                <DialogTrigger asChild>
+                                  <Button variant="ghost" size="sm">
+                                    <Eye className="h-4 w-4" />
+                                  </Button>
+                                </DialogTrigger>
+                                <DialogContent>
+                                  <DialogHeader>
+                                    <DialogTitle>Detalles del Recaudo</DialogTitle>
+                                  </DialogHeader>
+                                  <div className="space-y-4">
+                                    <div className="grid grid-cols-2 gap-4">
+                                      <div>
+                                        <h4 className="font-semibold">Historial de Contacto</h4>
+                                        {recaudo.historialContacto?.map((contacto, index) => (
+                                          <div key={index} className="text-sm mt-2">
+                                            <p className="font-medium">{contacto.fecha}</p>
+                                            <p className="text-gray-600">{contacto.nota}</p>
+                                          </div>
+                                        ))}
+                                      </div>
+                                      <div>
+                                        <h4 className="font-semibold">Información Adicional</h4>
+                                        <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                        <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                        <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
+                                      </div>
+                                    </div>
+                                  </div>
+                                </DialogContent>
+                              </Dialog>
                               <Button 
                                 variant="ghost" 
                                 size="sm"
@@ -268,11 +319,237 @@ export default function SeguimientoRecaudos() {
             </TabsContent>
 
             <TabsContent value="pendientes">
-              {/* Filtrar y mostrar solo recaudos pendientes */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recaudos.filter(r => r.estado === "Pendiente").map((recaudo) => (
+                  <Card key={recaudo.id} className="relative">
+                    {recaudo.prioridad === "Alta" && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                    )}
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {recaudo.numeroRecaudo}
+                      </CardTitle>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Detalles del Recaudo</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="font-semibold">Historial de Contacto</h4>
+                                  {recaudo.historialContacto?.map((contacto, index) => (
+                                    <div key={index} className="text-sm mt-2">
+                                      <p className="font-medium">{contacto.fecha}</p>
+                                      <p className="text-gray-600">{contacto.nota}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">Información Adicional</h4>
+                                  <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                  <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                  <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Cliente:</span>
+                          <span className="text-sm font-medium">{recaudo.cliente}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Agente:</span>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.agente}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Monto:</span>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.monto.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Vencimiento:</span>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.fechaVencimiento}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Estado:</span>
+                          <span className={`text-sm px-2 py-0.5 rounded-full ${
+                            recaudo.estado === "Pagado" 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}>
+                            {recaudo.estado}
+                          </span>
+                        </div>
+                        {recaudo.diasRestantes !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Días Restantes:</span>
+                            <span className={`text-sm font-medium ${
+                              recaudo.diasRestantes <= 5 ? "text-red-600" : "text-gray-600"
+                            }`}>
+                              {recaudo.diasRestantes} días
+                            </span>
+                          </div>
+                        )}
+                        <div className="pt-3 flex gap-2 justify-end border-t">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEnviarMensaje(recaudo.id)}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleMarcarGestion(recaudo.id)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
 
             <TabsContent value="pagados">
-              {/* Filtrar y mostrar solo recaudos pagados */}
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {recaudos.filter(r => r.estado === "Pagado").map((recaudo) => (
+                  <Card key={recaudo.id} className="relative">
+                    {recaudo.prioridad === "Alta" && (
+                      <div className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1">
+                        <AlertCircle className="h-4 w-4" />
+                      </div>
+                    )}
+                    <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                      <CardTitle className="text-sm font-medium">
+                        {recaudo.numeroRecaudo}
+                      </CardTitle>
+                      <div className="flex gap-2">
+                        <Dialog>
+                          <DialogTrigger asChild>
+                            <Button variant="ghost" size="sm">
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </DialogTrigger>
+                          <DialogContent>
+                            <DialogHeader>
+                              <DialogTitle>Detalles del Recaudo</DialogTitle>
+                            </DialogHeader>
+                            <div className="space-y-4">
+                              <div className="grid grid-cols-2 gap-4">
+                                <div>
+                                  <h4 className="font-semibold">Historial de Contacto</h4>
+                                  {recaudo.historialContacto?.map((contacto, index) => (
+                                    <div key={index} className="text-sm mt-2">
+                                      <p className="font-medium">{contacto.fecha}</p>
+                                      <p className="text-gray-600">{contacto.nota}</p>
+                                    </div>
+                                  ))}
+                                </div>
+                                <div>
+                                  <h4 className="font-semibold">Información Adicional</h4>
+                                  <p className="text-sm mt-2">Método de Pago: {recaudo.metodoPago || 'No especificado'}</p>
+                                  <p className="text-sm">Última Gestión: {recaudo.ultimaGestion || 'Sin gestiones'}</p>
+                                  <p className="text-sm">Observación: {recaudo.ultimaObservacion || 'Sin observaciones'}</p>
+                                </div>
+                              </div>
+                            </div>
+                          </DialogContent>
+                        </Dialog>
+                      </div>
+                    </CardHeader>
+                    <CardContent>
+                      <div className="space-y-3">
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Cliente:</span>
+                          <span className="text-sm font-medium">{recaudo.cliente}</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Agente:</span>
+                          <div className="flex items-center gap-2">
+                            <User className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.agente}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Monto:</span>
+                          <div className="flex items-center gap-1">
+                            <DollarSign className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.monto.toLocaleString()}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Vencimiento:</span>
+                          <div className="flex items-center gap-1">
+                            <Calendar className="h-4 w-4" />
+                            <span className="text-sm">{recaudo.fechaVencimiento}</span>
+                          </div>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-sm text-muted-foreground">Estado:</span>
+                          <span className={`text-sm px-2 py-0.5 rounded-full ${
+                            recaudo.estado === "Pagado" 
+                              ? "bg-green-100 text-green-800" 
+                              : "bg-yellow-100 text-yellow-800"
+                          }`}>
+                            {recaudo.estado}
+                          </span>
+                        </div>
+                        {recaudo.diasRestantes !== undefined && (
+                          <div className="flex justify-between">
+                            <span className="text-sm text-muted-foreground">Días Restantes:</span>
+                            <span className={`text-sm font-medium ${
+                              recaudo.diasRestantes <= 5 ? "text-red-600" : "text-gray-600"
+                            }`}>
+                              {recaudo.diasRestantes} días
+                            </span>
+                          </div>
+                        )}
+                        <div className="pt-3 flex gap-2 justify-end border-t">
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleEnviarMensaje(recaudo.id)}
+                          >
+                            <MessageCircle className="h-4 w-4" />
+                          </Button>
+                          <Button 
+                            variant="outline" 
+                            size="sm"
+                            onClick={() => handleMarcarGestion(recaudo.id)}
+                          >
+                            <Check className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
             </TabsContent>
           </Tabs>
         </div>

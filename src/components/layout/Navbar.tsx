@@ -87,12 +87,13 @@ export const Navbar = () => {
   };
 
   return (
-    <nav
+    <aside
       className={cn(
-        "fixed h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative z-50",
+        "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-50",
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}
+      style={{ position: 'fixed' }}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -204,6 +205,6 @@ export const Navbar = () => {
           </div>
         ))}
       </div>
-    </nav>
+    </aside>
   );
 };

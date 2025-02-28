@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import {
   DndContext,
   DragOverlay,
@@ -26,13 +26,26 @@ import { LayoutDrop } from "./LayoutDrop";
 import { ClausulaPreviewCard } from "./ClausulaPreviewCard";
 import { clausulasDisponibles } from "@/data/clausulasContrato";
 import { toast } from "sonner";
-import { Clausula } from "@/types/contrato";
+import { Clausula, Contrato } from "@/types/contrato";
 
 interface ContratoBuilderProps {
   titulo: string;
+  contratante: {
+    nombre: string;
+    identificacion: string;
+    cargo?: string;
+  };
+  contratista: {
+    nombre: string;
+    identificacion: string;
+  };
 }
 
-export const ContratoBuilder = ({ titulo }: ContratoBuilderProps) => {
+export const ContratoBuilder = ({ 
+  titulo, 
+  contratante,
+  contratista
+}: ContratoBuilderProps) => {
   const [activeId, setActiveId] = useState<string | null>(null);
   const [clausulasSeleccionadas, setClausulasSeleccionadas] = useState<Clausula[]>([
     {
@@ -52,6 +65,44 @@ export const ContratoBuilder = ({ titulo }: ContratoBuilderProps) => {
       requerido: true
     }
   ]);
+  
+  // Efecto para actualizar las cláusulas con los datos de las partes
+  useEffect(() => {
+    if (contratante.nombre || contratista.nombre) {
+      setClausulasSeleccionadas(clausulas => 
+        clausulas.map(clausula => {
+          let contenidoActualizado = clausula.contenido;
+          
+          // Reemplazar datos del contratante
+          if (contratante.nombre) {
+            contenidoActualizado = contenidoActualizado.replace(/\[NOMBRE EMPRESA\]/g, contratante.nombre);
+          }
+          if (contratante.identificacion) {
+            contenidoActualizado = contenidoActualizado.replace(/\[NIT \[\.\.\.\]\]/g, `NIT ${contratante.identificacion}`);
+            contenidoActualizado = contenidoActualizado.replace(/NIT \[\.\.\.\]/g, `NIT ${contratante.identificacion}`);
+          }
+          if (contratante.cargo) {
+            contenidoActualizado = contenidoActualizado.replace(/\[REPRESENTANTE LEGAL\]/g, contratante.cargo);
+          }
+          
+          // Reemplazar datos del contratista
+          if (contratista.nombre) {
+            contenidoActualizado = contenidoActualizado.replace(/\[NOMBRE CONTRATISTA\]/g, contratista.nombre);
+          }
+          if (contratista.identificacion) {
+            contenidoActualizado = contenidoActualizado.replace(/\[DOCUMENTO IDENTIDAD\] No\. \[\.\.\.\]/g, `C.C. No. ${contratista.identificacion}`);
+            contenidoActualizado = contenidoActualizado.replace(/\[DOCUMENTO IDENTIDAD\]/g, "C.C.");
+            contenidoActualizado = contenidoActualizado.replace(/No\. \[\.\.\.\]/g, `No. ${contratista.identificacion}`);
+          }
+          
+          return {
+            ...clausula,
+            contenido: contenidoActualizado
+          };
+        })
+      );
+    }
+  }, [contratante, contratista]);
   
   const sensors = useSensors(
     useSensor(PointerSensor),
@@ -84,15 +135,43 @@ export const ContratoBuilder = ({ titulo }: ContratoBuilderProps) => {
   
   // Agregar una cláusula desde la biblioteca
   const agregarClausula = (clausula: Clausula) => {
-    // Verificar si ya existe la cláusula
-    const existe = clausulasSeleccionadas.some((c) => c.id === clausula.id);
+    // Generar un ID único para la nueva cláusula
+    const newId = `${clausula.id}-${Date.now()}`;
+    
+    // Reemplazar placeholder con datos reales en la nueva cláusula
+    let contenidoActualizado = clausula.contenido;
+    
+    // Reemplazar datos del contratante
+    if (contratante.nombre) {
+      contenidoActualizado = contenidoActualizado.replace(/\[NOMBRE EMPRESA\]/g, contratante.nombre);
+    }
+    if (contratante.identificacion) {
+      contenidoActualizado = contenidoActualizado.replace(/\[NIT \[\.\.\.\]\]/g, `NIT ${contratante.identificacion}`);
+      contenidoActualizado = contenidoActualizado.replace(/NIT \[\.\.\.\]/g, `NIT ${contratante.identificacion}`);
+    }
+    if (contratante.cargo) {
+      contenidoActualizado = contenidoActualizado.replace(/\[REPRESENTANTE LEGAL\]/g, contratante.cargo);
+    }
+    
+    // Reemplazar datos del contratista
+    if (contratista.nombre) {
+      contenidoActualizado = contenidoActualizado.replace(/\[NOMBRE CONTRATISTA\]/g, contratista.nombre);
+    }
+    if (contratista.identificacion) {
+      contenidoActualizado = contenidoActualizado.replace(/\[DOCUMENTO IDENTIDAD\] No\. \[\.\.\.\]/g, `C.C. No. ${contratista.identificacion}`);
+      contenidoActualizado = contenidoActualizado.replace(/\[DOCUMENTO IDENTIDAD\]/g, "C.C.");
+      contenidoActualizado = contenidoActualizado.replace(/No\. \[\.\.\.\]/g, `No. ${contratista.identificacion}`);
+    }
+    
+    // Verificar si ya existe una cláusula con el mismo tipo
+    const existe = clausulasSeleccionadas.some((c) => c.tipo === clausula.tipo && clausula.tipo !== "otros");
     if (existe) {
-      toast.info("Esta cláusula ya está añadida al contrato");
+      toast.info(`Ya existe una cláusula de tipo "${clausula.titulo}"`);
       return;
     }
     
     setClausulasSeleccionadas([...clausulasSeleccionadas, 
-      {...clausula, id: `${clausula.id}-${Date.now()}`}
+      {...clausula, id: newId, contenido: contenidoActualizado}
     ]);
     toast.success(`Cláusula "${clausula.titulo}" añadida`);
   };
@@ -194,14 +273,14 @@ export const ContratoBuilder = ({ titulo }: ContratoBuilderProps) => {
               <div className="border-t pt-4">
                 <p className="text-center font-medium">CONTRATANTE</p>
                 <p className="text-center mt-16">_________________________</p>
-                <p className="text-center text-sm mt-2">[Nombre del Representante]</p>
-                <p className="text-center text-sm">[Cargo]</p>
+                <p className="text-center text-sm mt-2">{contratante.nombre || "[Nombre del Representante]"}</p>
+                <p className="text-center text-sm">{contratante.cargo || "[Cargo]"}</p>
               </div>
               <div className="border-t pt-4">
                 <p className="text-center font-medium">CONTRATISTA</p>
                 <p className="text-center mt-16">_________________________</p>
-                <p className="text-center text-sm mt-2">[Nombre del Contratista]</p>
-                <p className="text-center text-sm">[Identificación]</p>
+                <p className="text-center text-sm mt-2">{contratista.nombre || "[Nombre del Contratista]"}</p>
+                <p className="text-center text-sm">{contratista.identificacion ? `C.C. ${contratista.identificacion}` : "[Identificación]"}</p>
               </div>
             </div>
           </CardContent>

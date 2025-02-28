@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Pencil, Save, Trash2 } from "lucide-react";
@@ -23,6 +23,11 @@ export const ClausulaItem = ({
   const [isEditing, setIsEditing] = useState(false);
   const [contenido, setContenido] = useState(clausula.contenido);
   
+  // Actualizar el contenido si cambia la cláusula externamente
+  useEffect(() => {
+    setContenido(clausula.contenido);
+  }, [clausula.contenido]);
+  
   const handleSave = () => {
     if (onUpdate) {
       onUpdate(clausula.id, contenido);
@@ -33,6 +38,13 @@ export const ClausulaItem = ({
   const handleDelete = () => {
     if (onRemove) {
       onRemove(clausula.id);
+    }
+  };
+  
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Guardar al presionar Ctrl+Enter o Cmd+Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleSave();
     }
   };
   
@@ -71,13 +83,45 @@ export const ClausulaItem = ({
       </CardHeader>
       <CardContent className="pt-0 px-4 print:px-0">
         {isEditing ? (
-          <Textarea 
-            value={contenido} 
-            onChange={(e) => setContenido(e.target.value)}
-            className="min-h-[120px]"
-          />
+          <div className="space-y-2">
+            <Textarea 
+              value={contenido} 
+              onChange={(e) => setContenido(e.target.value)}
+              onKeyDown={handleKeyDown}
+              className="min-h-[120px] font-normal"
+              placeholder="Ingrese el contenido de la cláusula"
+            />
+            <div className="flex justify-end space-x-2">
+              <Button 
+                size="sm" 
+                variant="outline" 
+                onClick={() => {
+                  setContenido(clausula.contenido);
+                  setIsEditing(false);
+                }}
+              >
+                Cancelar
+              </Button>
+              <Button 
+                size="sm" 
+                variant="default" 
+                onClick={handleSave}
+                className="bg-teal hover:bg-sage"
+              >
+                Guardar
+              </Button>
+            </div>
+            <p className="text-xs text-gray-500">
+              Puedes usar Ctrl+Enter para guardar rápidamente.
+            </p>
+          </div>
         ) : (
-          <div className="text-sm whitespace-pre-line">{contenido}</div>
+          <div 
+            className="text-sm whitespace-pre-line cursor-pointer"
+            onClick={() => clausula.editable && setIsEditing(true)}
+          >
+            {contenido}
+          </div>
         )}
       </CardContent>
     </Card>

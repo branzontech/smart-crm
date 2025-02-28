@@ -6,7 +6,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "exposicion-motivos",
     titulo: "Exposición de Motivos",
     tipo: "preambulo",
-    contenido: "CONSIDERANDO: Que EL CONTRATANTE necesita [DESCRIPCIÓN DE LA NECESIDAD].\n\nCONSIDERANDO: Que EL CONTRATISTA cuenta con la experiencia y capacidad para [DESCRIPCIÓN DE LA CAPACIDAD].\n\nEn virtud de lo anterior, las partes han convenido celebrar el presente contrato que se regirá por las siguientes cláusulas:",
+    contenido: "CONSIDERANDO: Que [NOMBRE EMPRESA] necesita [DESCRIPCIÓN DE LA NECESIDAD].\n\nCONSIDERANDO: Que [NOMBRE CONTRATISTA] cuenta con la experiencia y capacidad para [DESCRIPCIÓN DE LA CAPACIDAD].\n\nEn virtud de lo anterior, las partes han convenido celebrar el presente contrato que se regirá por las siguientes cláusulas:",
     editable: true,
     requerido: false
   },
@@ -22,7 +22,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "precio-pago",
     titulo: "Precio y Forma de Pago",
     tipo: "precio",
-    contenido: "EL CONTRATANTE pagará a EL CONTRATISTA por la prestación de los servicios objeto del presente contrato la suma de [VALOR EN NÚMEROS Y LETRAS], los cuales serán pagados de la siguiente manera: [FORMA DE PAGO].\n\nPARÁGRAFO: Los pagos se realizarán previa presentación de la factura correspondiente y certificación de cumplimiento expedida por el supervisor del contrato.",
+    contenido: "[NOMBRE EMPRESA] pagará a [NOMBRE CONTRATISTA] por la prestación de los servicios objeto del presente contrato la suma de [VALOR EN NÚMEROS Y LETRAS], los cuales serán pagados de la siguiente manera: [FORMA DE PAGO].\n\nPARÁGRAFO: Los pagos se realizarán previa presentación de la factura correspondiente y certificación de cumplimiento expedida por el supervisor del contrato.",
     editable: true,
     requerido: false
   },
@@ -38,7 +38,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "obligaciones-contratante",
     titulo: "Obligaciones del Contratante",
     tipo: "obligaciones",
-    contenido: "EL CONTRATANTE se obliga a:\n\n1. Pagar el valor del contrato en la forma y términos establecidos.\n2. Suministrar la información requerida por EL CONTRATISTA para el cabal cumplimiento de sus obligaciones.\n3. Realizar la supervisión del contrato.\n4. [OTRAS OBLIGACIONES].",
+    contenido: "[NOMBRE EMPRESA] se obliga a:\n\n1. Pagar el valor del contrato en la forma y términos establecidos.\n2. Suministrar la información requerida por [NOMBRE CONTRATISTA] para el cabal cumplimiento de sus obligaciones.\n3. Realizar la supervisión del contrato.\n4. [OTRAS OBLIGACIONES].",
     editable: true,
     requerido: false
   },
@@ -46,7 +46,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "obligaciones-contratista",
     titulo: "Obligaciones del Contratista",
     tipo: "obligaciones",
-    contenido: "EL CONTRATISTA se obliga a:\n\n1. Ejecutar el objeto del contrato de acuerdo con las especificaciones técnicas establecidas.\n2. Mantener la confidencialidad de la información a la que tenga acceso.\n3. Cumplir con los plazos establecidos.\n4. [OTRAS OBLIGACIONES].",
+    contenido: "[NOMBRE CONTRATISTA] se obliga a:\n\n1. Ejecutar el objeto del contrato de acuerdo con las especificaciones técnicas establecidas.\n2. Mantener la confidencialidad de la información a la que tenga acceso.\n3. Cumplir con los plazos establecidos.\n4. [OTRAS OBLIGACIONES].",
     editable: true,
     requerido: false
   },
@@ -54,7 +54,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "garantias",
     titulo: "Garantías",
     tipo: "garantias",
-    contenido: "EL CONTRATISTA se obliga a constituir a favor de EL CONTRATANTE las siguientes garantías:\n\n1. Cumplimiento: Por un valor equivalente al [PORCENTAJE] del valor total del contrato y con una vigencia igual al plazo de ejecución del mismo y [TIEMPO] más.\n2. Calidad del servicio: Por un valor equivalente al [PORCENTAJE] del valor total del contrato y con una vigencia igual al plazo de ejecución del mismo y [TIEMPO] más.\n3. [OTRAS GARANTÍAS].",
+    contenido: "[NOMBRE CONTRATISTA] se obliga a constituir a favor de [NOMBRE EMPRESA] las siguientes garantías:\n\n1. Cumplimiento: Por un valor equivalente al [PORCENTAJE] del valor total del contrato y con una vigencia igual al plazo de ejecución del mismo y [TIEMPO] más.\n2. Calidad del servicio: Por un valor equivalente al [PORCENTAJE] del valor total del contrato y con una vigencia igual al plazo de ejecución del mismo y [TIEMPO] más.\n3. [OTRAS GARANTÍAS].",
     editable: true,
     requerido: false
   },
@@ -62,7 +62,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "incumplimiento",
     titulo: "Cláusulas de Incumplimiento",
     tipo: "incumplimiento",
-    contenido: "En caso de incumplimiento de las obligaciones por parte de EL CONTRATISTA, EL CONTRATANTE podrá:\n\n1. Imponer multas sucesivas del [PORCENTAJE] del valor total del contrato por cada día de retraso.\n2. Hacer efectivas las garantías constituidas.\n3. Terminar unilateralmente el contrato.",
+    contenido: "En caso de incumplimiento de las obligaciones por parte de [NOMBRE CONTRATISTA], [NOMBRE EMPRESA] podrá:\n\n1. Imponer multas sucesivas del [PORCENTAJE] del valor total del contrato por cada día de retraso.\n2. Hacer efectivas las garantías constituidas.\n3. Terminar unilateralmente el contrato.",
     editable: true,
     requerido: false
   },
@@ -94,7 +94,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "cesion",
     titulo: "Cesión",
     tipo: "cesion",
-    contenido: "El presente contrato no podrá ser cedido total o parcialmente por EL CONTRATISTA sin la autorización previa, expresa y escrita de EL CONTRATANTE.",
+    contenido: "El presente contrato no podrá ser cedido total o parcialmente por [NOMBRE CONTRATISTA] sin la autorización previa, expresa y escrita de [NOMBRE EMPRESA].",
     editable: true,
     requerido: false
   },
@@ -110,7 +110,7 @@ export const clausulasDisponibles: Clausula[] = [
     id: "notificaciones",
     titulo: "Notificaciones",
     tipo: "notificaciones",
-    contenido: "Todas las notificaciones relacionadas con la ejecución del presente contrato se enviarán a las siguientes direcciones:\n\nEL CONTRATANTE: [DIRECCIÓN, TELÉFONO, EMAIL]\nEL CONTRATISTA: [DIRECCIÓN, TELÉFONO, EMAIL]",
+    contenido: "Todas las notificaciones relacionadas con la ejecución del presente contrato se enviarán a las siguientes direcciones:\n\n[NOMBRE EMPRESA]: [DIRECCIÓN, TELÉFONO, EMAIL]\n[NOMBRE CONTRATISTA]: [DIRECCIÓN, TELÉFONO, EMAIL]",
     editable: true,
     requerido: false
   },

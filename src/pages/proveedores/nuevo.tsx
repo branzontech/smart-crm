@@ -24,15 +24,37 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Textarea } from "@/components/ui/textarea";
 
 const proveedorSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
   tipoDocumento: z.string().min(2, "El tipo de documento es requerido"),
   documento: z.string().min(5, "El documento es requerido"),
   contacto: z.string().min(7, "El número de contacto es requerido"),
+  tipoProveedor: z.string().min(2, "El tipo de proveedor es requerido"),
+  descripcion: z.string().optional(),
 });
 
 type ProveedorForm = z.infer<typeof proveedorSchema>;
+
+// Lista de tipos de industria/proveedor
+const tiposIndustria = [
+  "Tecnología",
+  "Manufactura",
+  "Servicios",
+  "Construcción",
+  "Alimentación",
+  "Transporte",
+  "Consultoría",
+  "Educación",
+  "Salud",
+  "Finanzas",
+  "Retail",
+  "Energía",
+  "Agricultura",
+  "Inmobiliaria",
+  "Otro"
+];
 
 export default function NuevoProveedor() {
   const navigate = useNavigate();
@@ -40,6 +62,8 @@ export default function NuevoProveedor() {
     resolver: zodResolver(proveedorSchema),
     defaultValues: {
       tipoDocumento: "NIT",
+      tipoProveedor: "",
+      descripcion: "",
     },
   });
 
@@ -94,50 +118,97 @@ export default function NuevoProveedor() {
                       )}
                     />
 
-                    <FormField
-                      control={form.control}
-                      name="tipoDocumento"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Tipo de Documento</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="tipoDocumento"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo de Documento</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione tipo de documento" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="CC">Cédula de Ciudadanía</SelectItem>
+                                <SelectItem value="NIT">NIT</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="documento"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número de Documento</FormLabel>
                             <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Seleccione tipo de documento" />
-                              </SelectTrigger>
+                              <Input placeholder="123456789-0" {...field} />
                             </FormControl>
-                            <SelectContent>
-                              <SelectItem value="CC">Cédula de Ciudadanía</SelectItem>
-                              <SelectItem value="NIT">NIT</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="contacto"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número de Contacto</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+57 300 123 4567" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="tipoProveedor"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Tipo de Proveedor</FormLabel>
+                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione el tipo de industria" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {tiposIndustria.map((tipo) => (
+                                  <SelectItem key={tipo} value={tipo}>
+                                    {tipo}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
                     <FormField
                       control={form.control}
-                      name="documento"
+                      name="descripcion"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Número de Documento</FormLabel>
+                          <FormLabel>Descripción</FormLabel>
                           <FormControl>
-                            <Input placeholder="123456789-0" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name="contacto"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número de Contacto</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+57 300 123 4567" {...field} />
+                            <Textarea 
+                              placeholder="Describe brevemente al proveedor y sus servicios" 
+                              className="min-h-[100px]" 
+                              {...field} 
+                            />
                           </FormControl>
                           <FormMessage />
                         </FormItem>

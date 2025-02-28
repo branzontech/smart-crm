@@ -34,7 +34,7 @@ const TAREAS_MOCK: CalendarioTarea[] = [
     completada: false,
     prioridad: 'media',
     agentes: ['a1', 'a3'],
-    categoria: 'presentacion',
+    categoria: 'entrega', // Cambiado de "presentacion" a "entrega" para que coincida con los tipos permitidos
   },
   {
     id: 't3',

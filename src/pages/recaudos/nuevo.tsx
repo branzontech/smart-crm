@@ -255,13 +255,15 @@ const NuevoRecaudo = () => {
     setProveedoresFiltrados([]);
   };
   
-  const handleClienteCreado = (cliente: { id: number; nombre: string }) => {
+  // Aquí está el cambio, de onClienteCreado a onClienteCreated
+  const handleClienteCreated = (cliente: { id: number; nombre: string }) => {
     form.setValue('cliente', cliente.id.toString());
     form.setValue('clienteNombre', cliente.nombre);
     setClienteQuery(cliente.nombre);
   };
   
-  const handleProveedorCreado = (proveedor: { id: number; nombre: string }) => {
+  // Aquí está el cambio, de onProveedorCreado a onProveedorCreated
+  const handleProveedorCreated = (proveedor: { id: number; nombre: string }) => {
     setNuevoArticulo({
       ...nuevoArticulo,
       proveedor: proveedor.id.toString(),
@@ -337,7 +339,8 @@ const NuevoRecaudo = () => {
                               />
                               <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                             </div>
-                            <CreateClienteDialog onClienteCreado={handleClienteCreado} />
+                            {/* Cambio de onClienteCreado a onClienteCreated */}
+                            <CreateClienteDialog onClienteCreated={handleClienteCreated} />
                           </div>
                           
                           {clientesFiltrados.length > 0 && (
@@ -478,7 +481,8 @@ const NuevoRecaudo = () => {
                                     />
                                     <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                                   </div>
-                                  <CreateProveedorDialog onProveedorCreado={handleProveedorCreado} />
+                                  {/* Cambio de onProveedorCreado a onProveedorCreated */}
+                                  <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
                                 </div>
                                 
                                 {proveedoresFiltrados.length > 0 && (

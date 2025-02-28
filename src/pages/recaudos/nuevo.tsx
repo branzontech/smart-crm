@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Coins, BanknoteIcon, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, Save, Coins, BanknoteIcon, Plus, Trash2, Search } from "lucide-react";
 import { 
   Select, 
   SelectContent, 
@@ -29,10 +29,14 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Label } from "@/components/ui/label";
+import { CreateClienteDialog } from "@/components/CreateClienteDialog";
+import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
 
 // Esquema para los artículos
 const articuloSchema = z.object({
   id: z.string().optional(),
+  proveedor: z.string().min(1, { message: "El proveedor es requerido" }),
+  nombreProveedor: z.string().optional(),
   descripcion: z.string().min(1, { message: "La descripción es requerida" }),
   cantidad: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
   valorUnitario: z.number().min(0, { message: "El valor unitario debe ser mayor o igual a 0" }),
@@ -42,8 +46,7 @@ const articuloSchema = z.object({
 // Esquema de validación para el formulario principal
 const formSchema = z.object({
   cliente: z.string().min(1, { message: "Seleccione un cliente" }),
-  proveedor: z.string().min(1, { message: "Seleccione un proveedor" }),
-  factura: z.string().min(1, { message: "Ingrese el número de factura" }),
+  clienteNombre: z.string().optional(),
   monto: z.string().min(1, { message: "Ingrese el monto" }),
   subtotal: z.number().min(0, { message: "El subtotal debe ser mayor o igual a 0" }),
   iva: z.number().min(0, { message: "El IVA debe ser mayor o igual a 0" }),
@@ -60,12 +63,22 @@ type Articulo = z.infer<typeof articuloSchema>;
 
 const NuevoRecaudo = () => {
   const navigate = useNavigate();
+  const [nextRecaudoNumber, setNextRecaudoNumber] = useState(1);
   const [articulos, setArticulos] = useState<Articulo[]>([]);
+  const [clienteQuery, setClienteQuery] = useState("");
+  const [proveedorQuery, setProveedorQuery] = useState("");
+  const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
+  const [proveedoresFiltrados, setProveedoresFiltrados] = useState<any[]>([]);
+  
   const [nuevoArticulo, setNuevoArticulo] = useState<{
+    proveedor: string;
+    nombreProveedor: string;
     descripcion: string;
     cantidad: number;
     valorUnitario: number;
   }>({
+    proveedor: "",
+    nombreProveedor: "",
     descripcion: "",
     cantidad: 1,
     valorUnitario: 0,
@@ -73,20 +86,20 @@ const NuevoRecaudo = () => {
   
   // Lista de clientes (normalmente vendría de una API)
   const clientes = [
-    { id: 1, nombre: "Tech Solutions SA" },
-    { id: 2, nombre: "Green Energy Corp" },
-    { id: 3, nombre: "Global Logistics" },
-    { id: 4, nombre: "Digital Systems Inc" },
-    { id: 5, nombre: "Smart Solutions" },
+    { id: "1", nombre: "Tech Solutions SA" },
+    { id: "2", nombre: "Green Energy Corp" },
+    { id: "3", nombre: "Global Logistics" },
+    { id: "4", nombre: "Digital Systems Inc" },
+    { id: "5", nombre: "Smart Solutions" },
   ];
   
   // Lista de proveedores
   const proveedores = [
-    { id: 1, nombre: "ProveedorTech SA" },
-    { id: 2, nombre: "Insumos Digitales" },
-    { id: 3, nombre: "Servicios Globales" },
-    { id: 4, nombre: "Componentes XYZ" },
-    { id: 5, nombre: "Tecnología Avanzada" },
+    { id: "1", nombre: "ProveedorTech SA" },
+    { id: "2", nombre: "Insumos Digitales" },
+    { id: "3", nombre: "Servicios Globales" },
+    { id: "4", nombre: "Componentes XYZ" },
+    { id: "5", nombre: "Tecnología Avanzada" },
   ];
   
   // Métodos de pago disponibles
@@ -114,18 +127,52 @@ const NuevoRecaudo = () => {
     { valor: 0.19, etiqueta: "19%" },
   ];
   
+  // Simular obtención del siguiente número de recaudo
+  useEffect(() => {
+    // En un caso real, esto vendría de la API
+    const fetchNextRecaudoNumber = () => {
+      // Simular retraso de API
+      setTimeout(() => {
+        setNextRecaudoNumber(123);
+      }, 500);
+    };
+    
+    fetchNextRecaudoNumber();
+  }, []);
+  
+  useEffect(() => {
+    if (clienteQuery) {
+      const filtered = clientes.filter(cliente => 
+        cliente.nombre.toLowerCase().includes(clienteQuery.toLowerCase())
+      );
+      setClientesFiltrados(filtered);
+    } else {
+      setClientesFiltrados([]);
+    }
+  }, [clienteQuery]);
+  
+  useEffect(() => {
+    if (proveedorQuery) {
+      const filtered = proveedores.filter(proveedor => 
+        proveedor.nombre.toLowerCase().includes(proveedorQuery.toLowerCase())
+      );
+      setProveedoresFiltrados(filtered);
+    } else {
+      setProveedoresFiltrados([]);
+    }
+  }, [proveedorQuery]);
+  
   // Configurar el formulario con React Hook Form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       cliente: "",
-      proveedor: "",
-      factura: "",
+      clienteNombre: "",
       monto: "",
       subtotal: 0,
       iva: 0,
       total: 0,
-      metodoPago: "",
+      metodoPago: "transferencia",
       fechaPago: new Date().toISOString().substring(0, 10),
       fechaVencimiento: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().substring(0, 10),
       estado: "pendiente",
@@ -148,14 +195,16 @@ const NuevoRecaudo = () => {
   
   // Agregar un nuevo artículo a la lista
   const agregarArticulo = () => {
-    if (!nuevoArticulo.descripcion) {
-      toast.error("La descripción del artículo es requerida");
+    if (!nuevoArticulo.proveedor || !nuevoArticulo.descripcion) {
+      toast.error("El proveedor y la descripción son requeridos");
       return;
     }
     
     const valorTotal = nuevoArticulo.cantidad * nuevoArticulo.valorUnitario;
     const articulo: Articulo = {
       id: `art-${Date.now()}`,
+      proveedor: nuevoArticulo.proveedor,
+      nombreProveedor: nuevoArticulo.nombreProveedor,
       descripcion: nuevoArticulo.descripcion,
       cantidad: nuevoArticulo.cantidad,
       valorUnitario: nuevoArticulo.valorUnitario,
@@ -167,10 +216,16 @@ const NuevoRecaudo = () => {
     
     // Resetear el formulario de nuevo artículo
     setNuevoArticulo({
+      proveedor: "",
+      nombreProveedor: "",
       descripcion: "",
       cantidad: 1,
       valorUnitario: 0,
     });
+    
+    // Limpiar la búsqueda de proveedor
+    setProveedorQuery("");
+    setProveedoresFiltrados([]);
     
     // Actualizar totales
     setTimeout(() => calcularTotales(), 0);
@@ -183,6 +238,38 @@ const NuevoRecaudo = () => {
     setTimeout(() => calcularTotales(), 0);
   };
   
+  const seleccionarCliente = (cliente: any) => {
+    form.setValue('cliente', cliente.id);
+    form.setValue('clienteNombre', cliente.nombre);
+    setClienteQuery(cliente.nombre);
+    setClientesFiltrados([]);
+  };
+  
+  const seleccionarProveedor = (proveedor: any) => {
+    setNuevoArticulo({
+      ...nuevoArticulo,
+      proveedor: proveedor.id,
+      nombreProveedor: proveedor.nombre,
+    });
+    setProveedorQuery(proveedor.nombre);
+    setProveedoresFiltrados([]);
+  };
+  
+  const handleClienteCreado = (cliente: { id: number; nombre: string }) => {
+    form.setValue('cliente', cliente.id.toString());
+    form.setValue('clienteNombre', cliente.nombre);
+    setClienteQuery(cliente.nombre);
+  };
+  
+  const handleProveedorCreado = (proveedor: { id: number; nombre: string }) => {
+    setNuevoArticulo({
+      ...nuevoArticulo,
+      proveedor: proveedor.id.toString(),
+      nombreProveedor: proveedor.nombre,
+    });
+    setProveedorQuery(proveedor.nombre);
+  };
+  
   const onSubmit = (data: FormValues) => {
     if (articulos.length === 0) {
       toast.error("Debe agregar al menos un artículo");
@@ -191,6 +278,7 @@ const NuevoRecaudo = () => {
     
     const recaudoCompleto = {
       ...data,
+      numero: `N°000${nextRecaudoNumber}`,
       articulos,
     };
     
@@ -223,7 +311,7 @@ const NuevoRecaudo = () => {
                 </Button>
                 <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
                   <Coins className="h-6 w-6 text-teal" />
-                  Nuevo Recaudo
+                  Nuevo Recaudo N°{String(nextRecaudoNumber).padStart(3, '0')}
                 </h1>
               </div>
             </div>
@@ -236,81 +324,40 @@ const NuevoRecaudo = () => {
                 <Form {...form}>
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      <FormField
-                        control={form.control}
-                        name="cliente"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cliente</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar cliente" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {clientes.map((cliente) => (
-                                  <SelectItem 
-                                    key={cliente.id} 
-                                    value={cliente.id.toString()}
-                                  >
-                                    {cliente.nombre}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="proveedor"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Proveedor</FormLabel>
-                            <Select 
-                              onValueChange={field.onChange} 
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccionar proveedor" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {proveedores.map((proveedor) => (
-                                  <SelectItem 
-                                    key={proveedor.id} 
-                                    value={proveedor.id.toString()}
-                                  >
-                                    {proveedor.nombre}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      
-                      <FormField
-                        control={form.control}
-                        name="factura"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Número de Factura</FormLabel>
-                            <FormControl>
-                              <Input {...field} placeholder="Ej: FAC-2023-001" />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      <div>
+                        <FormLabel>Cliente</FormLabel>
+                        <div className="relative">
+                          <div className="flex space-x-2 mb-2">
+                            <div className="relative flex-grow">
+                              <Input
+                                placeholder="Buscar cliente..."
+                                value={clienteQuery}
+                                onChange={(e) => setClienteQuery(e.target.value)}
+                                className="pr-10"
+                              />
+                              <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                            </div>
+                            <CreateClienteDialog onClienteCreado={handleClienteCreado} />
+                          </div>
+                          
+                          {clientesFiltrados.length > 0 && (
+                            <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                              {clientesFiltrados.map(cliente => (
+                                <div
+                                  key={cliente.id}
+                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                  onClick={() => seleccionarCliente(cliente)}
+                                >
+                                  {cliente.nombre}
+                                </div>
+                              ))}
+                            </div>
+                          )}
+                          <FormMessage>
+                            {form.formState.errors.cliente?.message}
+                          </FormMessage>
+                        </div>
+                      </div>
                       
                       <FormField
                         control={form.control}
@@ -412,44 +459,83 @@ const NuevoRecaudo = () => {
                     {/* Sección de Artículos */}
                     <Card className="border border-gray-200">
                       <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Artículos o Servicios</CardTitle>
+                        <CardTitle className="text-lg">Artículos o Servicios por Proveedor</CardTitle>
                       </CardHeader>
                       <CardContent>
-                        <div className="mb-4 grid grid-cols-1 md:grid-cols-4 gap-2">
-                          <div className="col-span-2">
-                            <Label htmlFor="descripcion">Descripción</Label>
-                            <Input 
-                              id="descripcion"
-                              placeholder="Descripción del artículo o servicio" 
-                              value={nuevoArticulo.descripcion} 
-                              onChange={(e) => setNuevoArticulo({...nuevoArticulo, descripcion: e.target.value})}
-                            />
+                        <div className="mb-4 grid grid-cols-1 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="proveedor">Proveedor</Label>
+                              <div className="relative">
+                                <div className="flex space-x-2">
+                                  <div className="relative flex-grow">
+                                    <Input
+                                      id="proveedor"
+                                      placeholder="Buscar proveedor..."
+                                      value={proveedorQuery}
+                                      onChange={(e) => setProveedorQuery(e.target.value)}
+                                      className="pr-10"
+                                    />
+                                    <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
+                                  </div>
+                                  <CreateProveedorDialog onProveedorCreado={handleProveedorCreado} />
+                                </div>
+                                
+                                {proveedoresFiltrados.length > 0 && (
+                                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
+                                    {proveedoresFiltrados.map(proveedor => (
+                                      <div
+                                        key={proveedor.id}
+                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                        onClick={() => seleccionarProveedor(proveedor)}
+                                      >
+                                        {proveedor.nombre}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+                            <div>
+                              <Label htmlFor="descripcion">Descripción</Label>
+                              <Input 
+                                id="descripcion"
+                                placeholder="Descripción del artículo o servicio" 
+                                value={nuevoArticulo.descripcion} 
+                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, descripcion: e.target.value})}
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="cantidad">Cantidad</Label>
-                            <Input 
-                              id="cantidad"
-                              type="number" 
-                              min="1" 
-                              value={nuevoArticulo.cantidad} 
-                              onChange={(e) => setNuevoArticulo({...nuevoArticulo, cantidad: parseInt(e.target.value) || 1})}
-                            />
+                          
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                              <Label htmlFor="cantidad">Cantidad</Label>
+                              <Input 
+                                id="cantidad"
+                                type="number" 
+                                min="1" 
+                                value={nuevoArticulo.cantidad} 
+                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, cantidad: parseInt(e.target.value) || 1})}
+                              />
+                            </div>
+                            <div>
+                              <Label htmlFor="valorUnitario">Valor Unitario</Label>
+                              <Input 
+                                id="valorUnitario"
+                                type="number" 
+                                min="0" 
+                                value={nuevoArticulo.valorUnitario} 
+                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, valorUnitario: parseFloat(e.target.value) || 0})}
+                              />
+                            </div>
                           </div>
-                          <div>
-                            <Label htmlFor="valorUnitario">Valor Unitario</Label>
-                            <Input 
-                              id="valorUnitario"
-                              type="number" 
-                              min="0" 
-                              value={nuevoArticulo.valorUnitario} 
-                              onChange={(e) => setNuevoArticulo({...nuevoArticulo, valorUnitario: parseFloat(e.target.value) || 0})}
-                            />
-                          </div>
-                          <div className="col-span-1 md:col-span-4 flex justify-end mt-2">
+                          
+                          <div className="flex justify-end mt-2">
                             <Button 
                               type="button" 
                               className="bg-teal hover:bg-sage text-white"
                               onClick={agregarArticulo}
+                              disabled={!nuevoArticulo.proveedor || !nuevoArticulo.descripcion}
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               Agregar Artículo
@@ -461,6 +547,7 @@ const NuevoRecaudo = () => {
                           <Table>
                             <TableHeader>
                               <TableRow>
+                                <TableHead>Proveedor</TableHead>
                                 <TableHead>Descripción</TableHead>
                                 <TableHead className="text-right">Cantidad</TableHead>
                                 <TableHead className="text-right">Valor Unitario</TableHead>
@@ -471,6 +558,7 @@ const NuevoRecaudo = () => {
                             <TableBody>
                               {articulos.map((articulo) => (
                                 <TableRow key={articulo.id}>
+                                  <TableCell>{articulo.nombreProveedor}</TableCell>
                                   <TableCell>{articulo.descripcion}</TableCell>
                                   <TableCell className="text-right">{articulo.cantidad}</TableCell>
                                   <TableCell className="text-right">

@@ -3,6 +3,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Navbar } from "@/components/layout/Navbar";
+import { Header } from "@/components/layout/Header";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -10,11 +11,19 @@ import { ArrowLeft, Building2 } from "lucide-react";
 import {
   Form,
   FormControl,
+  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from "@/components/ui/form";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,14 +37,28 @@ const empresaSchema = z.object({
   telefono: z.string().min(8, "El teléfono es requerido"),
   sitioWeb: z.string().url("Debe ser una URL válida").optional(),
   descripcion: z.string().optional(),
+  periodoVencimientoFacturas: z.string().min(1, "El periodo de vencimiento es requerido"),
 });
 
 type EmpresaForm = z.infer<typeof empresaSchema>;
+
+const periodosVencimiento = [
+  "15 días",
+  "30 días",
+  "45 días",
+  "60 días",
+  "90 días",
+];
 
 export default function NuevaEmpresa() {
   const navigate = useNavigate();
   const form = useForm<EmpresaForm>({
     resolver: zodResolver(empresaSchema),
+    defaultValues: {
+      periodoVencimientoFacturas: "30 días",
+      sitioWeb: "",
+      descripcion: "",
+    },
   });
 
   const onSubmit = async (data: EmpresaForm) => {
@@ -49,10 +72,11 @@ export default function NuevaEmpresa() {
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       <Navbar />
       <div className="main-container">
-        <main className="flex-1 content-container">
+        <Header />
+        <main className="content-container overflow-y-auto">
           <div className="max-w-content">
             <div className="mb-6">
               <Button
@@ -166,6 +190,36 @@ export default function NuevaEmpresa() {
                           </FormItem>
                         )}
                       />
+                      <FormField
+                        control={form.control}
+                        name="periodoVencimientoFacturas"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Periodo de Vencimiento de Facturas</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Seleccione un periodo" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {periodosVencimiento.map((periodo) => (
+                                  <SelectItem key={periodo} value={periodo}>
+                                    {periodo}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormDescription>
+                              Este periodo se utilizará para calcular fechas de vencimiento y alertas
+                            </FormDescription>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
                     </div>
                     <FormField
                       control={form.control}
@@ -185,6 +239,14 @@ export default function NuevaEmpresa() {
                       )}
                     />
                     <div className="flex justify-end">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="mr-2"
+                        onClick={() => navigate("/empresas")}
+                      >
+                        Cancelar
+                      </Button>
                       <Button type="submit" className="bg-teal hover:bg-sage text-white">
                         Crear Empresa
                       </Button>

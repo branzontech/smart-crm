@@ -65,123 +65,91 @@ export default function NuevaOportunidad() {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <div className="main-container">
-        <main className="flex-1 content-container">
-          <div className="max-w-content">
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
-                onClick={() => navigate("/ventas/oportunidades")}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver al listado
-              </Button>
-            </div>
-            <Card>
-              <CardHeader className="space-y-1">
-                <div className="flex items-center gap-2">
-                  <ClipboardList className="h-6 w-6 text-teal" />
-                  <CardTitle className="text-2xl font-semibold">Nueva Oportunidad</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="cliente"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cliente</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Nombre del cliente" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="valor"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Valor</FormLabel>
-                            <FormControl>
-                              <Input type="number" placeholder="10000" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="etapa"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Etapa</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccione una etapa" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {etapas.map((etapa) => (
-                                  <SelectItem key={etapa} value={etapa}>
-                                    {etapa}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="probabilidad"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Probabilidad (%)</FormLabel>
-                            <FormControl>
-                              <Input
-                                type="number"
-                                placeholder="50"
-                                min="0"
-                                max="100"
-                                {...field}
-                              />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="fechaCierre"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Fecha Estimada de Cierre</FormLabel>
-                            <FormControl>
-                              <Input type="date" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
+      <main className="flex-1 p-8">
+        <div className="max-w-4xl mx-auto">
+          <div className="mb-6">
+            <Button
+              variant="ghost"
+              className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
+              onClick={() => navigate("/ventas/oportunidades")}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Volver al listado
+            </Button>
+          </div>
+          <Card>
+            <CardHeader className="space-y-1">
+              <div className="flex items-center gap-2">
+                <ClipboardList className="h-6 w-6 text-teal" />
+                <CardTitle className="text-2xl font-semibold">Nueva Oportunidad</CardTitle>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
-                      name="descripcion"
+                      name="cliente"
                       render={({ field }) => (
                         <FormItem>
-                          <FormLabel>Descripción</FormLabel>
+                          <FormLabel>Cliente</FormLabel>
                           <FormControl>
-                            <Textarea
-                              placeholder="Detalles de la oportunidad..."
-                              className="min-h-[100px]"
+                            <Input placeholder="Nombre del cliente" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="valor"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Valor</FormLabel>
+                          <FormControl>
+                            <Input type="number" placeholder="10000" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="etapa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Etapa</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Seleccione una etapa" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {etapas.map((etapa) => (
+                                <SelectItem key={etapa} value={etapa}>
+                                  {etapa}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="probabilidad"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Probabilidad (%)</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              placeholder="50"
+                              min="0"
+                              max="100"
                               {...field}
                             />
                           </FormControl>
@@ -189,18 +157,48 @@ export default function NuevaOportunidad() {
                         </FormItem>
                       )}
                     />
-                    <div className="flex justify-end">
-                      <Button type="submit" className="bg-teal hover:bg-sage text-white">
-                        Crear Oportunidad
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
-              </CardContent>
-            </Card>
-          </div>
-        </main>
-      </div>
+                    <FormField
+                      control={form.control}
+                      name="fechaCierre"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fecha Estimada de Cierre</FormLabel>
+                          <FormControl>
+                            <Input type="date" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                  <FormField
+                    control={form.control}
+                    name="descripcion"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Descripción</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Detalles de la oportunidad..."
+                            className="min-h-[100px]"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                  <div className="flex justify-end">
+                    <Button type="submit" className="bg-teal hover:bg-sage text-white">
+                      Crear Oportunidad
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 }

@@ -1,8 +1,22 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { format, addDays, startOfWeek, endOfWeek, isSameDay, addWeeks, subWeeks } from "date-fns";
+import { 
+  format, 
+  addDays, 
+  startOfWeek, 
+  endOfWeek, 
+  isSameDay, 
+  addWeeks, 
+  subWeeks,
+  addMonths,
+  subMonths,
+  startOfMonth,
+  endOfMonth,
+  eachDayOfInterval,
+  isSameMonth
+} from "date-fns";
 import { es } from "date-fns/locale";
 import { CalendarioTarea } from "@/types/calendario";
 import { calendarioService } from "@/services/calendarioService";
@@ -32,6 +46,9 @@ import {
   LayoutGrid,
   List,
   Settings2,
+  CalendarDays,
+  SidebarClose,
+  SidebarOpen
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -54,9 +71,16 @@ const CalendarioIndex = () => {
   const [agentesSeleccionados, setAgentesSeleccionados] = useState<string[]>([]);
   const [filtroEstado, setFiltroEstado] = useState<string>("todos");
   const [filtroCategoria, setFiltroCategoria] = useState<string[]>([]);
-  const [modoVista, setModoVista] = useState<"semana" | "lista">("semana");
+  const [modoVista, setModoVista] = useState<"semana" | "mes" | "lista">("semana");
   const [busqueda, setBusqueda] = useState<string>("");
-
+  
+  // Estado para controlar la visibilidad del panel lateral
+  const [mostrarPanel, setMostrarPanel] = useState<boolean>(false);
+  
+  // Referencia para detectar cuando el mouse entra en la zona de activación
+  const zonaActivacionRef = useRef<HTMLDivElement>(null);
+  const panelLateralRef = useRef<HTMLDivElement>(null);
+  
   const { toast } = useToast();
 
   // Cargar tareas al iniciar
@@ -70,6 +94,42 @@ const CalendarioIndex = () => {
     
     // Por defecto, mostrar todas las categorías
     setFiltroCategoria(["reunion", "entrega", "seguimiento", "otro"]);
+  }, []);
+  
+  // Manejar eventos de mouse para mostrar/ocultar el panel lateral
+  useEffect(() => {
+    const handleMouseEnter = () => {
+      setMostrarPanel(true);
+    };
+    
+    const handleMouseLeave = (e: MouseEvent) => {
+      // Verificar si el mouse está dentro del panel lateral o la zona de activación
+      if (panelLateralRef.current && !panelLateralRef.current.contains(e.relatedTarget as Node) &&
+          zonaActivacionRef.current && !zonaActivacionRef.current.contains(e.relatedTarget as Node)) {
+        setMostrarPanel(false);
+      }
+    };
+    
+    const zonaActivacion = zonaActivacionRef.current;
+    const panelLateral = panelLateralRef.current;
+    
+    if (zonaActivacion) {
+      zonaActivacion.addEventListener('mouseenter', handleMouseEnter);
+    }
+    
+    if (panelLateral) {
+      panelLateral.addEventListener('mouseleave', handleMouseLeave as EventListener);
+    }
+    
+    return () => {
+      if (zonaActivacion) {
+        zonaActivacion.removeEventListener('mouseenter', handleMouseEnter);
+      }
+      
+      if (panelLateral) {
+        panelLateral.removeEventListener('mouseleave', handleMouseLeave as EventListener);
+      }
+    };
   }, []);
 
   // Aplicar filtros cuando cambien los criterios
@@ -234,6 +294,21 @@ const CalendarioIndex = () => {
     
     return diasSemana;
   };
+  
+  // Generar días del mes para vista mensual
+  const generarDiasMes = () => {
+    const inicioMes = startOfMonth(fecha);
+    const finMes = endOfMonth(fecha);
+    
+    // Obtener el primer día de la semana que contiene el inicio del mes
+    const inicioCalendario = startOfWeek(inicioMes, { weekStartsOn: 1 });
+    
+    // Obtener el último día de la semana que contiene el fin del mes
+    const finCalendario = endOfWeek(finMes, { weekStartsOn: 1 });
+    
+    // Generar todos los días entre el inicio y fin del calendario
+    return eachDayOfInterval({ start: inicioCalendario, end: finCalendario });
+  };
 
   // Obtener tareas para un día específico
   const getTareasParaDia = (dia: Date) => {
@@ -250,28 +325,60 @@ const CalendarioIndex = () => {
   const irSemanaAnterior = () => {
     setFecha(subWeeks(fecha, 1));
   };
+  
+  // Navegación entre meses
+  const irMesSiguiente = () => {
+    setFecha(addMonths(fecha, 1));
+  };
+
+  const irMesAnterior = () => {
+    setFecha(subMonths(fecha, 1));
+  };
 
   const irAHoy = () => {
     setFecha(new Date());
   };
 
-  // Formatear rango de fechas para mostrar en la cabecera
-  const formatoRangoSemana = () => {
-    const inicio = startOfWeek(fecha, { weekStartsOn: 1 });
-    const fin = endOfWeek(fecha, { weekStartsOn: 1 });
-    return `${format(inicio, 'dd MMM', { locale: es })} - ${format(fin, 'dd MMM yyyy', { locale: es })}`;
+  // Formatear rango de fechas para mostrar en la cabecera según vista
+  const formatoRangoFechas = () => {
+    if (modoVista === 'semana') {
+      const inicio = startOfWeek(fecha, { weekStartsOn: 1 });
+      const fin = endOfWeek(fecha, { weekStartsOn: 1 });
+      return `${format(inicio, 'dd MMM', { locale: es })} - ${format(fin, 'dd MMM yyyy', { locale: es })}`;
+    } else if (modoVista === 'mes') {
+      return format(fecha, 'MMMM yyyy', { locale: es });
+    }
+    return '';
   };
 
   const formatoDia = (dia: Date) => {
     const hoy = new Date();
     const esHoy = isSameDay(dia, hoy);
+    const esMismoMes = isSameMonth(dia, fecha);
     
     return (
-      <div className={`text-center ${esHoy ? 'font-bold' : ''}`}>
+      <div className={`text-center ${esHoy ? 'font-bold' : ''} ${!esMismoMes ? 'opacity-40' : ''}`}>
         <div className="text-xs uppercase text-gray-500">{format(dia, 'EEE', { locale: es })}</div>
         <div className={`text-xl ${esHoy ? 'text-blue-600' : ''}`}>{format(dia, 'dd')}</div>
       </div>
     );
+  };
+  
+  // Navegar entre modos de visualización previo/siguiente
+  const navegarAnterior = () => {
+    if (modoVista === 'semana') {
+      irSemanaAnterior();
+    } else if (modoVista === 'mes') {
+      irMesAnterior();
+    }
+  };
+  
+  const navegarSiguiente = () => {
+    if (modoVista === 'semana') {
+      irSemanaSiguiente();
+    } else if (modoVista === 'mes') {
+      irMesSiguiente();
+    }
   };
 
   return (
@@ -344,14 +451,25 @@ const CalendarioIndex = () => {
                     size="sm" 
                     className={`px-3 ${modoVista === 'semana' ? 'bg-blue-50 text-blue-600' : ''}`}
                     onClick={() => setModoVista('semana')}
+                    title="Vista semanal"
                   >
                     <LayoutGrid className="h-4 w-4" />
                   </Button>
                   <Button 
                     variant="ghost" 
                     size="sm" 
+                    className={`px-3 ${modoVista === 'mes' ? 'bg-blue-50 text-blue-600' : ''}`}
+                    onClick={() => setModoVista('mes')}
+                    title="Vista mensual"
+                  >
+                    <CalendarDays className="h-4 w-4" />
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
                     className={`px-3 ${modoVista === 'lista' ? 'bg-blue-50 text-blue-600' : ''}`}
                     onClick={() => setModoVista('lista')}
+                    title="Vista lista"
                   >
                     <List className="h-4 w-4" />
                   </Button>
@@ -367,25 +485,26 @@ const CalendarioIndex = () => {
             </div>
 
             {/* Vista principal */}
-            <Tabs defaultValue="semana" className="w-full">
+            <Tabs value={modoVista} onValueChange={(valor) => setModoVista(valor as "semana" | "mes" | "lista")} className="w-full">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center space-x-2">
-                  <Button variant="outline" size="sm" onClick={irSemanaAnterior}>
+                  <Button variant="outline" size="sm" onClick={navegarAnterior}>
                     <ChevronLeft className="h-4 w-4" />
                   </Button>
                   <Button variant="outline" size="sm" onClick={irAHoy}>
                     Hoy
                   </Button>
-                  <Button variant="outline" size="sm" onClick={irSemanaSiguiente}>
+                  <Button variant="outline" size="sm" onClick={navegarSiguiente}>
                     <ChevronRight className="h-4 w-4" />
                   </Button>
                   <div className="text-lg font-medium mx-4">
-                    {formatoRangoSemana()}
+                    {formatoRangoFechas()}
                   </div>
                 </div>
                 <TabsList className="hidden md:flex">
-                  <TabsTrigger value="semana">Vista Semanal</TabsTrigger>
-                  <TabsTrigger value="lista">Lista de Tareas</TabsTrigger>
+                  <TabsTrigger value="semana">Semana</TabsTrigger>
+                  <TabsTrigger value="mes">Mes</TabsTrigger>
+                  <TabsTrigger value="lista">Lista</TabsTrigger>
                 </TabsList>
               </div>
 
@@ -480,6 +599,85 @@ const CalendarioIndex = () => {
                               </div>
                             </div>
                           )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
+              </TabsContent>
+              
+              {/* Vista mensual */}
+              <TabsContent value="mes" className="mt-0">
+                <div className="bg-white rounded-lg border">
+                  {/* Cabecera de días */}
+                  <div className="grid grid-cols-7 border-b">
+                    {['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'].map((dia, i) => (
+                      <div 
+                        key={i} 
+                        className="px-2 py-3 text-center border-r last:border-r-0 font-medium text-sm uppercase"
+                      >
+                        {dia}
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Contenido del calendario mensual */}
+                  <div className="grid grid-cols-7 auto-rows-fr h-[calc(100vh-280px)] overflow-y-auto">
+                    {generarDiasMes().map((dia, i) => {
+                      const tareasDelDia = getTareasParaDia(dia);
+                      const esMismoMes = isSameMonth(dia, fecha);
+                      const esHoy = isSameDay(dia, new Date());
+                      
+                      return (
+                        <div 
+                          key={i} 
+                          className={`p-1 border-r border-b last:border-r-0 ${
+                            esHoy ? 'bg-blue-50/30' : ''
+                          } ${!esMismoMes ? 'bg-gray-50/50 text-gray-400' : ''}`}
+                        >
+                          <div className="flex justify-between items-center mb-1">
+                            <span className={`text-sm font-medium ${esHoy ? 'text-blue-600' : ''}`}>
+                              {format(dia, 'dd')}
+                            </span>
+                            <button
+                              className="text-gray-400 hover:text-gray-600 p-1 rounded-full hover:bg-gray-100 hidden group-hover:block"
+                              onClick={() => {
+                                setFecha(dia);
+                                handleAgregarTarea();
+                              }}
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                          
+                          <div className="space-y-1 overflow-y-auto max-h-[80px]">
+                            {tareasDelDia.slice(0, 3).map(tarea => (
+                              <div
+                                key={tarea.id}
+                                className={`px-1 py-0.5 rounded text-[10px] truncate cursor-pointer ${
+                                  tarea.completada ? 'line-through text-gray-400' : ''
+                                }`}
+                                style={{
+                                  backgroundColor: `${calendarioService.getColorCategoria(tarea.categoria)}15`,
+                                  color: calendarioService.getColorCategoria(tarea.categoria)
+                                }}
+                                onClick={() => handleSeleccionarTarea(tarea)}
+                              >
+                                {tarea.titulo}
+                              </div>
+                            ))}
+                            {tareasDelDia.length > 3 && (
+                              <div 
+                                className="text-[10px] text-gray-500 cursor-pointer hover:underline"
+                                onClick={() => {
+                                  setFecha(dia);
+                                  setModoVista('semana');
+                                }}
+                              >
+                                +{tareasDelDia.length - 3} más...
+                              </div>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -596,12 +794,35 @@ const CalendarioIndex = () => {
               </TabsContent>
             </Tabs>
 
+            {/* Botón para mostrar panel lateral (zona de activación) */}
+            <div 
+              ref={zonaActivacionRef}
+              className="fixed right-0 top-[calc(var(--header-height)+20px)] h-12 w-12 flex items-center justify-center bg-white border-l border-t border-b rounded-l-md shadow-sm cursor-pointer transition-all hover:bg-gray-50"
+              title="Mostrar panel de filtros"
+            >
+              <SidebarOpen className="h-5 w-5 text-gray-500" />
+            </div>
+
             {/* Panel lateral */}
-            <div className="fixed right-0 top-[var(--header-height)] h-full w-64 border-l bg-white shadow-sm p-4 transform translate-x-full transition-transform duration-300 md:translate-x-0">
-              <div className="flex items-center mb-4">
-                <Users className="h-4 w-4 mr-2 text-gray-500" />
-                <h3 className="font-medium">Agentes</h3>
+            <div 
+              ref={panelLateralRef}
+              className={`fixed right-0 top-[var(--header-height)] h-full w-64 border-l bg-white shadow-sm p-4 transform transition-transform duration-300 ${
+                mostrarPanel ? 'translate-x-0' : 'translate-x-full'
+              }`}
+            >
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center">
+                  <Users className="h-4 w-4 mr-2 text-gray-500" />
+                  <h3 className="font-medium">Agentes</h3>
+                </div>
+                <button 
+                  className="text-gray-500 hover:text-gray-700"
+                  onClick={() => setMostrarPanel(false)}
+                >
+                  <SidebarClose className="h-4 w-4" />
+                </button>
               </div>
+              
               <AgentesSelector
                 agentesSeleccionados={agentesSeleccionados}
                 onCambiarSeleccion={handleCambioAgente}

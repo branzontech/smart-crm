@@ -1,5 +1,6 @@
 
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Header } from "@/components/layout/Header";
 import Index from "@/pages/Index";
 import NotFound from "@/pages/NotFound";
 import ClientesIndex from "@/pages/clientes/index";
@@ -29,32 +30,37 @@ import "./App.css";
 function App() {
   return (
     <Router>
-      <Toaster position="top-right" />
-      <Routes>
-        <Route path="/" element={<Index />} />
-        <Route path="/clientes" element={<ClientesIndex />} />
-        <Route path="/clientes/:id" element={<ClienteDetail />} />
-        <Route path="/clientes/nuevo" element={<NuevoCliente />} />
-        <Route path="/empresas" element={<EmpresasIndex />} />
-        <Route path="/empresas/nuevo" element={<NuevaEmpresa />} />
-        <Route path="/proveedores" element={<ProveedoresIndex />} />
-        <Route path="/proveedores/nuevo" element={<NuevoProveedor />} />
-        <Route path="/recaudos" element={<RecaudosIndex />} />
-        <Route path="/recaudos/nuevo" element={<NuevoRecaudo />} />
-        <Route path="/recaudos/seguimiento" element={<SeguimientoRecaudos />} />
-        <Route path="/ventas" element={<VentasIndex />} />
-        <Route path="/ventas/oportunidades" element={<OportunidadesIndex />} />
-        <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />
-        <Route path="/ventas/cotizaciones" element={<CotizacionesIndex />} />
-        <Route path="/ventas/cotizaciones/nueva" element={<NuevaCotizacion />} />
-        <Route path="/ventas/contratos" element={<ContratosIndex />} />
-        <Route path="/ventas/contratos/nuevo" element={<NuevoContrato />} />
-        <Route path="/reportes" element={<ReportesIndex />} />
-        <Route path="/calendario" element={<CalendarioIndex />} />
-        <Route path="/comunicaciones" element={<ComunicacionesIndex />} />
-        <Route path="/configuracion" element={<ConfiguracionIndex />} />
-        <Route path="*" element={<NotFound />} />
-      </Routes>
+      <div className="flex flex-col min-h-screen">
+        <Header />
+        <div className="app-content pt-header">
+          <Toaster position="top-right" />
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/clientes" element={<ClientesIndex />} />
+            <Route path="/clientes/:id" element={<ClienteDetail />} />
+            <Route path="/clientes/nuevo" element={<NuevoCliente />} />
+            <Route path="/empresas" element={<EmpresasIndex />} />
+            <Route path="/empresas/nuevo" element={<NuevaEmpresa />} />
+            <Route path="/proveedores" element={<ProveedoresIndex />} />
+            <Route path="/proveedores/nuevo" element={<NuevoProveedor />} />
+            <Route path="/recaudos" element={<RecaudosIndex />} />
+            <Route path="/recaudos/nuevo" element={<NuevoRecaudo />} />
+            <Route path="/recaudos/seguimiento" element={<SeguimientoRecaudos />} />
+            <Route path="/ventas" element={<VentasIndex />} />
+            <Route path="/ventas/oportunidades" element={<OportunidadesIndex />} />
+            <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />
+            <Route path="/ventas/cotizaciones" element={<CotizacionesIndex />} />
+            <Route path="/ventas/cotizaciones/nueva" element={<NuevaCotizacion />} />
+            <Route path="/ventas/contratos" element={<ContratosIndex />} />
+            <Route path="/ventas/contratos/nuevo" element={<NuevoContrato />} />
+            <Route path="/reportes" element={<ReportesIndex />} />
+            <Route path="/calendario" element={<CalendarioIndex />} />
+            <Route path="/comunicaciones" element={<ComunicacionesIndex />} />
+            <Route path="/configuracion" element={<ConfiguracionIndex />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </div>
+      </div>
     </Router>
   );
 }

@@ -1,42 +1,59 @@
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
+
+:root {
+  --header-height: 61px; /* Altura del header (ajustar según la altura real del componente) */
+}
+
+.pt-header {
+  padding-top: var(--header-height);
+}
+
+/* Para contenedores con navbar lateral y header */
+.main-container {
+  flex: 1;
+  margin-left: var(--sidebar-width, 5rem);
+  transition: margin-left 0.3s ease-in-out;
+  width: calc(100% - var(--sidebar-width, 5rem));
+}
+
+.main-container.expanded {
+  margin-left: var(--sidebar-width, 16rem);
+  width: calc(100% - var(--sidebar-width, 16rem));
+}
+
+.content-container {
   padding: 2rem;
-  text-align: center;
 }
 
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
+.max-w-content {
+  max-width: 72rem;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+/* Personalización de la barra de desplazamiento */
+.scrollbar-custom {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(155, 155, 155, 0.5) transparent;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
+.scrollbar-custom::-webkit-scrollbar {
+  width: 4px;
 }
 
-.card {
-  padding: 2em;
+.scrollbar-custom::-webkit-scrollbar-track {
+  background: transparent;
 }
 
-.read-the-docs {
-  color: #888;
+.scrollbar-custom::-webkit-scrollbar-thumb {
+  background-color: rgba(155, 155, 155, 0.5);
+  border-radius: 20px;
+}
+
+.scrollbar-hidden {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hidden::-webkit-scrollbar {
+  display: none;
 }

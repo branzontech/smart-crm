@@ -105,7 +105,7 @@ export const Navbar = () => {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-50",
+        "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-10 mt-[var(--header-height)]",
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}
@@ -127,16 +127,7 @@ export const Navbar = () => {
           !isExpanded && "scrollbar-hidden"
         )}
       >
-        <div className="h-16 flex items-center justify-center">
-          <span
-            className={cn(
-              "text-xl font-semibold text-white transition-all duration-300 transform",
-              !isExpanded ? "scale-0 opacity-0" : "scale-100 opacity-100"
-            )}
-          >
-            CRM
-          </span>
-        </div>
+        <div className="h-4"></div> {/* Espaciado superior modificado */}
 
         {navItems.map((item) => (
           <div key={item.path} className="relative">

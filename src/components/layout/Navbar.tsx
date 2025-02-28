@@ -16,7 +16,8 @@ import {
   Mail,
   Settings,
   ChevronDown,
-  Store
+  Store,
+  FileText
 } from "lucide-react";
 import {
   Tooltip,
@@ -44,6 +45,15 @@ const navItems: NavItem[] = [
     subItems: [
       { label: "Nuevo", path: "/recaudos/nuevo" },
       { label: "Seguimiento", path: "/recaudos/seguimiento" },
+    ],
+  },
+  {
+    label: "Cuentas de Cobro",
+    icon: FileText,
+    path: "/cuentas-cobro",
+    subItems: [
+      { label: "Listar", path: "/cuentas-cobro" },
+      { label: "Nueva", path: "/cuentas-cobro/nueva" },
     ],
   },
   {

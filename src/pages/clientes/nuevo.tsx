@@ -104,18 +104,18 @@ export default function NuevoCliente() {
       // Aquí iría la lógica para guardar en la base de datos
       console.log(data);
       toast.success("Cliente guardado exitosamente");
-      form.reset();
+      navigate("/clientes");
     } catch (error) {
       toast.error("Error al guardar el cliente");
     }
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="flex h-screen bg-gray-50">
       <Navbar />
-      <div className="main-container pt-[var(--header-height)]">
+      <div className="main-container">
         <Header />
-        <main className="flex-1 content-container">
+        <main className="content-container overflow-y-auto">
           <div className="max-w-content">
             <div className="mb-6">
               <Button
@@ -535,7 +535,7 @@ export default function NuevoCliente() {
                       <Button
                         type="button"
                         variant="outline"
-                        onClick={() => form.reset()}
+                        onClick={() => navigate("/clientes")}
                       >
                         Cancelar
                       </Button>

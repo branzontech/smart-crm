@@ -3,7 +3,8 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
 import { Building2, Plus } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 
 const ProveedoresIndex = () => {
   const navigate = useNavigate();
@@ -28,41 +29,68 @@ const ProveedoresIndex = () => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <div className="flex items-center gap-2">
-              <Building2 className="h-6 w-6 text-teal" />
-              <h1 className="text-2xl font-semibold text-gray-900">Proveedores</h1>
+      <div className="main-container">
+        <main className="flex-1 content-container">
+          <div className="max-w-content">
+            <div className="flex justify-between items-center mb-6">
+              <div className="flex items-center gap-2">
+                <Building2 className="h-6 w-6 text-teal" />
+                <h1 className="text-2xl font-semibold text-gray-900">Proveedores</h1>
+              </div>
+              <Button
+                onClick={() => navigate("/proveedores/nuevo")}
+                className="bg-teal hover:bg-sage text-white transition-colors duration-200"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Nuevo Proveedor
+              </Button>
             </div>
-            <Button
-              onClick={() => navigate("/proveedores/nuevo")}
-              className="bg-teal hover:bg-sage text-white transition-colors duration-200"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Nuevo Proveedor
-            </Button>
-          </div>
 
-          <div className="grid gap-4">
-            {proveedores.map((proveedor) => (
-              <Card key={proveedor.id} className="p-4">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="font-semibold text-lg">{proveedor.nombre}</h3>
-                    <p className="text-sm text-gray-500">
-                      {proveedor.tipoDocumento}: {proveedor.documento}
-                    </p>
-                    <p className="text-sm text-gray-600">
-                      Contacto: {proveedor.contacto}
-                    </p>
-                  </div>
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle>Listado de Proveedores</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-mint/20">
+                      <TableRow>
+                        <TableHead className="text-teal">Nombre</TableHead>
+                        <TableHead className="text-teal">Tipo Doc.</TableHead>
+                        <TableHead className="text-teal">Documento</TableHead>
+                        <TableHead className="text-teal">Contacto</TableHead>
+                        <TableHead className="text-teal">Acciones</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {proveedores.map((proveedor) => (
+                        <TableRow
+                          key={proveedor.id}
+                          className="hover:bg-gray-50 transition-colors duration-150"
+                        >
+                          <TableCell className="font-medium">{proveedor.nombre}</TableCell>
+                          <TableCell>{proveedor.tipoDocumento}</TableCell>
+                          <TableCell>{proveedor.documento}</TableCell>
+                          <TableCell>{proveedor.contacto}</TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              className="text-teal hover:text-sage hover:bg-mint/20"
+                              onClick={() => navigate(`/proveedores/${proveedor.id}`)}
+                            >
+                              Ver detalles
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
-              </Card>
-            ))}
+              </CardContent>
+            </Card>
           </div>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 };

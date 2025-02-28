@@ -115,12 +115,43 @@ export default function NuevaCuentaCobro() {
 
   const onSubmit = (data: z.infer<typeof cuentaCobroSchema>) => {
     try {
-      // Convertir los datos del formulario al formato requerido
+      // Aquí está el problema: necesitamos asegurarnos de que todos los campos requeridos estén presentes
+      // Creamos un objeto que corresponde exactamente al tipo CuentaCobroFormData
       const formData: CuentaCobroFormData = {
-        ...data,
+        fechaEmision: data.fechaEmision,
+        emisor: {
+          nombre: data.emisor.nombre,
+          ciudad: data.emisor.ciudad,
+          telefono: data.emisor.telefono,
+          email: data.emisor.email,
+          documento: data.emisor.documento,
+        },
+        receptor: {
+          empresa: data.receptor.empresa,
+          direccion: data.receptor.direccion,
+          ciudad: data.receptor.ciudad,
+        },
+        periodo: {
+          desde: data.periodo.desde,
+          hasta: data.periodo.hasta,
+        },
+        servicio: {
+          descripcion: data.servicio.descripcion,
+          proyecto: data.servicio.proyecto,
+          fase: data.servicio.fase,
+          ordenCompra: data.servicio.ordenCompra,
+        },
         valor: {
           monto: Number(data.valor.monto),
         },
+        datosPago: {
+          banco: data.datosPago.banco,
+          tipoCuenta: data.datosPago.tipoCuenta,
+          numeroCuenta: data.datosPago.numeroCuenta,
+          titular: data.datosPago.titular,
+        },
+        fechaVencimiento: data.fechaVencimiento,
+        notas: data.notas,
       };
 
       // Crear la cuenta de cobro

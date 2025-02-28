@@ -51,149 +51,151 @@ export default function NuevaEmpresa() {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8">
-        <div className="max-w-4xl mx-auto">
-          <div className="mb-6">
-            <Button
-              variant="ghost"
-              className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
-              onClick={() => navigate("/empresas")}
-            >
-              <ArrowLeft className="mr-2 h-4 w-4" />
-              Volver al listado
-            </Button>
+      <div className="main-container">
+        <main className="flex-1 content-container">
+          <div className="max-w-content">
+            <div className="mb-6">
+              <Button
+                variant="ghost"
+                className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
+                onClick={() => navigate("/empresas")}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Volver al listado
+              </Button>
+            </div>
+            <Card>
+              <CardHeader className="space-y-1">
+                <div className="flex items-center gap-2">
+                  <Building2 className="h-6 w-6 text-teal" />
+                  <CardTitle className="text-2xl font-semibold">Nueva Empresa</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <FormField
+                        control={form.control}
+                        name="nombre"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Nombre de la Empresa</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Empresa S.A." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="industria"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Industria</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Tecnología, Manufactura, etc." {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="empleados"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número de Empleados</FormLabel>
+                            <FormControl>
+                              <Input type="number" placeholder="100" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="ciudad"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Ciudad</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Buenos Aires" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="direccion"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Dirección</FormLabel>
+                            <FormControl>
+                              <Input placeholder="Av. Principal 123" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="telefono"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Teléfono</FormLabel>
+                            <FormControl>
+                              <Input placeholder="+54 11 1234-5678" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="sitioWeb"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Sitio Web</FormLabel>
+                            <FormControl>
+                              <Input placeholder="https://www.empresa.com" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                    <FormField
+                      control={form.control}
+                      name="descripcion"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Descripción</FormLabel>
+                          <FormControl>
+                            <Textarea
+                              placeholder="Breve descripción de la empresa..."
+                              className="min-h-[100px]"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex justify-end">
+                      <Button type="submit" className="bg-teal hover:bg-sage text-white">
+                        Crear Empresa
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              </CardContent>
+            </Card>
           </div>
-          <Card>
-            <CardHeader className="space-y-1">
-              <div className="flex items-center gap-2">
-                <Building2 className="h-6 w-6 text-teal" />
-                <CardTitle className="text-2xl font-semibold">Nueva Empresa</CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <FormField
-                      control={form.control}
-                      name="nombre"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Nombre de la Empresa</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Empresa S.A." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="industria"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Industria</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Tecnología, Manufactura, etc." {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="empleados"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Número de Empleados</FormLabel>
-                          <FormControl>
-                            <Input type="number" placeholder="100" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="ciudad"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Ciudad</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Buenos Aires" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="direccion"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Dirección</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Av. Principal 123" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="telefono"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Teléfono</FormLabel>
-                          <FormControl>
-                            <Input placeholder="+54 11 1234-5678" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <FormField
-                      control={form.control}
-                      name="sitioWeb"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Sitio Web</FormLabel>
-                          <FormControl>
-                            <Input placeholder="https://www.empresa.com" {...field} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <FormField
-                    control={form.control}
-                    name="descripcion"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Descripción</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Breve descripción de la empresa..."
-                            className="min-h-[100px]"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex justify-end">
-                    <Button type="submit" className="bg-teal hover:bg-sage text-white">
-                      Crear Empresa
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </CardContent>
-          </Card>
-        </div>
-      </main>
+        </main>
+      </div>
     </div>
   );
 }

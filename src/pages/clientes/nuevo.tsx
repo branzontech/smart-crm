@@ -26,18 +26,23 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const clienteSchema = z.object({
+  tipoPersona: z.enum(["natural", "juridica"]),
+  tipoDocumento: z.enum(["CC", "NIT", "CE", "pasaporte"]),
+  documento: z.string().min(5, "El documento es requerido"),
   nombre: z.string().min(2, "El nombre es requerido"),
-  apellidos: z.string().min(2, "Los apellidos son requeridos"),
-  empresa: z.string().min(2, "La empresa es requerida"),
-  cargo: z.string().min(2, "El cargo es requerido"),
+  apellidos: z.string().optional(),
+  empresa: z.string().optional(),
+  cargo: z.string().optional(),
   email: z.string().email("Email inválido"),
   telefono: z
     .string()
     .min(10, "El teléfono debe tener al menos 10 dígitos")
     .regex(/^\d+$/, "Solo se permiten números"),
-  tipo: z.enum(["potencial", "activo", "inactivo"]),
+  tipo: z.enum(["potencial", "activo", "inactivo", "recurrente", "referido", "suspendido", "corporativo"]),
+  tipoServicio: z.string().min(2, "El tipo de servicio es requerido"),
   sector: z.string().min(2, "El sector es requerido"),
   direccion: z.string().min(5, "La dirección es requerida"),
   ciudad: z.string().min(2, "La ciudad es requerida"),
@@ -60,15 +65,38 @@ const sectores = [
   "Otro",
 ];
 
+const tiposServicio = [
+  "Desarrollo de software",
+  "Consultoría tecnológica",
+  "Diseño web",
+  "Marketing digital",
+  "Infraestructura y nube",
+  "Ciberseguridad",
+  "Soporte técnico",
+  "Capacitación",
+  "Análisis de datos",
+  "Otro",
+];
+
 export default function NuevoCliente() {
   const navigate = useNavigate();
   const form = useForm<ClienteForm>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
+      tipoPersona: "natural",
+      tipoDocumento: "CC",
       tipo: "potencial",
       origen: "web",
+      apellidos: "",
+      empresa: "",
+      cargo: "",
+      notas: "",
+      presupuestoEstimado: "",
     },
   });
+
+  // Observar el tipo de persona para condicionar la UI
+  const tipoPersona = form.watch("tipoPersona");
 
   const onSubmit = async (data: ClienteForm) => {
     try {
@@ -108,36 +136,125 @@ export default function NuevoCliente() {
                   onSubmit={form.handleSubmit(onSubmit)}
                   className="space-y-6"
                 >
+                  {/* Tipo de persona */}
+                  <FormField
+                    control={form.control}
+                    name="tipoPersona"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormLabel>Tipo de Persona</FormLabel>
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex space-x-4"
+                          >
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="natural" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Persona Natural
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-2 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="juridica" />
+                              </FormControl>
+                              <FormLabel className="font-normal cursor-pointer">
+                                Persona Jurídica
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  {/* Documento */}
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="tipoDocumento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Tipo de Documento</FormLabel>
+                          <Select
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                          >
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Tipo de documento" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="CC">Cédula de Ciudadanía</SelectItem>
+                              <SelectItem value="NIT">NIT</SelectItem>
+                              <SelectItem value="CE">Cédula de Extranjería</SelectItem>
+                              <SelectItem value="pasaporte">Pasaporte</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <div className="md:col-span-2">
+                      <FormField
+                        control={form.control}
+                        name="documento"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Número de Documento</FormLabel>
+                            <FormControl>
+                              <Input placeholder="1234567890" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  </div>
+
+                  {/* Información Personal */}
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {/* Información Personal */}
                     <div className="space-y-4">
                       <FormField
                         control={form.control}
                         name="nombre"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Nombre</FormLabel>
+                            <FormLabel>
+                              {tipoPersona === "natural" ? "Nombre" : "Razón Social"}
+                            </FormLabel>
                             <FormControl>
-                              <Input placeholder="Juan" {...field} />
+                              <Input 
+                                placeholder={tipoPersona === "natural" ? "Juan" : "Empresa S.A."} 
+                                {...field} 
+                              />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
                       />
 
-                      <FormField
-                        control={form.control}
-                        name="apellidos"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Apellidos</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Pérez González" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {tipoPersona === "natural" && (
+                        <FormField
+                          control={form.control}
+                          name="apellidos"
+                          render={({ field }) => (
+                            <FormItem>
+                              <FormLabel>Apellidos</FormLabel>
+                              <FormControl>
+                                <Input placeholder="Pérez González" {...field} />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                      )}
 
                       <FormField
                         control={form.control}
@@ -174,33 +291,37 @@ export default function NuevoCliente() {
 
                     {/* Información Empresarial */}
                     <div className="space-y-4">
-                      <FormField
-                        control={form.control}
-                        name="empresa"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Empresa</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Empresa S.A." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                      {tipoPersona === "natural" && (
+                        <>
+                          <FormField
+                            control={form.control}
+                            name="empresa"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Empresa</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Empresa S.A." {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
 
-                      <FormField
-                        control={form.control}
-                        name="cargo"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Cargo</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Director Comercial" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
+                          <FormField
+                            control={form.control}
+                            name="cargo"
+                            render={({ field }) => (
+                              <FormItem>
+                                <FormLabel>Cargo</FormLabel>
+                                <FormControl>
+                                  <Input placeholder="Director Comercial" {...field} />
+                                </FormControl>
+                                <FormMessage />
+                              </FormItem>
+                            )}
+                          />
+                        </>
+                      )}
 
                       <FormField
                         control={form.control}
@@ -232,23 +353,55 @@ export default function NuevoCliente() {
 
                       <FormField
                         control={form.control}
-                        name="tipo"
+                        name="tipoServicio"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Tipo de Cliente</FormLabel>
+                            <FormLabel>Tipo de Servicio</FormLabel>
                             <Select
                               onValueChange={field.onChange}
                               defaultValue={field.value}
                             >
                               <FormControl>
                                 <SelectTrigger>
-                                  <SelectValue placeholder="Selecciona el tipo" />
+                                  <SelectValue placeholder="Selecciona un servicio" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                {tiposServicio.map((servicio) => (
+                                  <SelectItem key={servicio} value={servicio}>
+                                    {servicio}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name="tipo"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>Estado del Cliente</FormLabel>
+                            <Select
+                              onValueChange={field.onChange}
+                              defaultValue={field.value}
+                            >
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Selecciona el estado" />
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
                                 <SelectItem value="potencial">Potencial</SelectItem>
                                 <SelectItem value="activo">Activo</SelectItem>
                                 <SelectItem value="inactivo">Inactivo</SelectItem>
+                                <SelectItem value="recurrente">Recurrente</SelectItem>
+                                <SelectItem value="referido">Referido</SelectItem>
+                                <SelectItem value="suspendido">Suspendido</SelectItem>
+                                <SelectItem value="corporativo">Corporativo</SelectItem>
                               </SelectContent>
                             </Select>
                             <FormMessage />

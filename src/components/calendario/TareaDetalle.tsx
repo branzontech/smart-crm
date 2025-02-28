@@ -48,8 +48,8 @@ export const TareaDetalle = ({
         <div className="flex justify-between items-start mb-2">
           <h3 className="text-xl font-semibold">{tarea.titulo}</h3>
           <Badge 
-            variant={tarea.completada ? "success" : "secondary"}
-            className="ml-2 cursor-pointer"
+            variant={tarea.completada ? "secondary" : "outline"}
+            className={`ml-2 cursor-pointer ${tarea.completada ? 'bg-green-100 text-green-700 hover:bg-green-200' : ''}`}
             onClick={onToggleCompletada}
           >
             {tarea.completada ? (

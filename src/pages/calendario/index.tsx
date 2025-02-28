@@ -654,7 +654,7 @@ const CalendarioIndex = () => {
         open={!!tareaSeleccionada} 
         onOpenChange={(open) => !open && setTareaSeleccionada(null)}
       >
-        <SheetContent className="sm:max-w-md">
+        <SheetContent className="sm:max-w-md overflow-y-auto">
           <SheetHeader>
             <SheetTitle>Detalles de la tarea</SheetTitle>
             <SheetDescription>
@@ -680,7 +680,6 @@ const CalendarioIndex = () => {
       <Sheet 
         open={mostrarFormulario} 
         onOpenChange={(open) => !open && setMostrarFormulario(false)}
-        className="overflow-auto"
       >
         <SheetContent className="sm:max-w-xl overflow-y-auto">
           <SheetHeader>

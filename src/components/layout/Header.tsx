@@ -46,8 +46,8 @@ export const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-6 py-3 z-20 h-[var(--header-height)]">
-      <div className="flex items-center justify-between">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-6 py-3 z-10 h-[var(--header-height)]">
+      <div className="flex items-center justify-between ml-[var(--sidebar-width, 5rem)] transition-all duration-300">
         <div className="flex items-center gap-2 text-gray-600">
           <Clock className="h-5 w-5" />
           <span>

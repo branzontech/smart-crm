@@ -89,6 +89,13 @@ export const Navbar = () => {
         mainContainer.classList.remove('expanded');
       }
     }
+    
+    // Actualizar el margen del header cuando cambia el ancho del sidebar
+    const header = document.querySelector('header > div');
+    if (header) {
+      header.classList.remove('ml-20', 'ml-64');
+      header.classList.add(isExpanded ? 'ml-64' : 'ml-20');
+    }
   }, [isExpanded, isMobile]);
 
   const handleNavigation = (path: string) => {
@@ -105,14 +112,14 @@ export const Navbar = () => {
   return (
     <aside
       className={cn(
-        "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-10 mt-[var(--header-height)]",
+        "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-20",
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
-        className="absolute -right-3 top-6 p-1.5 bg-teal rounded-full shadow-lg hover:bg-sage transition-all duration-300 ease-in-out transform hover:scale-110"
+        className="absolute -right-3 top-6 p-1.5 bg-teal rounded-full shadow-lg hover:bg-sage transition-all duration-300 ease-in-out transform hover:scale-110 z-30"
       >
         {isExpanded ? (
           <ChevronLeft className="h-4 w-4 text-white" />
@@ -123,12 +130,10 @@ export const Navbar = () => {
 
       <div 
         className={cn(
-          "p-4 space-y-4 overflow-y-auto h-full",
+          "p-4 space-y-4 overflow-y-auto h-full pt-[calc(var(--header-height)+1rem)]",
           !isExpanded && "scrollbar-hidden"
         )}
       >
-        <div className="h-4"></div> {/* Espaciado superior modificado */}
-
         {navItems.map((item) => (
           <div key={item.path} className="relative">
             <TooltipProvider>

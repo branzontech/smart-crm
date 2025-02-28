@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Bell, Clock, Settings, UserRound } from "lucide-react";
 import {
   DropdownMenu,
@@ -17,12 +17,12 @@ export const Header = () => {
   const navigate = useNavigate();
 
   // Actualizar la hora cada minuto
-  useState(() => {
+  useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
     }, 60000);
     return () => clearInterval(timer);
-  });
+  }, []);
 
   const notifications = [
     {
@@ -46,7 +46,7 @@ export const Header = () => {
   ];
 
   return (
-    <header className="bg-white border-b border-gray-200 px-6 py-3">
+    <header className="sticky top-0 w-full bg-white border-b border-gray-200 px-6 py-3 z-10">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-gray-600">
           <Clock className="h-5 w-5" />

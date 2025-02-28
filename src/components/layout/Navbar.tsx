@@ -63,17 +63,33 @@ const navItems: NavItem[] = [
 ];
 
 export const Navbar = () => {
-  const [isExpanded, setIsExpanded] = useState(false); // Estado inicial colapsado
+  const [isExpanded, setIsExpanded] = useState(false);
   const [openSubmenu, setOpenSubmenu] = useState<string | null>(null);
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
 
+  // Actualizar el CSS cuando cambia el estado expandido
   useEffect(() => {
+    document.documentElement.style.setProperty(
+      '--sidebar-width', 
+      isExpanded ? '16rem' : '5rem'
+    );
+    
     if (isMobile) {
       setIsExpanded(false);
     }
-  }, [isMobile]);
+    
+    // Agregar o quitar la clase expandida del contenedor principal
+    const mainContainer = document.querySelector('.main-container');
+    if (mainContainer) {
+      if (isExpanded) {
+        mainContainer.classList.add('expanded');
+      } else {
+        mainContainer.classList.remove('expanded');
+      }
+    }
+  }, [isExpanded, isMobile]);
 
   const handleNavigation = (path: string) => {
     navigate(path);
@@ -93,7 +109,6 @@ export const Navbar = () => {
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}
-      style={{ position: 'fixed' }}
     >
       <button
         onClick={() => setIsExpanded(!isExpanded)}
@@ -111,10 +126,6 @@ export const Navbar = () => {
           "p-4 space-y-4 overflow-y-auto h-full",
           !isExpanded && "scrollbar-hidden"
         )}
-        style={{
-          msOverflowStyle: 'none',
-          scrollbarWidth: 'none'
-        }}
       >
         <div className="h-16 flex items-center justify-center">
           <span

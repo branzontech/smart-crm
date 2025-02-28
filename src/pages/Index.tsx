@@ -378,10 +378,10 @@ const Index = () => {
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
-      <div className="flex-1 flex flex-col ml-20 transition-all duration-300">
+      <div className="main-container">
         <Header />
-        <main className="flex-1 p-8 overflow-auto">
-          <div className="max-w-7xl mx-auto space-y-6">
+        <main className="flex-1 content-container overflow-auto">
+          <div className="max-w-content space-y-6">
             <div className="flex items-center justify-between mb-6">
               <h1 className="text-3xl font-semibold text-gray-900">Dashboard</h1>
               <Button onClick={() => navigate("/reportes")} className="bg-teal hover:bg-sage">

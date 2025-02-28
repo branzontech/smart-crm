@@ -1,0 +1,14 @@
+
+/* Estilos para sobrescribir el alineamiento de los labels en formularios */
+.form-item label,
+[data-radix-label],
+.FormLabel,
+[class^="FormLabel"],
+[class*=" FormLabel"],
+[class*="form-label"],
+[class*="formLabel"],
+.form-control label {
+  text-align: left !important;
+  justify-content: flex-start !important;
+  display: flex !important;
+}

@@ -89,7 +89,7 @@ export const Navbar = () => {
   return (
     <nav
       className={cn(
-        "fixed h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative",
+        "fixed h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col relative z-50",
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}

@@ -41,62 +41,59 @@ export const ClausulaItem = ({
     }
   };
   
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    // Guardar al presionar Ctrl+Enter o Cmd+Enter
+    if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+      handleSave();
+    }
+  };
+  
   return (
-    <Card className="shadow-sm">
-      <CardHeader className="py-2 px-4 bg-gray-50 border-b">
+    <Card className={cn(
+      "transition-shadow",
+      isOverlay ? "shadow-md" : "shadow-sm",
+      "print:shadow-none print:border-none"
+    )}>
+      <CardHeader className="py-3 px-4 print:py-1 print:px-0">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-base font-medium">{clausula.titulo}</CardTitle>
+          <CardTitle className="text-base">{clausula.titulo}</CardTitle>
           {!isOverlay && (
-            <div className="flex space-x-1">
-              {!clausula.requerido && (
-                <Button 
-                  size="sm" 
-                  variant="destructive"
-                  onClick={handleDelete}
-                >
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Eliminar
-                </Button>
-              )}
+            <div className="flex space-x-2 print:hidden">
               {clausula.editable && (
                 <>
                   {isEditing ? (
-                    <Button 
-                      size="sm" 
-                      variant="default" 
-                      onClick={handleSave}
-                      className="bg-green-600 hover:bg-green-700"
-                    >
-                      <Save className="h-4 w-4 mr-1" />
-                      Guardar
+                    <Button size="sm" variant="ghost" onClick={handleSave}>
+                      <Save className="h-4 w-4" />
                     </Button>
                   ) : (
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => setIsEditing(true)}
-                    >
-                      <Pencil className="h-4 w-4 mr-1" />
-                      Editar
+                    <Button size="sm" variant="ghost" onClick={() => setIsEditing(true)}>
+                      <Pencil className="h-4 w-4" />
                     </Button>
                   )}
                 </>
+              )}
+              {!clausula.requerido && (
+                <Button size="sm" variant="ghost" onClick={handleDelete} className="text-red-500 hover:text-red-700">
+                  <Trash2 className="h-4 w-4" />
+                </Button>
               )}
             </div>
           )}
         </div>
       </CardHeader>
-      <CardContent className="p-4">
+      <CardContent className="pt-0 px-4 print:px-0">
         {isEditing ? (
-          <div className="space-y-3">
+          <div className="space-y-2">
             <Textarea 
               value={contenido} 
               onChange={(e) => setContenido(e.target.value)}
-              className="min-h-[150px] w-full"
+              onKeyDown={handleKeyDown}
+              className="min-h-[120px] font-normal"
               placeholder="Ingrese el contenido de la cláusula"
             />
             <div className="flex justify-end space-x-2">
               <Button 
+                size="sm" 
                 variant="outline" 
                 onClick={() => {
                   setContenido(clausula.contenido);
@@ -106,16 +103,23 @@ export const ClausulaItem = ({
                 Cancelar
               </Button>
               <Button 
+                size="sm" 
                 variant="default" 
                 onClick={handleSave}
-                className="bg-green-600 hover:bg-green-700"
+                className="bg-teal hover:bg-sage"
               >
-                Guardar cambios
+                Guardar
               </Button>
             </div>
+            <p className="text-xs text-gray-500">
+              Puedes usar Ctrl+Enter para guardar rápidamente.
+            </p>
           </div>
         ) : (
-          <div className="text-sm whitespace-pre-line">
+          <div 
+            className="text-sm whitespace-pre-line cursor-pointer"
+            onClick={() => clausula.editable && setIsEditing(true)}
+          >
             {contenido}
           </div>
         )}

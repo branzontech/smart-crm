@@ -14,23 +14,17 @@ export const ClausulaPreviewCard = ({
   onClick 
 }: ClausulaPreviewCardProps) => {
   return (
-    <Card className="hover:shadow-md border border-gray-200">
-      <CardHeader className="py-2 px-3 bg-gray-50 border-b">
+    <Card className="transition-shadow hover:shadow-md">
+      <CardHeader className="py-3 px-4">
         <div className="flex justify-between items-center">
-          <CardTitle className="text-sm font-medium">{clausula.titulo}</CardTitle>
-          <Button 
-            onClick={onClick} 
-            size="sm" 
-            variant="outline"
-            className="h-8 bg-white"
-          >
-            <Plus className="h-4 w-4 mr-1" />
-            Añadir
+          <CardTitle className="text-sm">{clausula.titulo}</CardTitle>
+          <Button size="sm" variant="ghost" onClick={onClick} className="text-teal hover:text-sage">
+            <Plus className="h-4 w-4" />
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="py-2 px-3">
-        <p className="text-xs text-gray-600 line-clamp-2">
+      <CardContent className="pt-0 px-4">
+        <p className="text-xs text-gray-500 line-clamp-2">
           {clausula.contenido}
         </p>
       </CardContent>

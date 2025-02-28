@@ -178,8 +178,6 @@ export const ContratoBuilder = ({
   
   // Remover una cláusula
   const removerClausula = (id: string) => {
-    console.log("Eliminando cláusula con ID:", id);
-    
     // No permitir eliminar cláusulas requeridas
     const clausula = clausulasSeleccionadas.find(c => c.id === id);
     if (clausula?.requerido) {
@@ -187,22 +185,17 @@ export const ContratoBuilder = ({
       return;
     }
     
-    setClausulasSeleccionadas(
-      clausulasSeleccionadas.filter((c) => c.id !== id)
-    );
-    toast.success("Cláusula eliminada correctamente");
+    setClausulasSeleccionadas(clausulasSeleccionadas.filter((c) => c.id !== id));
+    toast.success("Cláusula eliminada");
   };
   
   // Actualizar contenido de una cláusula
   const actualizarClausula = (id: string, contenido: string) => {
-    console.log("Actualizando cláusula con ID:", id);
-    
     setClausulasSeleccionadas(
       clausulasSeleccionadas.map((c) => 
         c.id === id ? { ...c, contenido } : c
       )
     );
-    toast.success("Cláusula actualizada correctamente");
   };
   
   // Encontrar la cláusula activa

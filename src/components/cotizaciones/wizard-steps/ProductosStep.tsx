@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -40,8 +39,7 @@ export const ProductosStep: React.FC = () => {
       descripcion,
       cantidad,
       precioUnitario,
-      iva,
-      total: 0, // This will be calculated in the context
+      iva
     });
 
     // Reset form
@@ -94,7 +92,7 @@ export const ProductosStep: React.FC = () => {
       descripcion,
       cantidad,
       precioUnitario,
-      iva,
+      iva
     });
 
     // Reset form

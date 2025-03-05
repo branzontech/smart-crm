@@ -6,6 +6,7 @@ export interface EmpresaEmisor {
   nit: string;
   telefono: string;
   direccion: string;
+  firmaNombre?: string; // Added for signature name in preview
 }
 
 export interface Cliente {

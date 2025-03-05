@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -306,7 +307,7 @@ const NuevoRecaudo = () => {
       <Navbar />
       <div className="main-container">
         <Header />
-        <main className="content-container overflow-y-auto">
+        <main className="content-container pt-[var(--header-height)] overflow-y-auto">
           <div className="max-w-content">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">

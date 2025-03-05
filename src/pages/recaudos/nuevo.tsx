@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -41,6 +40,8 @@ const articuloSchema = z.object({
   cantidad: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
   valorUnitario: z.number().min(0, { message: "El valor unitario debe ser mayor o igual a 0" }),
   valorTotal: z.number().min(0, { message: "El valor total debe ser mayor o igual a 0" }),
+  tasaIva: z.number().min(0, { message: "La tasa de IVA debe ser mayor o igual a 0" }),
+  valorIva: z.number().min(0, { message: "El valor del IVA debe ser mayor o igual a 0" }),
 });
 
 // Esquema de validación para el formulario principal
@@ -76,12 +77,14 @@ const NuevoRecaudo = () => {
     descripcion: string;
     cantidad: number;
     valorUnitario: number;
+    tasaIva: number;
   }>({
     proveedor: "",
     nombreProveedor: "",
     descripcion: "",
     cantidad: 1,
     valorUnitario: 0,
+    tasaIva: 0.19, // Tasa por defecto 19%
   });
   
   // Lista de clientes (normalmente vendría de una API)
@@ -183,8 +186,7 @@ const NuevoRecaudo = () => {
   // Cálculos automáticos cuando se actualizan los artículos
   const calcularTotales = () => {
     const subtotal = articulos.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
-    const tasaIva = 0.19; // Tasa por defecto, se podría hacer seleccionable
-    const iva = subtotal * tasaIva;
+    const iva = articulos.reduce((sum, item) => sum + (item.valorIva || 0), 0);
     const total = subtotal + iva;
     
     form.setValue('subtotal', subtotal);
@@ -201,6 +203,8 @@ const NuevoRecaudo = () => {
     }
     
     const valorTotal = nuevoArticulo.cantidad * nuevoArticulo.valorUnitario;
+    const valorIva = valorTotal * nuevoArticulo.tasaIva;
+    
     const articulo: Articulo = {
       id: `art-${Date.now()}`,
       proveedor: nuevoArticulo.proveedor,
@@ -209,6 +213,8 @@ const NuevoRecaudo = () => {
       cantidad: nuevoArticulo.cantidad,
       valorUnitario: nuevoArticulo.valorUnitario,
       valorTotal,
+      tasaIva: nuevoArticulo.tasaIva,
+      valorIva,
     };
     
     const nuevosArticulos = [...articulos, articulo];
@@ -221,6 +227,7 @@ const NuevoRecaudo = () => {
       descripcion: "",
       cantidad: 1,
       valorUnitario: 0,
+      tasaIva: 0.19, // Mantener la tasa de IVA por defecto
     });
     
     // Limpiar la búsqueda de proveedor
@@ -511,7 +518,7 @@ const NuevoRecaudo = () => {
                             </div>
                           </div>
                           
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div>
                               <Label htmlFor="cantidad">Cantidad</Label>
                               <Input 
@@ -531,6 +538,27 @@ const NuevoRecaudo = () => {
                                 value={nuevoArticulo.valorUnitario} 
                                 onChange={(e) => setNuevoArticulo({...nuevoArticulo, valorUnitario: parseFloat(e.target.value) || 0})}
                               />
+                            </div>
+                            <div>
+                              <Label htmlFor="tasaIva">IVA</Label>
+                              <Select 
+                                value={nuevoArticulo.tasaIva.toString()}
+                                onValueChange={(value) => setNuevoArticulo({
+                                  ...nuevoArticulo, 
+                                  tasaIva: parseFloat(value)
+                                })}
+                              >
+                                <SelectTrigger id="tasaIva">
+                                  <SelectValue placeholder="Seleccionar IVA" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                  {tasasIVA.map((tasa) => (
+                                    <SelectItem key={tasa.valor} value={tasa.valor.toString()}>
+                                      {tasa.etiqueta}
+                                    </SelectItem>
+                                  ))}
+                                </SelectContent>
+                              </Select>
                             </div>
                           </div>
                           
@@ -555,6 +583,8 @@ const NuevoRecaudo = () => {
                                 <TableHead>Descripción</TableHead>
                                 <TableHead className="text-right">Cantidad</TableHead>
                                 <TableHead className="text-right">Valor Unitario</TableHead>
+                                <TableHead className="text-right">IVA (%)</TableHead>
+                                <TableHead className="text-right">Valor IVA</TableHead>
                                 <TableHead className="text-right">Valor Total</TableHead>
                                 <TableHead className="text-center">Acciones</TableHead>
                               </TableRow>
@@ -567,6 +597,12 @@ const NuevoRecaudo = () => {
                                   <TableCell className="text-right">{articulo.cantidad}</TableCell>
                                   <TableCell className="text-right">
                                     ${articulo.valorUnitario.toLocaleString()}
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    {(articulo.tasaIva * 100).toFixed(0)}%
+                                  </TableCell>
+                                  <TableCell className="text-right">
+                                    ${articulo.valorIva.toLocaleString()}
                                   </TableCell>
                                   <TableCell className="text-right">
                                     ${articulo.valorTotal.toLocaleString()}
@@ -598,7 +634,7 @@ const NuevoRecaudo = () => {
                             <span>${form.watch('subtotal').toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between items-center">
-                            <span className="font-medium">IVA (19%):</span>
+                            <span className="font-medium">Total IVA:</span>
                             <span>${form.watch('iva').toLocaleString()}</span>
                           </div>
                           <div className="flex justify-between items-center font-bold text-lg">

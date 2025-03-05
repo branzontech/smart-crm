@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, X, File, FileImage, FilePdf } from "lucide-react";
+import { Upload, X, File, FileImage, FileText } from "lucide-react";
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -63,7 +63,7 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
     if (file.type.startsWith('image/')) {
       return <FileImage className="w-8 h-8 text-blue-500" />;
     } else if (file.type === 'application/pdf') {
-      return <FilePdf className="w-8 h-8 text-red-500" />;
+      return <FileText className="w-8 h-8 text-red-500" />;
     } else {
       return <File className="w-8 h-8 text-gray-500" />;
     }

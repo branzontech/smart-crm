@@ -115,7 +115,7 @@ export default function NuevoCliente() {
       <Navbar />
       <div className="main-container">
         <Header />
-        <main className="content-container overflow-y-auto">
+        <main className="content-container pt-[var(--header-height)] overflow-y-auto">
           <div className="max-w-content">
             <div className="mb-6">
               <Button

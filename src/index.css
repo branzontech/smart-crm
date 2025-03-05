@@ -16,6 +16,7 @@
 
     --primary: 180 43% 28%;
     --primary-hover: 180 43% 22%;
+    --primary-foreground: 0 0% 100%;
 
     --secondary: 210 40% 96.1%;
     --secondary-foreground: 222.2 47.4% 11.2%;
@@ -180,11 +181,31 @@
   /* Estilos para botones con tema dinámico */
   .btn-themed {
     background-color: hsl(var(--primary));
-    color: #ffffff;
+    color: hsl(var(--primary-foreground));
   }
   
   .btn-themed:hover {
     background-color: hsl(var(--primary-hover));
+  }
+
+  /* Aplicar colores a los botones de shadcn/ui */
+  .bg-primary {
+    background-color: hsl(var(--primary));
+    color: hsl(var(--primary-foreground));
+  }
+  
+  .bg-secondary {
+    background-color: hsl(var(--secondary));
+    color: hsl(var(--secondary-foreground));
+  }
+  
+  .bg-accent {
+    background-color: hsl(var(--accent));
+    color: hsl(var(--accent-foreground));
+  }
+  
+  .border-accent {
+    border-color: hsl(var(--accent));
   }
 }
 

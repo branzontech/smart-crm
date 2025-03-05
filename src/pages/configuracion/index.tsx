@@ -9,20 +9,23 @@ import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
 import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
 
 const ConfiguracionIndex = () => {
+  const { currentTheme } = useTheme();
+  
   const handleSave = () => {
     toast.success("Configuración guardada correctamente");
   };
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex bg-background">
       <Navbar />
       <main className="flex-1 p-8">
         <div className="max-w-4xl mx-auto">
           <div className="flex items-center gap-2 mb-6">
-            <Settings className="h-6 w-6 text-teal" />
-            <h1 className="text-2xl font-semibold text-gray-900">Configuración</h1>
+            <Settings className="h-6 w-6 text-primary" />
+            <h1 className="text-2xl font-semibold text-foreground">Configuración</h1>
           </div>
 
           <Tabs defaultValue="general" className="space-y-6">
@@ -61,14 +64,14 @@ const ConfiguracionIndex = () => {
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Notificaciones por Email</Label>
-                      <p className="text-sm text-gray-500">Recibe actualizaciones importantes por email</p>
+                      <p className="text-sm text-muted-foreground">Recibe actualizaciones importantes por email</p>
                     </div>
                     <Switch />
                   </div>
                   <div className="flex items-center justify-between">
                     <div className="space-y-0.5">
                       <Label>Notificaciones del Sistema</Label>
-                      <p className="text-sm text-gray-500">Recibe notificaciones en el sistema</p>
+                      <p className="text-sm text-muted-foreground">Recibe notificaciones en el sistema</p>
                     </div>
                     <Switch />
                   </div>
@@ -91,10 +94,7 @@ const ConfiguracionIndex = () => {
             </TabsContent>
 
             <div className="flex justify-end">
-              <Button 
-                className="bg-teal hover:bg-sage text-white transition-colors duration-200"
-                onClick={handleSave}
-              >
+              <Button onClick={handleSave}>
                 <Save className="mr-2 h-4 w-4" />
                 Guardar Cambios
               </Button>

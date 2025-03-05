@@ -37,7 +37,11 @@ import {
   Printer,
   MoreHorizontal,
   Columns,
-  GripVertical
+  GripVertical,
+  Calendar,
+  DollarSign,
+  Building,
+  FileText
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
@@ -50,9 +54,33 @@ import {
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogDescription,
+  DialogFooter
+} from "@/components/ui/dialog";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useReactToPrint } from "react-to-print";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Label } from "@/components/ui/label";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { CalendarIcon } from "lucide-react";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { addDays, format } from "date-fns";
+import { es } from "date-fns/locale";
 
 // Tipos para las columnas
 interface Column {
@@ -91,6 +119,14 @@ const SeguimientoRecaudos = () => {
   const [estado, setEstado] = useState("todos");
   const [recaudoSeleccionado, setRecaudoSeleccionado] = useState<Recaudo | null>(null);
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
+  const [mostrarPagoConfirmacion, setMostrarPagoConfirmacion] = useState(false);
+  const [mostrarCambioEstado, setMostrarCambioEstado] = useState(false);
+  const [nuevoEstado, setNuevoEstado] = useState("");
+  const [fechaDesde, setFechaDesde] = useState<Date | undefined>(undefined);
+  const [fechaHasta, setFechaHasta] = useState<Date | undefined>(undefined);
+  const [montoMinimo, setMontoMinimo] = useState("");
+  const [montoMaximo, setMontoMaximo] = useState("");
+  const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
   const impresionRef = useRef<HTMLDivElement>(null);
 
   // Datos ficticios de recaudos pendientes o en proceso
@@ -229,18 +265,60 @@ const SeguimientoRecaudos = () => {
       );
     }
     
+    // Filtrar por rango de fechas
+    if (fechaDesde) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        recaudo => new Date(recaudo.fechaVencimiento) >= fechaDesde
+      );
+    }
+    
+    if (fechaHasta) {
+      recaudosFiltrados = recaudosFiltrados.filter(
+        recaudo => new Date(recaudo.fechaVencimiento) <= fechaHasta
+      );
+    }
+    
+    // Filtrar por rango de montos
+    if (montoMinimo !== "") {
+      const min = parseFloat(montoMinimo);
+      if (!isNaN(min)) {
+        recaudosFiltrados = recaudosFiltrados.filter(
+          recaudo => recaudo.monto >= min
+        );
+      }
+    }
+    
+    if (montoMaximo !== "") {
+      const max = parseFloat(montoMaximo);
+      if (!isNaN(max)) {
+        recaudosFiltrados = recaudosFiltrados.filter(
+          recaudo => recaudo.monto <= max
+        );
+      }
+    }
+    
     setRecaudos(recaudosFiltrados);
   };
 
   // Efecto para aplicar filtros
   const handleFiltroBusqueda = (e: React.ChangeEvent<HTMLInputElement>) => {
     setFiltro(e.target.value);
-    filtrarRecaudos();
+    setTimeout(filtrarRecaudos, 0);
   };
 
   const handleFiltroEstado = (value: string) => {
     setEstado(value);
     setTimeout(filtrarRecaudos, 0);
+  };
+
+  const handleLimpiarFiltros = () => {
+    setFiltro("");
+    setEstado("todos");
+    setFechaDesde(undefined);
+    setFechaHasta(undefined);
+    setMontoMinimo("");
+    setMontoMaximo("");
+    setRecaudos(recaudosPendientes);
   };
 
   // Función para marcar como pagado
@@ -251,12 +329,43 @@ const SeguimientoRecaudos = () => {
     // Actualizamos el estado local
     const recaudosActualizados = recaudos.filter(recaudo => recaudo.id !== id);
     setRecaudos(recaudosActualizados);
+    setMostrarPagoConfirmacion(false);
+  };
+
+  // Función para cambiar estado
+  const cambiarEstado = () => {
+    if (recaudoSeleccionado && nuevoEstado) {
+      // Aquí se enviaría la actualización a la API
+      toast.success(`Estado de recaudo ${recaudoSeleccionado.id} cambiado a ${nuevoEstado}`);
+      
+      // Actualizamos el estado local
+      const recaudosActualizados = recaudos.map(recaudo => 
+        recaudo.id === recaudoSeleccionado.id 
+          ? { ...recaudo, estado: nuevoEstado } 
+          : recaudo
+      );
+      setRecaudos(recaudosActualizados);
+      setMostrarCambioEstado(false);
+    }
   };
 
   // Función para ver detalle de recaudo
   const verDetalleRecaudo = (recaudo: Recaudo) => {
     setRecaudoSeleccionado(recaudo);
     setMostrarDetalle(true);
+  };
+
+  // Función para abrir diálogo de confirmación de pago
+  const confirmarPago = (recaudo: Recaudo) => {
+    setRecaudoSeleccionado(recaudo);
+    setMostrarPagoConfirmacion(true);
+  };
+
+  // Función para abrir diálogo de cambio de estado
+  const abrirCambioEstado = (recaudo: Recaudo) => {
+    setRecaudoSeleccionado(recaudo);
+    setNuevoEstado(recaudo.estado);
+    setMostrarCambioEstado(true);
   };
 
   // Función para cambiar visibilidad de columnas
@@ -300,6 +409,12 @@ const SeguimientoRecaudos = () => {
     content: () => impresionRef.current,
   });
 
+  // Aplicar filtros cuando cambian
+  const aplicarFiltros = () => {
+    filtrarRecaudos();
+    setMostrarFiltrosAvanzados(false);
+  };
+
   // Obtener columnas ordenadas y visibles
   const columnasOrdenadas = [...columnas]
     .sort((a, b) => a.order - b.order)
@@ -336,32 +451,143 @@ const SeguimientoRecaudos = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="relative flex-1">
-                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                    <Input
-                      placeholder="Buscar por cliente, factura o ID"
-                      className="pl-10"
-                      value={filtro}
-                      onChange={handleFiltroBusqueda}
-                    />
+                <div className="flex flex-col space-y-4">
+                  <div className="flex flex-col sm:flex-row gap-4">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                      <Input
+                        placeholder="Buscar por cliente, factura o ID"
+                        className="pl-10"
+                        value={filtro}
+                        onChange={handleFiltroBusqueda}
+                      />
+                    </div>
+                    <div className="w-full sm:w-48">
+                      <Select
+                        value={estado}
+                        onValueChange={handleFiltroEstado}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Todos los estados" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="todos">Todos los estados</SelectItem>
+                          <SelectItem value="pendiente">Pendiente</SelectItem>
+                          <SelectItem value="en proceso">En proceso</SelectItem>
+                          <SelectItem value="vencido">Vencido</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
                   </div>
-                  <div className="w-full sm:w-48">
-                    <Select
-                      defaultValue="todos"
-                      onValueChange={handleFiltroEstado}
+                  
+                  <div className="flex justify-between items-center">
+                    <Button 
+                      variant="outline" 
+                      onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
+                      className="text-teal"
                     >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Todos los estados" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="todos">Todos los estados</SelectItem>
-                        <SelectItem value="pendiente">Pendiente</SelectItem>
-                        <SelectItem value="en proceso">En proceso</SelectItem>
-                        <SelectItem value="vencido">Vencido</SelectItem>
-                      </SelectContent>
-                    </Select>
+                      {mostrarFiltrosAvanzados ? "Ocultar filtros avanzados" : "Mostrar filtros avanzados"}
+                    </Button>
+                    
+                    <Button 
+                      variant="ghost" 
+                      onClick={handleLimpiarFiltros}
+                      className="text-gray-500"
+                    >
+                      Limpiar filtros
+                    </Button>
                   </div>
+                  
+                  {mostrarFiltrosAvanzados && (
+                    <div className="p-4 bg-gray-50 rounded-md space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div className="space-y-2">
+                          <h3 className="text-sm font-medium flex items-center gap-2">
+                            <Calendar className="h-4 w-4 text-teal" />
+                            Rango de fechas
+                          </h3>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="flex-1">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {fechaDesde ? format(fechaDesde, 'PP', { locale: es }) : "Fecha desde"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                  <CalendarComponent
+                                    mode="single"
+                                    selected={fechaDesde}
+                                    onSelect={setFechaDesde}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                            <div className="flex-1">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    className="w-full justify-start text-left font-normal"
+                                  >
+                                    <CalendarIcon className="mr-2 h-4 w-4" />
+                                    {fechaHasta ? format(fechaHasta, 'PP', { locale: es }) : "Fecha hasta"}
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-auto p-0">
+                                  <CalendarComponent
+                                    mode="single"
+                                    selected={fechaHasta}
+                                    onSelect={setFechaHasta}
+                                    initialFocus
+                                  />
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          </div>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <h3 className="text-sm font-medium flex items-center gap-2">
+                            <DollarSign className="h-4 w-4 text-teal" />
+                            Rango de montos
+                          </h3>
+                          <div className="flex gap-2">
+                            <div className="flex-1">
+                              <Input
+                                type="number"
+                                placeholder="Monto mínimo"
+                                value={montoMinimo}
+                                onChange={(e) => setMontoMinimo(e.target.value)}
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <Input
+                                type="number"
+                                placeholder="Monto máximo"
+                                value={montoMaximo}
+                                onChange={(e) => setMontoMaximo(e.target.value)}
+                              />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      <div className="flex justify-end">
+                        <Button 
+                          className="bg-teal hover:bg-teal/90"
+                          onClick={aplicarFiltros}
+                        >
+                          Aplicar filtros
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -435,22 +661,37 @@ const SeguimientoRecaudos = () => {
                                 );
                               } else if (columna.id === "cliente") {
                                 return (
-                                  <TableCell key={columna.id}>{recaudo.cliente}</TableCell>
+                                  <TableCell key={columna.id}>
+                                    <div className="flex items-center gap-2">
+                                      <Building className="h-4 w-4 text-gray-400" />
+                                      {recaudo.cliente}
+                                    </div>
+                                  </TableCell>
                                 );
                               } else if (columna.id === "factura") {
                                 return (
-                                  <TableCell key={columna.id}>{recaudo.factura}</TableCell>
+                                  <TableCell key={columna.id}>
+                                    <div className="flex items-center gap-2">
+                                      <FileText className="h-4 w-4 text-gray-400" />
+                                      {recaudo.factura}
+                                    </div>
+                                  </TableCell>
                                 );
                               } else if (columna.id === "monto") {
                                 return (
                                   <TableCell key={columna.id} className="text-right">
-                                    ${recaudo.monto.toLocaleString()}
+                                    <span className="font-semibold text-gray-700">
+                                      ${recaudo.monto.toLocaleString()}
+                                    </span>
                                   </TableCell>
                                 );
                               } else if (columna.id === "fechaVencimiento") {
                                 return (
                                   <TableCell key={columna.id}>
-                                    {new Date(recaudo.fechaVencimiento).toLocaleDateString()}
+                                    <div className="flex items-center gap-2">
+                                      <Calendar className="h-4 w-4 text-gray-400" />
+                                      {new Date(recaudo.fechaVencimiento).toLocaleDateString()}
+                                    </div>
                                   </TableCell>
                                 );
                               } else if (columna.id === "estado") {
@@ -458,11 +699,14 @@ const SeguimientoRecaudos = () => {
                                   <TableCell key={columna.id}>
                                     <Badge
                                       variant="outline"
-                                      className={`
-                                        ${recaudo.estado === "Pendiente" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" : ""}
-                                        ${recaudo.estado === "En proceso" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : ""}
-                                        ${recaudo.estado === "Vencido" ? "bg-red-100 text-red-800 hover:bg-red-100" : ""}
-                                      `}
+                                      className={`cursor-pointer hover:opacity-80 transition-opacity ${
+                                        recaudo.estado === "Pendiente" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" : ""
+                                      } ${
+                                        recaudo.estado === "En proceso" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : ""
+                                      } ${
+                                        recaudo.estado === "Vencido" ? "bg-red-100 text-red-800 hover:bg-red-100" : ""
+                                      }`}
+                                      onClick={() => abrirCambioEstado(recaudo)}
                                     >
                                       {recaudo.estado === "Pendiente" && (
                                         <Clock className="mr-1 h-3 w-3" />
@@ -493,9 +737,18 @@ const SeguimientoRecaudos = () => {
                                       </Button>
                                       <Button
                                         variant="outline"
+                                        className="bg-green-50 text-green-600 hover:bg-green-100"
+                                        size="sm"
+                                        onClick={() => abrirCambioEstado(recaudo)}
+                                      >
+                                        <Edit className="h-4 w-4 mr-1" />
+                                        Estado
+                                      </Button>
+                                      <Button
+                                        variant="outline"
                                         className="bg-teal/10 text-teal hover:bg-teal/20 hover:text-teal-600"
                                         size="sm"
-                                        onClick={() => marcarComoPagado(recaudo.id)}
+                                        onClick={() => confirmarPago(recaudo)}
                                       >
                                         <Check className="h-4 w-4 mr-1" />
                                         Pagado
@@ -616,6 +869,84 @@ const SeguimientoRecaudos = () => {
                     </div>
                   )}
                 </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Diálogo de confirmación para marcar como pagado */}
+            <AlertDialog open={mostrarPagoConfirmacion} onOpenChange={setMostrarPagoConfirmacion}>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Confirmar pago</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    ¿Está seguro de que desea marcar este recaudo como pagado? Esta acción no se puede deshacer.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                  <AlertDialogAction 
+                    className="bg-teal hover:bg-teal/90"
+                    onClick={() => recaudoSeleccionado && marcarComoPagado(recaudoSeleccionado.id)}
+                  >
+                    Confirmar pago
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Diálogo para cambiar estado */}
+            <Dialog open={mostrarCambioEstado} onOpenChange={setMostrarCambioEstado}>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Cambiar Estado del Recaudo</DialogTitle>
+                  <DialogDescription>
+                    Seleccione el nuevo estado para este recaudo
+                  </DialogDescription>
+                </DialogHeader>
+                
+                <div className="py-4">
+                  <RadioGroup value={nuevoEstado} onValueChange={setNuevoEstado}>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="Pendiente" id="pendiente" />
+                      <Label htmlFor="pendiente" className="flex items-center">
+                        <Clock className="h-4 w-4 mr-2 text-yellow-500" />
+                        Pendiente
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="En proceso" id="proceso" />
+                      <Label htmlFor="proceso" className="flex items-center">
+                        <Check className="h-4 w-4 mr-2 text-blue-500" />
+                        En proceso
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2 mb-3">
+                      <RadioGroupItem value="Vencido" id="vencido" />
+                      <Label htmlFor="vencido" className="flex items-center">
+                        <AlertCircle className="h-4 w-4 mr-2 text-red-500" />
+                        Vencido
+                      </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <RadioGroupItem value="Pagado" id="pagado" />
+                      <Label htmlFor="pagado" className="flex items-center">
+                        <Check className="h-4 w-4 mr-2 text-green-500" />
+                        Pagado
+                      </Label>
+                    </div>
+                  </RadioGroup>
+                </div>
+                
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setMostrarCambioEstado(false)}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    className="bg-teal hover:bg-teal/90"
+                    onClick={cambiarEstado}
+                  >
+                    Guardar cambios
+                  </Button>
+                </DialogFooter>
               </DialogContent>
             </Dialog>
           </div>

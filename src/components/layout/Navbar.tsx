@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -78,6 +78,53 @@ export const Navbar = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
+  const expandTimeoutRef = useRef<number | null>(null);
+  const collapseTimeoutRef = useRef<number | null>(null);
+  const sidebarRef = useRef<HTMLDivElement>(null);
+
+  // Function to handle hover expand
+  const handleMouseEnter = () => {
+    if (isMobile) return;
+    
+    // Clear any pending collapse timeout
+    if (collapseTimeoutRef.current !== null) {
+      window.clearTimeout(collapseTimeoutRef.current);
+      collapseTimeoutRef.current = null;
+    }
+    
+    // Set timeout for expansion to prevent accidental triggers
+    expandTimeoutRef.current = window.setTimeout(() => {
+      setIsExpanded(true);
+    }, 300);
+  };
+
+  // Function to handle hover collapse
+  const handleMouseLeave = () => {
+    if (isMobile) return;
+    
+    // Clear any pending expand timeout
+    if (expandTimeoutRef.current !== null) {
+      window.clearTimeout(expandTimeoutRef.current);
+      expandTimeoutRef.current = null;
+    }
+    
+    // Set timeout for collapse to prevent accidental triggers
+    collapseTimeoutRef.current = window.setTimeout(() => {
+      setIsExpanded(false);
+    }, 500);
+  };
+
+  // Clean up timeouts on unmount
+  useEffect(() => {
+    return () => {
+      if (expandTimeoutRef.current !== null) {
+        window.clearTimeout(expandTimeoutRef.current);
+      }
+      if (collapseTimeoutRef.current !== null) {
+        window.clearTimeout(collapseTimeoutRef.current);
+      }
+    };
+  }, []);
 
   // Actualizar el CSS cuando cambia el estado expandido
   useEffect(() => {
@@ -119,16 +166,23 @@ export const Navbar = () => {
     setOpenSubmenu(openSubmenu === path ? null : path);
   };
 
+  const handleToggleClick = () => {
+    setIsExpanded(!isExpanded);
+  };
+
   return (
     <aside
+      ref={sidebarRef}
       className={cn(
         "fixed top-0 left-0 h-screen bg-gradient-to-b from-teal to-sage shadow-lg transition-all duration-300 ease-in-out flex flex-col z-20",
         isExpanded ? "w-64" : "w-20",
         "scrollbar-custom"
       )}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <button
-        onClick={() => setIsExpanded(!isExpanded)}
+        onClick={handleToggleClick}
         className="absolute -right-3 top-6 p-1.5 bg-teal rounded-full shadow-lg hover:bg-sage transition-all duration-300 ease-in-out transform hover:scale-110 z-30"
       >
         {isExpanded ? (

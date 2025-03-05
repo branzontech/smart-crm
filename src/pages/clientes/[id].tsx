@@ -1,16 +1,34 @@
+
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Calendar, Mail, Gift, Tag, Lightbulb, MessageSquare, User, Phone, Building, AtSign } from "lucide-react";
+import {
+  Calendar,
+  Mail,
+  Gift,
+  Tag,
+  Lightbulb,
+  MessageSquare,
+  User,
+  Phone,
+  Building,
+  AtSign,
+  PenSquare,
+  Save,
+  X
+} from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { ClienteTimeline } from "@/components/clientes/ClienteTimeline";
+import { Form, FormField, FormItem, FormLabel, FormControl } from "@/components/ui/form";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { useForm } from "react-hook-form";
 
 type Cliente = {
   id: number;
@@ -37,10 +55,16 @@ const clienteEjemplo: Cliente = {
 export default function ClienteDetalle() {
   const { id } = useParams();
   const { toast } = useToast();
-  const [cliente] = useState<Cliente>(clienteEjemplo);
+  const [cliente, setCliente] = useState<Cliente>(clienteEjemplo);
   const [mensaje, setMensaje] = useState("");
   const [asunto, setAsunto] = useState("");
+  const [isEditing, setIsEditing] = useState(false);
+  const [newInteres, setNewInteres] = useState("");
   const clienteId = parseInt(id || "1");
+
+  const form = useForm<Cliente>({
+    defaultValues: cliente
+  });
 
   const handleEnviarComunicacion = (tipo: string) => {
     toast({
@@ -51,6 +75,41 @@ export default function ClienteDetalle() {
     setAsunto("");
   };
 
+  const handleSaveChanges = (data: Cliente) => {
+    setCliente({ ...data, id: clienteId });
+    setIsEditing(false);
+    toast({
+      title: "Datos actualizados",
+      description: "La información del cliente ha sido actualizada correctamente.",
+    });
+  };
+
+  const handleAddInteres = () => {
+    if (newInteres.trim() && !cliente.intereses.includes(newInteres.trim())) {
+      const updatedIntereses = [...cliente.intereses, newInteres.trim()];
+      setCliente({ ...cliente, intereses: updatedIntereses });
+      form.setValue("intereses", updatedIntereses);
+      setNewInteres("");
+    }
+  };
+
+  const handleRemoveInteres = (interes: string) => {
+    const updatedIntereses = cliente.intereses.filter(i => i !== interes);
+    setCliente({ ...cliente, intereses: updatedIntereses });
+    form.setValue("intereses", updatedIntereses);
+  };
+
+  const toggleEditMode = () => {
+    if (isEditing) {
+      // Si estamos cancelando la edición, restauramos los valores originales
+      form.reset(cliente);
+    } else {
+      // Si estamos comenzando a editar, establecemos los valores actuales
+      form.reset(cliente);
+    }
+    setIsEditing(!isEditing);
+  };
+
   return (
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
@@ -58,26 +117,123 @@ export default function ClienteDetalle() {
         <div className="max-w-6xl mx-auto space-y-6">
           <div className="flex justify-between items-start">
             <div>
-              <h1 className="text-2xl font-semibold text-gray-900">{cliente.nombre}</h1>
-              <div className="mt-2 space-y-1">
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Building className="h-4 w-4" />
-                  <span>{cliente.empresa}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <AtSign className="h-4 w-4" />
-                  <span>{cliente.email}</span>
-                </div>
-                <div className="flex items-center gap-2 text-gray-600">
-                  <Phone className="h-4 w-4" />
-                  <span>{cliente.telefono}</span>
-                </div>
-              </div>
+              {!isEditing ? (
+                <>
+                  <h1 className="text-2xl font-semibold text-gray-900">{cliente.nombre}</h1>
+                  <div className="mt-2 space-y-1">
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Building className="h-4 w-4" />
+                      <span>{cliente.empresa}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <AtSign className="h-4 w-4" />
+                      <span>{cliente.email}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-gray-600">
+                      <Phone className="h-4 w-4" />
+                      <span>{cliente.telefono}</span>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <Form {...form}>
+                  <form onSubmit={form.handleSubmit(handleSaveChanges)} className="space-y-4 max-w-md">
+                    <FormField
+                      control={form.control}
+                      name="nombre"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Nombre</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="empresa"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Empresa</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Email</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="email" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="telefono"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Teléfono</FormLabel>
+                          <FormControl>
+                            <Input {...field} />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="fechaNacimiento"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Fecha de Nacimiento</FormLabel>
+                          <FormControl>
+                            <Input {...field} type="date" />
+                          </FormControl>
+                        </FormItem>
+                      )}
+                    />
+                    <div className="flex gap-2 mt-4">
+                      <Button 
+                        type="submit" 
+                        className="bg-teal hover:bg-sage"
+                      >
+                        <Save className="h-4 w-4 mr-2" />
+                        Guardar
+                      </Button>
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        onClick={toggleEditMode}
+                      >
+                        <X className="h-4 w-4 mr-2" />
+                        Cancelar
+                      </Button>
+                    </div>
+                  </form>
+                </Form>
+              )}
             </div>
-            <Button className="bg-teal hover:bg-sage">
-              <MessageSquare className="h-4 w-4 mr-2" />
-              Contactar
-            </Button>
+            <div className="flex gap-2">
+              {!isEditing ? (
+                <Button 
+                  className="bg-teal hover:bg-sage"
+                  onClick={toggleEditMode}
+                >
+                  <PenSquare className="h-4 w-4 mr-2" />
+                  Editar
+                </Button>
+              ) : null}
+              <Button className="bg-teal hover:bg-sage">
+                <MessageSquare className="h-4 w-4 mr-2" />
+                Contactar
+              </Button>
+            </div>
           </div>
 
           <Tabs defaultValue="comunicaciones" className="w-full">
@@ -322,23 +478,70 @@ export default function ClienteDetalle() {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                       <h3 className="font-semibold mb-2">Información de Contacto</h3>
-                      <div className="space-y-2">
-                        <p><span className="text-gray-600">Último contacto:</span> {cliente.ultimoContacto}</p>
-                        <p><span className="text-gray-600">Fecha de nacimiento:</span> {cliente.fechaNacimiento}</p>
-                      </div>
+                      {!isEditing ? (
+                        <div className="space-y-2">
+                          <p><span className="text-gray-600">Último contacto:</span> {cliente.ultimoContacto}</p>
+                          <p><span className="text-gray-600">Fecha de nacimiento:</span> {cliente.fechaNacimiento}</p>
+                        </div>
+                      ) : (
+                        <div className="space-y-4">
+                          <div>
+                            <Label>Último contacto</Label>
+                            <Input 
+                              type="date" 
+                              value={form.getValues().ultimoContacto} 
+                              onChange={(e) => form.setValue("ultimoContacto", e.target.value)}
+                            />
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div>
                       <h3 className="font-semibold mb-2">Intereses</h3>
-                      <div className="flex flex-wrap gap-2">
-                        {cliente.intereses.map((interes, index) => (
-                          <span 
-                            key={index}
-                            className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
-                          >
-                            {interes}
-                          </span>
-                        ))}
-                      </div>
+                      {isEditing ? (
+                        <div className="space-y-4">
+                          <div className="flex flex-wrap gap-2">
+                            {cliente.intereses.map((interes, index) => (
+                              <span 
+                                key={index}
+                                className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-700 flex items-center"
+                              >
+                                {interes}
+                                <X 
+                                  className="h-3 w-3 ml-1 cursor-pointer text-gray-500 hover:text-gray-800" 
+                                  onClick={() => handleRemoveInteres(interes)}
+                                />
+                              </span>
+                            ))}
+                          </div>
+                          <div className="flex gap-2">
+                            <Input
+                              placeholder="Nuevo interés"
+                              value={newInteres}
+                              onChange={(e) => setNewInteres(e.target.value)}
+                              onKeyDown={(e) => e.key === "Enter" && handleAddInteres()}
+                            />
+                            <Button 
+                              type="button" 
+                              variant="outline"
+                              onClick={handleAddInteres}
+                            >
+                              Añadir
+                            </Button>
+                          </div>
+                        </div>
+                      ) : (
+                        <div className="flex flex-wrap gap-2">
+                          {cliente.intereses.map((interes, index) => (
+                            <span 
+                              key={index}
+                              className="px-2 py-1 bg-gray-100 rounded-full text-sm text-gray-700"
+                            >
+                              {interes}
+                            </span>
+                          ))}
+                        </div>
+                      )}
                     </div>
                   </div>
                 </CardContent>

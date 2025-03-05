@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { Users, UserPlus } from "lucide-react";
+import { Users, UserPlus, Eye } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { SeguimientoMenu } from "@/components/clientes/SeguimientoMenu";
 
@@ -85,7 +85,8 @@ const ClientesIndex = () => {
                                 className="text-teal hover:text-sage hover:bg-mint/20"
                                 onClick={() => navigate(`/clientes/${cliente.id}`)}
                               >
-                                Ver detalles
+                                <Eye className="h-4 w-4 mr-2" />
+                                Ver
                               </Button>
                             </td>
                           </tr>

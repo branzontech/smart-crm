@@ -31,7 +31,8 @@ import {
   Clock,
   AlertCircle,
   Eye,
-  Edit
+  Edit,
+  DollarSign
 } from "lucide-react";
 
 interface RecaudoTableProps {
@@ -150,7 +151,10 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
           <TableBody>
             {recaudos.length > 0 ? (
               recaudos.map((recaudo) => (
-                <TableRow key={recaudo.id}>
+                <TableRow 
+                  key={recaudo.id}
+                  className={recaudo.estado === "Pagado" ? "bg-green-50" : ""}
+                >
                   {columnasOrdenadas.map((columna) => {
                     if (columna.id === "id") {
                       return (
@@ -204,6 +208,8 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
                               recaudo.estado === "En proceso" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : ""
                             } ${
                               recaudo.estado === "Vencido" ? "bg-red-100 text-red-800 hover:bg-red-100" : ""
+                            } ${
+                              recaudo.estado === "Pagado" ? "bg-green-100 text-green-800 hover:bg-green-100" : ""
                             }`}
                             onClick={() => onChangeStatus(recaudo)}
                           >
@@ -211,13 +217,16 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
                               <Clock className="mr-1 h-3 w-3" />
                             )}
                             {recaudo.estado === "En proceso" && (
-                              <Check className="mr-1 h-3 w-3" />
+                              <Clock className="mr-1 h-3 w-3" />
                             )}
                             {recaudo.estado === "Vencido" && (
                               <AlertCircle className="mr-1 h-3 w-3" />
                             )}
+                            {recaudo.estado === "Pagado" && (
+                              <Check className="mr-1 h-3 w-3" />
+                            )}
                             {recaudo.estado}
-                            {recaudo.diasVencido > 0 && ` (${recaudo.diasVencido} días)`}
+                            {recaudo.diasVencido > 0 && recaudo.estado !== "Pagado" && ` (${recaudo.diasVencido} días)`}
                           </Badge>
                         </TableCell>
                       );
@@ -234,24 +243,29 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
                               <Eye className="h-4 w-4 mr-1" />
                               Ver
                             </Button>
-                            <Button
-                              variant="outline"
-                              className="bg-green-50 text-green-600 hover:bg-green-100"
-                              size="sm"
-                              onClick={() => onChangeStatus(recaudo)}
-                            >
-                              <Edit className="h-4 w-4 mr-1" />
-                              Estado
-                            </Button>
-                            <Button
-                              variant="outline"
-                              className="bg-teal/10 text-teal hover:bg-teal/20 hover:text-teal-600"
-                              size="sm"
-                              onClick={() => onPayment(recaudo)}
-                            >
-                              <Check className="h-4 w-4 mr-1" />
-                              Pagado
-                            </Button>
+                            
+                            {recaudo.estado !== "Pagado" && (
+                              <>
+                                <Button
+                                  variant="outline"
+                                  className="bg-yellow-50 text-yellow-600 hover:bg-yellow-100"
+                                  size="sm"
+                                  onClick={() => onChangeStatus(recaudo)}
+                                >
+                                  <Edit className="h-4 w-4 mr-1" />
+                                  Estado
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  className="bg-teal/10 text-teal hover:bg-teal/20 hover:text-teal-600"
+                                  size="sm"
+                                  onClick={() => onPayment(recaudo)}
+                                >
+                                  <DollarSign className="h-4 w-4 mr-1" />
+                                  Pagar
+                                </Button>
+                              </>
+                            )}
                           </div>
                         </TableCell>
                       );

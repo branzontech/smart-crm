@@ -97,6 +97,25 @@ const recaudosPendientes: Recaudo[] = [
       metodoPago: "Cheque",
       notas: "Contactar para gestionar el cobro"
     }
+  },
+  {
+    id: "REC-2023-006",
+    cliente: "Innovación Digital",
+    factura: "FAC-2023-078",
+    monto: 22500,
+    fechaVencimiento: "2023-09-30",
+    estado: "Pagado",
+    diasVencido: 0,
+    detalles: {
+      direccion: "Av. Progreso #789, Ciudad Futuro",
+      telefono: "+57 300 111 2222",
+      articulos: [
+        { nombre: "Desarrollo web", cantidad: 1, precio: 18000 },
+        { nombre: "Diseño UX/UI", cantidad: 1, precio: 4500 }
+      ],
+      metodoPago: "Transferencia",
+      notas: "Pagado en su totalidad el 29/09/2023"
+    }
   }
 ];
 
@@ -174,7 +193,9 @@ export const useRecaudos = () => {
     toast.success(`Recaudo ${id} marcado como pagado`);
     
     // Actualizamos el estado local
-    const recaudosActualizados = recaudos.filter(recaudo => recaudo.id !== id);
+    const recaudosActualizados = recaudos.map(recaudo => 
+      recaudo.id === id ? { ...recaudo, estado: "Pagado", diasVencido: 0 } : recaudo
+    );
     setRecaudos(recaudosActualizados);
   };
 
@@ -187,7 +208,7 @@ export const useRecaudos = () => {
       // Actualizamos el estado local
       const recaudosActualizados = recaudos.map(recaudo => 
         recaudo.id === id 
-          ? { ...recaudo, estado: nuevoEstado } 
+          ? { ...recaudo, estado: nuevoEstado, diasVencido: nuevoEstado === "Pagado" ? 0 : recaudo.diasVencido } 
           : recaudo
       );
       setRecaudos(recaudosActualizados);

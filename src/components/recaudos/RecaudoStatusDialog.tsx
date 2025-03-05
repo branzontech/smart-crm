@@ -11,7 +11,7 @@ import {
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
-import { Clock, Check, AlertCircle } from "lucide-react";
+import { Clock, Check, AlertCircle, DollarSign } from "lucide-react";
 
 interface RecaudoStatusDialogProps {
   open: boolean;
@@ -54,7 +54,7 @@ export const RecaudoStatusDialog = ({
             <div className="flex items-center space-x-2 mb-3">
               <RadioGroupItem value="En proceso" id="proceso" />
               <Label htmlFor="proceso" className="flex items-center">
-                <Check className="h-4 w-4 mr-2 text-blue-500" />
+                <Clock className="h-4 w-4 mr-2 text-blue-500" />
                 En proceso
               </Label>
             </div>
@@ -68,7 +68,7 @@ export const RecaudoStatusDialog = ({
             <div className="flex items-center space-x-2">
               <RadioGroupItem value="Pagado" id="pagado" />
               <Label htmlFor="pagado" className="flex items-center">
-                <Check className="h-4 w-4 mr-2 text-green-500" />
+                <DollarSign className="h-4 w-4 mr-2 text-green-500" />
                 Pagado
               </Label>
             </div>

@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./App.css";
+import "./styles/print.css"; // Import print styles
 
 // Páginas
 import Index from "./pages/Index";
@@ -32,6 +33,7 @@ import Oportunidades from "./pages/ventas/oportunidades";
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import Cotizaciones from "./pages/ventas/cotizaciones";
 import NuevaCotizacion from "./pages/ventas/cotizaciones/nueva";
+import NuevaCotizacionWizard from "./pages/ventas/cotizaciones/nueva-cotizacion";
 import Contratos from "./pages/ventas/contratos";
 import NuevoContrato from "./pages/ventas/contratos/nuevo";
 
@@ -82,6 +84,7 @@ export default function App() {
           <Route path="/ventas/oportunidades/nueva" element={<NuevaOportunidad />} />
           <Route path="/ventas/cotizaciones" element={<Cotizaciones />} />
           <Route path="/ventas/cotizaciones/nueva" element={<NuevaCotizacion />} />
+          <Route path="/ventas/cotizaciones/nueva-wizard" element={<NuevaCotizacionWizard />} />
           <Route path="/ventas/contratos" element={<Contratos />} />
           <Route path="/ventas/contratos/nuevo" element={<NuevoContrato />} />
           

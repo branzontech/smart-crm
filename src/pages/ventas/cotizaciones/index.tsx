@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus } from "lucide-react";
+import { FileText, Plus, Wand2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 
 const CotizacionesIndex = () => {
@@ -48,13 +48,23 @@ const CotizacionesIndex = () => {
               <FileText className="h-6 w-6 text-teal" />
               <h1 className="text-2xl font-semibold text-gray-900">Cotizaciones</h1>
             </div>
-            <Button
-              onClick={() => navigate("/ventas/cotizaciones/nueva")}
-              className="bg-teal hover:bg-sage text-white transition-colors duration-200"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              Nueva Cotización
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                onClick={() => navigate("/ventas/cotizaciones/nueva")}
+                variant="outline"
+                className="text-teal hover:text-sage border-teal hover:border-sage transition-colors duration-200"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Formulario Básico
+              </Button>
+              <Button
+                onClick={() => navigate("/ventas/cotizaciones/nueva-wizard")}
+                className="bg-teal hover:bg-sage text-white transition-colors duration-200"
+              >
+                <Wand2 className="mr-2 h-4 w-4" />
+                Asistente Avanzado
+              </Button>
+            </div>
           </div>
 
           <div className="grid gap-4">

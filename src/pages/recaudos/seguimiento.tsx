@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
@@ -26,64 +26,186 @@ import {
   SelectValue 
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Check, Coins, Search, Clock, AlertCircle } from "lucide-react";
+import { 
+  ArrowLeft, 
+  Check, 
+  Coins, 
+  Search, 
+  Clock, 
+  AlertCircle, 
+  Eye, 
+  Printer,
+  MoreHorizontal,
+  Columns,
+  GripVertical
+} from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
+} from "@/components/ui/dropdown-menu";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Checkbox } from "@/components/ui/checkbox";
+import { useReactToPrint } from "react-to-print";
 
-// Datos ficticios de recaudos pendientes o en proceso
-const recaudosPendientes = [
-  {
-    id: "REC-2023-001",
-    cliente: "Tech Solutions SA",
-    factura: "FAC-2023-045",
-    monto: 15000,
-    fechaVencimiento: "2023-11-15",
-    estado: "Pendiente",
-    diasVencido: 0
-  },
-  {
-    id: "REC-2023-002",
-    cliente: "Green Energy Corp",
-    factura: "FAC-2023-032",
-    monto: 45000,
-    fechaVencimiento: "2023-10-25",
-    estado: "Vencido",
-    diasVencido: 21
-  },
-  {
-    id: "REC-2023-003",
-    cliente: "Global Logistics",
-    factura: "FAC-2023-018",
-    monto: 28500,
-    fechaVencimiento: "2023-11-05",
-    estado: "En proceso",
-    diasVencido: 0
-  },
-  {
-    id: "REC-2023-004",
-    cliente: "Digital Systems Inc",
-    factura: "FAC-2023-067",
-    monto: 12800,
-    fechaVencimiento: "2023-11-30",
-    estado: "Pendiente",
-    diasVencido: 0
-  },
-  {
-    id: "REC-2023-005",
-    cliente: "Smart Solutions",
-    factura: "FAC-2023-039",
-    monto: 35600,
-    fechaVencimiento: "2023-10-15",
-    estado: "Vencido",
-    diasVencido: 31
-  }
-];
+// Tipos para las columnas
+interface Column {
+  id: string;
+  header: string;
+  accessorKey: string;
+  isVisible: boolean;
+  order: number;
+}
+
+// Tipo para el recaudo
+interface Recaudo {
+  id: string;
+  cliente: string;
+  factura: string;
+  monto: number;
+  fechaVencimiento: string;
+  estado: string;
+  diasVencido: number;
+  detalles?: {
+    direccion: string;
+    telefono: string;
+    articulos: Array<{
+      nombre: string;
+      cantidad: number;
+      precio: number;
+    }>;
+    metodoPago: string;
+    notas: string;
+  };
+}
 
 const SeguimientoRecaudos = () => {
   const navigate = useNavigate();
   const [filtro, setFiltro] = useState("");
   const [estado, setEstado] = useState("todos");
-  const [recaudos, setRecaudos] = useState(recaudosPendientes);
+  const [recaudoSeleccionado, setRecaudoSeleccionado] = useState<Recaudo | null>(null);
+  const [mostrarDetalle, setMostrarDetalle] = useState(false);
+  const impresionRef = useRef<HTMLDivElement>(null);
+
+  // Datos ficticios de recaudos pendientes o en proceso
+  const recaudosPendientes: Recaudo[] = [
+    {
+      id: "REC-2023-001",
+      cliente: "Tech Solutions SA",
+      factura: "FAC-2023-045",
+      monto: 15000,
+      fechaVencimiento: "2023-11-15",
+      estado: "Pendiente",
+      diasVencido: 0,
+      detalles: {
+        direccion: "Calle Principal #123, Ciudad Empresa",
+        telefono: "+57 300 123 4567",
+        articulos: [
+          { nombre: "Servicio de Consultoría", cantidad: 1, precio: 15000 }
+        ],
+        metodoPago: "Transferencia",
+        notas: "Pago a 30 días"
+      }
+    },
+    {
+      id: "REC-2023-002",
+      cliente: "Green Energy Corp",
+      factura: "FAC-2023-032",
+      monto: 45000,
+      fechaVencimiento: "2023-10-25",
+      estado: "Vencido",
+      diasVencido: 21,
+      detalles: {
+        direccion: "Av. Sostenible #456, Ciudad Verde",
+        telefono: "+57 300 765 4321",
+        articulos: [
+          { nombre: "Paneles Solares", cantidad: 3, precio: 10000 },
+          { nombre: "Instalación", cantidad: 1, precio: 15000 }
+        ],
+        metodoPago: "Efectivo",
+        notas: "Cliente con historial de pagos tardíos"
+      }
+    },
+    {
+      id: "REC-2023-003",
+      cliente: "Global Logistics",
+      factura: "FAC-2023-018",
+      monto: 28500,
+      fechaVencimiento: "2023-11-05",
+      estado: "En proceso",
+      diasVencido: 0,
+      detalles: {
+        direccion: "Puerto Industrial #789, Ciudad Logística",
+        telefono: "+57 300 987 6543",
+        articulos: [
+          { nombre: "Servicio de Transporte", cantidad: 1, precio: 28500 }
+        ],
+        metodoPago: "Transferencia",
+        notas: "El cliente confirmó la transferencia, esperando verificación"
+      }
+    },
+    {
+      id: "REC-2023-004",
+      cliente: "Digital Systems Inc",
+      factura: "FAC-2023-067",
+      monto: 12800,
+      fechaVencimiento: "2023-11-30",
+      estado: "Pendiente",
+      diasVencido: 0,
+      detalles: {
+        direccion: "Calle Tecnológica #321, Ciudad Digital",
+        telefono: "+57 300 234 5678",
+        articulos: [
+          { nombre: "Hosting Anual", cantidad: 1, precio: 8800 },
+          { nombre: "Dominio Premium", cantidad: 1, precio: 4000 }
+        ],
+        metodoPago: "Tarjeta de Crédito",
+        notas: "Renovación automática anual"
+      }
+    },
+    {
+      id: "REC-2023-005",
+      cliente: "Smart Solutions",
+      factura: "FAC-2023-039",
+      monto: 35600,
+      fechaVencimiento: "2023-10-15",
+      estado: "Vencido",
+      diasVencido: 31,
+      detalles: {
+        direccion: "Av. Innovación #654, Ciudad Inteligente",
+        telefono: "+57 300 876 5432",
+        articulos: [
+          { nombre: "Software a medida", cantidad: 1, precio: 30000 },
+          { nombre: "Soporte técnico", cantidad: 1, precio: 5600 }
+        ],
+        metodoPago: "Cheque",
+        notas: "Contactar para gestionar el cobro"
+      }
+    }
+  ];
+
+  // Estado para almacenar los recaudos filtrados
+  const [recaudos, setRecaudos] = useState<Recaudo[]>(recaudosPendientes);
+
+  // Definición de columnas
+  const [columnas, setColumnas] = useState<Column[]>([
+    { id: "id", header: "ID", accessorKey: "id", isVisible: true, order: 0 },
+    { id: "cliente", header: "Cliente", accessorKey: "cliente", isVisible: true, order: 1 },
+    { id: "factura", header: "Factura", accessorKey: "factura", isVisible: true, order: 2 },
+    { id: "monto", header: "Monto", accessorKey: "monto", isVisible: true, order: 3 },
+    { id: "fechaVencimiento", header: "Vencimiento", accessorKey: "fechaVencimiento", isVisible: true, order: 4 },
+    { id: "estado", header: "Estado", accessorKey: "estado", isVisible: true, order: 5 },
+    { id: "acciones", header: "Acciones", accessorKey: "acciones", isVisible: true, order: 6 },
+  ]);
+
+  // Estado para el drag & drop
+  const [columnaDrag, setColumnaDrag] = useState<string | null>(null);
 
   // Función para filtrar recaudos
   const filtrarRecaudos = () => {
@@ -130,6 +252,58 @@ const SeguimientoRecaudos = () => {
     const recaudosActualizados = recaudos.filter(recaudo => recaudo.id !== id);
     setRecaudos(recaudosActualizados);
   };
+
+  // Función para ver detalle de recaudo
+  const verDetalleRecaudo = (recaudo: Recaudo) => {
+    setRecaudoSeleccionado(recaudo);
+    setMostrarDetalle(true);
+  };
+
+  // Función para cambiar visibilidad de columnas
+  const toggleColumnaVisibilidad = (id: string) => {
+    setColumnas(prevColumnas => 
+      prevColumnas.map(col => 
+        col.id === id ? { ...col, isVisible: !col.isVisible } : col
+      )
+    );
+  };
+
+  // Funciones para drag & drop de columnas
+  const handleDragStart = (id: string) => {
+    setColumnaDrag(id);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLTableCellElement>, id: string) => {
+    e.preventDefault();
+    if (columnaDrag && columnaDrag !== id) {
+      const columnasList = [...columnas];
+      const dragIndex = columnasList.findIndex(col => col.id === columnaDrag);
+      const hoverIndex = columnasList.findIndex(col => col.id === id);
+      
+      if (dragIndex !== -1 && hoverIndex !== -1) {
+        // Intercambiar órdenes
+        const dragOrder = columnasList[dragIndex].order;
+        columnasList[dragIndex].order = columnasList[hoverIndex].order;
+        columnasList[hoverIndex].order = dragOrder;
+        
+        setColumnas(columnasList);
+      }
+    }
+  };
+
+  const handleDragEnd = () => {
+    setColumnaDrag(null);
+  };
+
+  // Para imprimir el detalle
+  const handlePrint = useReactToPrint({
+    content: () => impresionRef.current,
+  });
+
+  // Obtener columnas ordenadas y visibles
+  const columnasOrdenadas = [...columnas]
+    .sort((a, b) => a.order - b.order)
+    .filter(col => col.isVisible);
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -194,77 +368,149 @@ const SeguimientoRecaudos = () => {
             
             <Card>
               <CardHeader className="pb-3">
-                <CardTitle>Recaudos Pendientes</CardTitle>
-                <CardDescription>
-                  {recaudos.length} recaudos encontrados
-                </CardDescription>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <CardTitle>Recaudos Pendientes</CardTitle>
+                    <CardDescription>
+                      {recaudos.length} recaudos encontrados
+                    </CardDescription>
+                  </div>
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="outline" size="sm">
+                        <Columns className="h-4 w-4 mr-2" />
+                        Columnas
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuLabel>Mostrar columnas</DropdownMenuLabel>
+                      <DropdownMenuSeparator />
+                      {columnas.map((columna) => (
+                        <DropdownMenuCheckboxItem
+                          key={columna.id}
+                          checked={columna.isVisible}
+                          onCheckedChange={() => toggleColumnaVisibilidad(columna.id)}
+                        >
+                          {columna.header}
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
               </CardHeader>
               <CardContent>
                 <div className="overflow-x-auto">
                   <Table>
                     <TableHeader>
                       <TableRow>
-                        <TableHead>ID</TableHead>
-                        <TableHead>Cliente</TableHead>
-                        <TableHead>Factura</TableHead>
-                        <TableHead className="text-right">Monto</TableHead>
-                        <TableHead>Vencimiento</TableHead>
-                        <TableHead>Estado</TableHead>
-                        <TableHead className="text-right">Acciones</TableHead>
+                        {columnasOrdenadas.map((columna) => (
+                          <TableHead
+                            key={columna.id}
+                            className={`${
+                              columnaDrag === columna.id ? "bg-gray-100" : ""
+                            } cursor-grab`}
+                            draggable
+                            onDragStart={() => handleDragStart(columna.id)}
+                            onDragOver={(e) => handleDragOver(e, columna.id)}
+                            onDragEnd={handleDragEnd}
+                          >
+                            <div className="flex items-center">
+                              <GripVertical className="h-4 w-4 mr-1 opacity-50" />
+                              {columna.header}
+                            </div>
+                          </TableHead>
+                        ))}
                       </TableRow>
                     </TableHeader>
                     <TableBody>
                       {recaudos.length > 0 ? (
                         recaudos.map((recaudo) => (
                           <TableRow key={recaudo.id}>
-                            <TableCell className="font-medium">
-                              {recaudo.id}
-                            </TableCell>
-                            <TableCell>{recaudo.cliente}</TableCell>
-                            <TableCell>{recaudo.factura}</TableCell>
-                            <TableCell className="text-right">
-                              ${recaudo.monto.toLocaleString()}
-                            </TableCell>
-                            <TableCell>
-                              {new Date(recaudo.fechaVencimiento).toLocaleDateString()}
-                            </TableCell>
-                            <TableCell>
-                              <Badge
-                                variant="outline"
-                                className={`
-                                  ${recaudo.estado === "Pendiente" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" : ""}
-                                  ${recaudo.estado === "En proceso" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : ""}
-                                  ${recaudo.estado === "Vencido" ? "bg-red-100 text-red-800 hover:bg-red-100" : ""}
-                                `}
-                              >
-                                {recaudo.estado === "Pendiente" && (
-                                  <Clock className="mr-1 h-3 w-3" />
-                                )}
-                                {recaudo.estado === "En proceso" && (
-                                  <Check className="mr-1 h-3 w-3" />
-                                )}
-                                {recaudo.estado === "Vencido" && (
-                                  <AlertCircle className="mr-1 h-3 w-3" />
-                                )}
-                                {recaudo.estado}
-                                {recaudo.diasVencido > 0 && ` (${recaudo.diasVencido} días)`}
-                              </Badge>
-                            </TableCell>
-                            <TableCell className="text-right">
-                              <Button
-                                variant="outline"
-                                className="bg-teal/10 text-teal hover:bg-teal/20 hover:text-teal-600"
-                                onClick={() => marcarComoPagado(recaudo.id)}
-                              >
-                                <Check className="mr-2 h-4 w-4" />
-                                Marcar como Pagado
-                              </Button>
-                            </TableCell>
+                            {columnasOrdenadas.map((columna) => {
+                              if (columna.id === "id") {
+                                return (
+                                  <TableCell key={columna.id} className="font-medium">
+                                    {recaudo.id}
+                                  </TableCell>
+                                );
+                              } else if (columna.id === "cliente") {
+                                return (
+                                  <TableCell key={columna.id}>{recaudo.cliente}</TableCell>
+                                );
+                              } else if (columna.id === "factura") {
+                                return (
+                                  <TableCell key={columna.id}>{recaudo.factura}</TableCell>
+                                );
+                              } else if (columna.id === "monto") {
+                                return (
+                                  <TableCell key={columna.id} className="text-right">
+                                    ${recaudo.monto.toLocaleString()}
+                                  </TableCell>
+                                );
+                              } else if (columna.id === "fechaVencimiento") {
+                                return (
+                                  <TableCell key={columna.id}>
+                                    {new Date(recaudo.fechaVencimiento).toLocaleDateString()}
+                                  </TableCell>
+                                );
+                              } else if (columna.id === "estado") {
+                                return (
+                                  <TableCell key={columna.id}>
+                                    <Badge
+                                      variant="outline"
+                                      className={`
+                                        ${recaudo.estado === "Pendiente" ? "bg-yellow-100 text-yellow-800 hover:bg-yellow-100" : ""}
+                                        ${recaudo.estado === "En proceso" ? "bg-blue-100 text-blue-800 hover:bg-blue-100" : ""}
+                                        ${recaudo.estado === "Vencido" ? "bg-red-100 text-red-800 hover:bg-red-100" : ""}
+                                      `}
+                                    >
+                                      {recaudo.estado === "Pendiente" && (
+                                        <Clock className="mr-1 h-3 w-3" />
+                                      )}
+                                      {recaudo.estado === "En proceso" && (
+                                        <Check className="mr-1 h-3 w-3" />
+                                      )}
+                                      {recaudo.estado === "Vencido" && (
+                                        <AlertCircle className="mr-1 h-3 w-3" />
+                                      )}
+                                      {recaudo.estado}
+                                      {recaudo.diasVencido > 0 && ` (${recaudo.diasVencido} días)`}
+                                    </Badge>
+                                  </TableCell>
+                                );
+                              } else if (columna.id === "acciones") {
+                                return (
+                                  <TableCell key={columna.id} className="text-right">
+                                    <div className="flex justify-end space-x-2">
+                                      <Button
+                                        variant="outline"
+                                        size="sm"
+                                        className="bg-blue-50 text-blue-600 hover:bg-blue-100"
+                                        onClick={() => verDetalleRecaudo(recaudo)}
+                                      >
+                                        <Eye className="h-4 w-4 mr-1" />
+                                        Ver
+                                      </Button>
+                                      <Button
+                                        variant="outline"
+                                        className="bg-teal/10 text-teal hover:bg-teal/20 hover:text-teal-600"
+                                        size="sm"
+                                        onClick={() => marcarComoPagado(recaudo.id)}
+                                      >
+                                        <Check className="h-4 w-4 mr-1" />
+                                        Pagado
+                                      </Button>
+                                    </div>
+                                  </TableCell>
+                                );
+                              }
+                              return <TableCell key={columna.id}></TableCell>;
+                            })}
                           </TableRow>
                         ))
                       ) : (
                         <TableRow>
-                          <TableCell colSpan={7} className="text-center py-6 text-muted-foreground">
+                          <TableCell colSpan={columnasOrdenadas.length} className="text-center py-6 text-muted-foreground">
                             No hay recaudos que coincidan con los filtros.
                           </TableCell>
                         </TableRow>
@@ -274,6 +520,104 @@ const SeguimientoRecaudos = () => {
                 </div>
               </CardContent>
             </Card>
+
+            {/* Diálogo para mostrar detalles del recaudo */}
+            <Dialog open={mostrarDetalle} onOpenChange={setMostrarDetalle}>
+              <DialogContent className="max-w-4xl">
+                <DialogHeader>
+                  <DialogTitle>Detalle del Recaudo</DialogTitle>
+                </DialogHeader>
+                <div className="mt-4">
+                  {recaudoSeleccionado && (
+                    <div>
+                      <div className="flex justify-end mb-4">
+                        <Button 
+                          variant="outline" 
+                          className="bg-green-50 text-green-600 hover:bg-green-100"
+                          onClick={handlePrint}
+                        >
+                          <Printer className="h-4 w-4 mr-2" />
+                          Imprimir
+                        </Button>
+                      </div>
+                      
+                      <div ref={impresionRef} className="p-6 bg-white">
+                        <div className="border-b pb-4 mb-4">
+                          <h2 className="text-2xl font-bold text-gray-800">{recaudoSeleccionado.id}</h2>
+                          <div className="flex justify-between mt-2">
+                            <div>
+                              <h3 className="font-semibold text-lg">{recaudoSeleccionado.cliente}</h3>
+                              <p className="text-gray-600">{recaudoSeleccionado.detalles?.direccion}</p>
+                              <p className="text-gray-600">{recaudoSeleccionado.detalles?.telefono}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-gray-600">Factura: {recaudoSeleccionado.factura}</p>
+                              <p className="text-gray-600">
+                                Fecha de vencimiento: {new Date(recaudoSeleccionado.fechaVencimiento).toLocaleDateString()}
+                              </p>
+                              <Badge
+                                variant="outline"
+                                className={`
+                                  ${recaudoSeleccionado.estado === "Pendiente" ? "bg-yellow-100 text-yellow-800" : ""}
+                                  ${recaudoSeleccionado.estado === "En proceso" ? "bg-blue-100 text-blue-800" : ""}
+                                  ${recaudoSeleccionado.estado === "Vencido" ? "bg-red-100 text-red-800" : ""}
+                                `}
+                              >
+                                {recaudoSeleccionado.estado}
+                                {recaudoSeleccionado.diasVencido > 0 && ` (${recaudoSeleccionado.diasVencido} días)`}
+                              </Badge>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div className="mb-6">
+                          <h3 className="font-semibold text-lg mb-2">Detalles de los Artículos</h3>
+                          <table className="w-full border-collapse">
+                            <thead>
+                              <tr className="bg-gray-50">
+                                <th className="border p-2 text-left">Artículo</th>
+                                <th className="border p-2 text-right">Cantidad</th>
+                                <th className="border p-2 text-right">Precio Unitario</th>
+                                <th className="border p-2 text-right">Total</th>
+                              </tr>
+                            </thead>
+                            <tbody>
+                              {recaudoSeleccionado.detalles?.articulos.map((articulo, index) => (
+                                <tr key={index} className="border-b">
+                                  <td className="border p-2">{articulo.nombre}</td>
+                                  <td className="border p-2 text-right">{articulo.cantidad}</td>
+                                  <td className="border p-2 text-right">${articulo.precio.toLocaleString()}</td>
+                                  <td className="border p-2 text-right">${(articulo.cantidad * articulo.precio).toLocaleString()}</td>
+                                </tr>
+                              ))}
+                              <tr className="font-semibold">
+                                <td colSpan={3} className="border p-2 text-right">Total:</td>
+                                <td className="border p-2 text-right">${recaudoSeleccionado.monto.toLocaleString()}</td>
+                              </tr>
+                            </tbody>
+                          </table>
+                        </div>
+
+                        <div className="grid grid-cols-2 gap-4 mb-6">
+                          <div>
+                            <h3 className="font-semibold text-lg mb-2">Método de Pago</h3>
+                            <p>{recaudoSeleccionado.detalles?.metodoPago}</p>
+                          </div>
+                          <div>
+                            <h3 className="font-semibold text-lg mb-2">Notas</h3>
+                            <p>{recaudoSeleccionado.detalles?.notas}</p>
+                          </div>
+                        </div>
+
+                        <div className="border-t pt-4 text-center text-sm text-gray-500">
+                          <p>Este documento es un comprobante de recaudo y no tiene validez como factura.</p>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
         </main>
       </div>

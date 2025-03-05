@@ -19,6 +19,8 @@ import {
   ChevronLeft,
   ChevronRight,
 } from "lucide-react";
+import { ClienteTimeline } from "./ClienteTimeline";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface Cliente {
   id: number;
@@ -42,6 +44,8 @@ export const SeguimientoMenu = () => {
   const [sortBy, setSortBy] = useState<"nombre" | "empresa">("nombre");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [selectedCliente, setSelectedCliente] = useState<Cliente | null>(null);
+  const [activeTab, setActiveTab] = useState<"lista" | "timeline">("lista");
   const itemsPerPage = 10;
 
   const handleSelectCliente = (id: number) => {
@@ -113,283 +117,330 @@ export const SeguimientoMenu = () => {
     setSelectedFiles([]);
   };
 
+  const viewClientTimeline = (cliente: Cliente) => {
+    setSelectedCliente(cliente);
+    setActiveTab("timeline");
+  };
+
   return (
     <div className="space-y-6">
-      <Card className="p-4">
-        <div className="space-y-4">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <h3 className="text-lg font-semibold">Selección de Clientes</h3>
-            <div className="flex items-center gap-2">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
-                <Input
-                  placeholder="Buscar clientes..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-9 w-64"
-                />
-              </div>
-              <Button
-                variant="outline"
-                onClick={handleSelectVisible}
-                className="flex items-center gap-2"
-              >
-                <Users className="h-4 w-4" />
-                Seleccionar Visibles
-              </Button>
-            </div>
-          </div>
-
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b">
-                  <th className="w-8 p-2">
-                    <Checkbox
-                      checked={currentClientes.length > 0 && currentClientes.every(c => c.selected)}
-                      onCheckedChange={handleSelectVisible}
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "lista" | "timeline")}>
+        <TabsList className="mb-4">
+          <TabsTrigger value="lista">Lista de Clientes</TabsTrigger>
+          {selectedCliente && (
+            <TabsTrigger value="timeline">Línea de Tiempo: {selectedCliente.nombre}</TabsTrigger>
+          )}
+        </TabsList>
+        
+        <TabsContent value="lista" className="space-y-6 animate-fade-in">
+          <Card className="p-4">
+            <div className="space-y-4">
+              <div className="flex items-center justify-between gap-4 flex-wrap">
+                <h3 className="text-lg font-semibold">Selección de Clientes</h3>
+                <div className="flex items-center gap-2">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+                    <Input
+                      placeholder="Buscar clientes..."
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                      className="pl-9 w-64"
                     />
-                  </th>
-                  <th
-                    className="p-2 text-left cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort("nombre")}
+                  </div>
+                  <Button
+                    variant="outline"
+                    onClick={handleSelectVisible}
+                    className="flex items-center gap-2"
                   >
-                    Nombre
-                  </th>
-                  <th
-                    className="p-2 text-left cursor-pointer hover:bg-gray-50"
-                    onClick={() => handleSort("empresa")}
+                    <Users className="h-4 w-4" />
+                    Seleccionar Visibles
+                  </Button>
+                </div>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b">
+                      <th className="w-8 p-2">
+                        <Checkbox
+                          checked={currentClientes.length > 0 && currentClientes.every(c => c.selected)}
+                          onCheckedChange={handleSelectVisible}
+                        />
+                      </th>
+                      <th
+                        className="p-2 text-left cursor-pointer hover:bg-gray-50"
+                        onClick={() => handleSort("nombre")}
+                      >
+                        Nombre
+                      </th>
+                      <th
+                        className="p-2 text-left cursor-pointer hover:bg-gray-50"
+                        onClick={() => handleSort("empresa")}
+                      >
+                        Empresa
+                      </th>
+                      <th className="p-2 text-left">Email</th>
+                      <th className="p-2 text-right">Acciones</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {currentClientes.map((cliente) => (
+                      <tr key={cliente.id} className="border-b hover:bg-gray-50 transition-colors">
+                        <td className="p-2">
+                          <Checkbox
+                            checked={cliente.selected}
+                            onCheckedChange={() => handleSelectCliente(cliente.id)}
+                          />
+                        </td>
+                        <td className="p-2">{cliente.nombre}</td>
+                        <td className="p-2">{cliente.empresa}</td>
+                        <td className="p-2">{cliente.email}</td>
+                        <td className="p-2 text-right">
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => viewClientTimeline(cliente)}
+                            className="hover-scale text-teal"
+                          >
+                            Ver historial
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex items-center justify-between mt-4">
+                <p className="text-sm text-gray-500">
+                  {getSelectedClientes().length} cliente(s) seleccionado(s)
+                </p>
+                <div className="flex items-center gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
                   >
-                    Empresa
-                  </th>
-                  <th className="p-2 text-left">Email</th>
-                </tr>
-              </thead>
-              <tbody>
-                {currentClientes.map((cliente) => (
-                  <tr key={cliente.id} className="border-b">
-                    <td className="p-2">
-                      <Checkbox
-                        checked={cliente.selected}
-                        onCheckedChange={() => handleSelectCliente(cliente.id)}
-                      />
-                    </td>
-                    <td className="p-2">{cliente.nombre}</td>
-                    <td className="p-2">{cliente.empresa}</td>
-                    <td className="p-2">{cliente.email}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+                    <ChevronLeft className="h-4 w-4" />
+                  </Button>
+                  <span className="text-sm">
+                    Página {currentPage} de {totalPages || 1}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages || totalPages === 0}
+                  >
+                    <ChevronRight className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            </div>
+          </Card>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {/* Recordatorio */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-blue-500" />
+                    <h3 className="font-semibold">Enviar Recordatorio</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Envía recordatorios a los clientes seleccionados
+                  </p>
+                </Card>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Enviar Recordatorio</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Asunto</Label>
+                    <Input
+                      value={asunto}
+                      onChange={(e) => setAsunto(e.target.value)}
+                      placeholder="Asunto del recordatorio"
+                    />
+                  </div>
+                  <div>
+                    <Label>Mensaje</Label>
+                    <Textarea
+                      value={mensaje}
+                      onChange={(e) => setMensaje(e.target.value)}
+                      placeholder="Escribe el mensaje del recordatorio..."
+                    />
+                  </div>
+                  <FileUpload onFilesChange={setSelectedFiles} />
+                  <Button 
+                    className="w-full bg-teal hover:bg-sage"
+                    onClick={() => handleEnviarComunicacion("recordatorio")}
+                  >
+                    Enviar a {getSelectedClientes().length} cliente(s)
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Promoción */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2">
+                    <Tag className="h-5 w-5 text-green-500" />
+                    <h3 className="font-semibold">Enviar Promoción</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Envía promociones especiales
+                  </p>
+                </Card>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Enviar Promoción</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Asunto</Label>
+                    <Input
+                      value={asunto}
+                      onChange={(e) => setAsunto(e.target.value)}
+                      placeholder="Asunto de la promoción"
+                    />
+                  </div>
+                  <div>
+                    <Label>Mensaje</Label>
+                    <Textarea
+                      value={mensaje}
+                      onChange={(e) => setMensaje(e.target.value)}
+                      placeholder="Describe la promoción..."
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-teal hover:bg-sage"
+                    onClick={() => handleEnviarComunicacion("promoción")}
+                  >
+                    Enviar a {getSelectedClientes().length} cliente(s)
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Newsletter */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2">
+                    <Mail className="h-5 w-5 text-purple-500" />
+                    <h3 className="font-semibold">Newsletter</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Envía actualizaciones y noticias
+                  </p>
+                </Card>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Enviar Newsletter</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Asunto</Label>
+                    <Input
+                      value={asunto}
+                      onChange={(e) => setAsunto(e.target.value)}
+                      placeholder="Asunto del newsletter"
+                    />
+                  </div>
+                  <div>
+                    <Label>Mensaje</Label>
+                    <Textarea
+                      value={mensaje}
+                      onChange={(e) => setMensaje(e.target.value)}
+                      placeholder="Contenido del newsletter..."
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-teal hover:bg-sage"
+                    onClick={() => handleEnviarComunicacion("newsletter")}
+                  >
+                    Enviar a {getSelectedClientes().length} cliente(s)
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
+
+            {/* Mensaje Personalizado */}
+            <Dialog>
+              <DialogTrigger asChild>
+                <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
+                  <div className="flex items-center gap-2">
+                    <MessageSquare className="h-5 w-5 text-orange-500" />
+                    <h3 className="font-semibold">Mensaje Personalizado</h3>
+                  </div>
+                  <p className="text-sm text-gray-500 mt-2">
+                    Envía un mensaje personalizado
+                  </p>
+                </Card>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Enviar Mensaje Personalizado</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label>Asunto</Label>
+                    <Input
+                      value={asunto}
+                      onChange={(e) => setAsunto(e.target.value)}
+                      placeholder="Asunto del mensaje"
+                    />
+                  </div>
+                  <div>
+                    <Label>Mensaje</Label>
+                    <Textarea
+                      value={mensaje}
+                      onChange={(e) => setMensaje(e.target.value)}
+                      placeholder="Escribe tu mensaje personalizado..."
+                    />
+                  </div>
+                  <Button 
+                    className="w-full bg-teal hover:bg-sage"
+                    onClick={() => handleEnviarComunicacion("mensaje")}
+                  >
+                    Enviar a {getSelectedClientes().length} cliente(s)
+                  </Button>
+                </div>
+              </DialogContent>
+            </Dialog>
           </div>
-
-          <div className="flex items-center justify-between mt-4">
-            <p className="text-sm text-gray-500">
-              {getSelectedClientes().length} cliente(s) seleccionado(s)
-            </p>
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                disabled={currentPage === 1}
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <span className="text-sm">
-                Página {currentPage} de {totalPages}
-              </span>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                disabled={currentPage === totalPages}
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </Card>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {/* Recordatorio */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2">
-                <Bell className="h-5 w-5 text-blue-500" />
-                <h3 className="font-semibold">Enviar Recordatorio</h3>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Envía recordatorios a los clientes seleccionados
-              </p>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Enviar Recordatorio</DialogTitle>
-            </DialogHeader>
+        </TabsContent>
+        
+        <TabsContent value="timeline" className="animate-fade-in">
+          {selectedCliente && (
             <div className="space-y-4">
-              <div>
-                <Label>Asunto</Label>
-                <Input
-                  value={asunto}
-                  onChange={(e) => setAsunto(e.target.value)}
-                  placeholder="Asunto del recordatorio"
-                />
+              <div className="flex justify-between items-center">
+                <h3 className="text-xl font-semibold">
+                  Línea de Tiempo para {selectedCliente.nombre}
+                </h3>
+                <Button 
+                  variant="outline" 
+                  onClick={() => setActiveTab("lista")}
+                  className="text-teal hover:bg-[#FEF7CD]"
+                >
+                  Volver a la lista
+                </Button>
               </div>
-              <div>
-                <Label>Mensaje</Label>
-                <Textarea
-                  value={mensaje}
-                  onChange={(e) => setMensaje(e.target.value)}
-                  placeholder="Escribe el mensaje del recordatorio..."
-                />
-              </div>
-              <FileUpload onFilesChange={setSelectedFiles} />
-              <Button 
-                className="w-full bg-teal hover:bg-sage"
-                onClick={() => handleEnviarComunicacion("recordatorio")}
-              >
-                Enviar a {getSelectedClientes().length} cliente(s)
-              </Button>
+              <ClienteTimeline clienteId={selectedCliente.id} />
             </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Promoción */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2">
-                <Tag className="h-5 w-5 text-green-500" />
-                <h3 className="font-semibold">Enviar Promoción</h3>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Envía promociones especiales
-              </p>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Enviar Promoción</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Asunto</Label>
-                <Input
-                  value={asunto}
-                  onChange={(e) => setAsunto(e.target.value)}
-                  placeholder="Asunto de la promoción"
-                />
-              </div>
-              <div>
-                <Label>Mensaje</Label>
-                <Textarea
-                  value={mensaje}
-                  onChange={(e) => setMensaje(e.target.value)}
-                  placeholder="Describe la promoción..."
-                />
-              </div>
-              <Button 
-                className="w-full bg-teal hover:bg-sage"
-                onClick={() => handleEnviarComunicacion("promoción")}
-              >
-                Enviar a {getSelectedClientes().length} cliente(s)
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Newsletter */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2">
-                <Mail className="h-5 w-5 text-purple-500" />
-                <h3 className="font-semibold">Newsletter</h3>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Envía actualizaciones y noticias
-              </p>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Enviar Newsletter</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Asunto</Label>
-                <Input
-                  value={asunto}
-                  onChange={(e) => setAsunto(e.target.value)}
-                  placeholder="Asunto del newsletter"
-                />
-              </div>
-              <div>
-                <Label>Mensaje</Label>
-                <Textarea
-                  value={mensaje}
-                  onChange={(e) => setMensaje(e.target.value)}
-                  placeholder="Contenido del newsletter..."
-                />
-              </div>
-              <Button 
-                className="w-full bg-teal hover:bg-sage"
-                onClick={() => handleEnviarComunicacion("newsletter")}
-              >
-                Enviar a {getSelectedClientes().length} cliente(s)
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-
-        {/* Mensaje Personalizado */}
-        <Dialog>
-          <DialogTrigger asChild>
-            <Card className="p-4 cursor-pointer hover:shadow-md transition-shadow">
-              <div className="flex items-center gap-2">
-                <MessageSquare className="h-5 w-5 text-orange-500" />
-                <h3 className="font-semibold">Mensaje Personalizado</h3>
-              </div>
-              <p className="text-sm text-gray-500 mt-2">
-                Envía un mensaje personalizado
-              </p>
-            </Card>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Enviar Mensaje Personalizado</DialogTitle>
-            </DialogHeader>
-            <div className="space-y-4">
-              <div>
-                <Label>Asunto</Label>
-                <Input
-                  value={asunto}
-                  onChange={(e) => setAsunto(e.target.value)}
-                  placeholder="Asunto del mensaje"
-                />
-              </div>
-              <div>
-                <Label>Mensaje</Label>
-                <Textarea
-                  value={mensaje}
-                  onChange={(e) => setMensaje(e.target.value)}
-                  placeholder="Escribe tu mensaje personalizado..."
-                />
-              </div>
-              <Button 
-                className="w-full bg-teal hover:bg-sage"
-                onClick={() => handleEnviarComunicacion("mensaje")}
-              >
-                Enviar a {getSelectedClientes().length} cliente(s)
-              </Button>
-            </div>
-          </DialogContent>
-        </Dialog>
-      </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

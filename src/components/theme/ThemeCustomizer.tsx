@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -10,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ColorPicker } from './ColorPicker';
 import { ThemeCard } from './ThemeCard';
 import { useTheme, Theme, ThemeColors } from '@/contexts/ThemeContext';
-import { Paintbrush, Save, Palette, GradientIcon } from 'lucide-react';
+import { Paintbrush, Save, Palette, Brush } from 'lucide-react';
 
 export const ThemeCustomizer: React.FC = () => {
   const { currentTheme, themes, setTheme, customizeTheme, addCustomTheme } = useTheme();
@@ -21,53 +20,46 @@ export const ThemeCustomizer: React.FC = () => {
   
   const [useGradient, setUseGradient] = useState(currentTheme.type === 'gradient');
   const [customThemeName, setCustomThemeName] = useState("");
-  
-  // Manejar cambios en los colores
+
   const handleColorChange = (colorKey: keyof ThemeColors, value: string) => {
     setCustomColors(prev => ({
       ...prev,
       [colorKey]: value
     }));
-    
-    // Aplicar cambio inmediatamente
+
     customizeTheme({ [colorKey]: value });
   };
-  
-  // Guardar tema personalizado
+
   const saveCustomTheme = () => {
     if (!customThemeName.trim()) return;
-    
+
     const newTheme: Theme = {
       id: uuidv4(),
       name: customThemeName,
       type: useGradient ? 'gradient' : 'solid',
       colors: customColors
     };
-    
+
     addCustomTheme(newTheme);
     setCustomThemeName("");
   };
-  
-  // Alternar entre tema sólido y gradiente
+
   const toggleThemeType = (checked: boolean) => {
     setUseGradient(checked);
-    
+
     const type = checked ? 'gradient' : 'solid';
     const updatedColors = {
       ...customColors,
-      // Si cambiamos a gradiente y no hay colores de gradiente definidos, establecer valores predeterminados
       ...(checked && !customColors.gradientStart ? { 
         gradientStart: '#ee9ca7', 
         gradientEnd: '#ffdde1' 
       } : {})
     };
-    
+
     setCustomColors(updatedColors);
-    
-    // Aplicar cambios al tema actual
     customizeTheme(updatedColors);
   };
-  
+
   return (
     <Tabs defaultValue="presets" className="space-y-4">
       <TabsList className="grid grid-cols-2">
@@ -105,7 +97,7 @@ export const ThemeCustomizer: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <GradientIcon className="h-4 w-4" />
+                <Brush className="h-4 w-4" />
                 <Label htmlFor="use-gradient">Usar Gradiente</Label>
               </div>
               <Switch

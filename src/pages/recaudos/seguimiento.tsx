@@ -81,6 +81,14 @@ export interface Recaudo {
       referencia: string;
       notas?: string;
     };
+    archivosAdjuntos?: Array<{
+      id: string;
+      nombre: string;
+      tipo: string;
+      url: string;
+      tamaño: number;
+      fechaSubida: string;
+    }>;
   };
 }
 

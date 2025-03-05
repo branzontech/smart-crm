@@ -21,7 +21,12 @@ import {
   CheckCircle, 
   AlertCircle,
   DollarSign,
-  Info 
+  Info,
+  FileImage,
+  File,
+  FileVideo,
+  Download,
+  Paperclip
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 
@@ -71,6 +76,21 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
       'app': 'Aplicación de Pago'
     };
     return metodos[metodoPago] || metodoPago;
+  };
+
+  // Función para obtener el icono del tipo de archivo
+  const getFileIcon = (tipo: string) => {
+    if (tipo.startsWith('image/')) return <FileImage className="h-4 w-4 text-blue-500" />;
+    if (tipo.startsWith('video/')) return <FileVideo className="h-4 w-4 text-purple-500" />;
+    if (tipo.startsWith('application/pdf')) return <FileText className="h-4 w-4 text-red-500" />;
+    return <File className="h-4 w-4 text-gray-500" />;
+  };
+
+  // Función para formatear el tamaño de archivo
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
   return (
@@ -220,6 +240,42 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
                   </tr>
                 </tbody>
               </table>
+            </div>
+
+            {/* Archivos adjuntos */}
+            <div className="mb-6">
+              <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
+                <Paperclip className="h-4 w-4 text-teal" />
+                Archivos Adjuntos
+              </h3>
+              
+              {recaudo.detalles?.archivosAdjuntos && recaudo.detalles.archivosAdjuntos.length > 0 ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {recaudo.detalles.archivosAdjuntos.map((archivo, index) => (
+                    <div 
+                      key={index} 
+                      className="flex items-center p-3 border rounded-md bg-gray-50 hover:bg-gray-100 transition-colors"
+                    >
+                      <div className="mr-3">
+                        {getFileIcon(archivo.tipo)}
+                      </div>
+                      <div className="flex-grow">
+                        <p className="font-medium truncate">{archivo.nombre}</p>
+                        <p className="text-xs text-gray-500">{formatFileSize(archivo.tamaño)} • {formatDate(archivo.fechaSubida)}</p>
+                      </div>
+                      <Button variant="ghost" size="sm" className="ml-2" asChild>
+                        <a href={archivo.url} target="_blank" rel="noreferrer">
+                          <Download className="h-4 w-4" />
+                        </a>
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center py-6 text-gray-500 bg-gray-50 rounded-md">
+                  No hay archivos adjuntos
+                </div>
+              )}
             </div>
 
             {/* Notas y observaciones */}

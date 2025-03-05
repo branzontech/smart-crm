@@ -29,6 +29,8 @@ export default {
         'soft-peach': '#FDE1D3',
         'soft-blue': '#D3E4FD',
         'soft-gray': '#F1F0FB',
+        'gradient-start': 'var(--gradient-start)',
+        'gradient-end': 'var(--gradient-end)',
         primary: {
           DEFAULT: "hsl(var(--primary))",
           hover: "hsl(var(--primary-hover))",
@@ -81,6 +83,9 @@ export default {
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+      },
+      backgroundImage: {
+        'gradient-primary': 'linear-gradient(to right, var(--gradient-start), var(--gradient-end))',
       },
     },
   },

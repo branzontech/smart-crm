@@ -46,6 +46,9 @@
     
     --sidebar-width: 5rem;
     --sidebar-width-expanded: 16rem;
+    
+    --gradient-start: #ee9ca7;
+    --gradient-end: #ffdde1;
   }
 
   .dark {
@@ -167,6 +170,21 @@
   /* Dropdown z-index siempre por encima */
   [data-radix-popper-content-wrapper] {
     z-index: 50 !important;
+  }
+  
+  /* Estilos para elementos con gradiente */
+  .bg-gradient-primary {
+    background: linear-gradient(to right, var(--gradient-start), var(--gradient-end));
+  }
+  
+  /* Estilos para botones con tema dinámico */
+  .btn-themed {
+    background-color: hsl(var(--primary));
+    color: #ffffff;
+  }
+  
+  .btn-themed:hover {
+    background-color: hsl(var(--primary-hover));
   }
 }
 

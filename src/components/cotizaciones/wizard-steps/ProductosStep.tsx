@@ -1,13 +1,13 @@
-
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Plus, Trash, Edit, Save, X } from 'lucide-react';
+import { Plus, Trash, Edit, Save, X, BadgePercent } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
+import { Checkbox } from '@/components/ui/checkbox';
 
 export const ProductosStep: React.FC = () => {
   const { cotizacion, addProducto, updateProducto, removeProducto } = useCotizacion();
@@ -17,6 +17,7 @@ export const ProductosStep: React.FC = () => {
   const [cantidad, setCantidad] = useState(1);
   const [precioUnitario, setPrecioUnitario] = useState(0);
   const [iva, setIva] = useState(19); // Default IVA rate in Colombia
+  const [aplicarIva, setAplicarIva] = useState(true); // State for the checkbox
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
 
   const handleAddProducto = () => {
@@ -40,7 +41,7 @@ export const ProductosStep: React.FC = () => {
       descripcion,
       cantidad,
       precioUnitario,
-      iva
+      iva: aplicarIva ? iva : 0
     });
 
     // Reset form
@@ -48,6 +49,7 @@ export const ProductosStep: React.FC = () => {
     setCantidad(1);
     setPrecioUnitario(0);
     setIva(19);
+    // Keep aplicarIva checkbox as is for user convenience
 
     toast.success('Producto agregado correctamente');
   };
@@ -93,7 +95,7 @@ export const ProductosStep: React.FC = () => {
       descripcion,
       cantidad,
       precioUnitario,
-      iva
+      iva: aplicarIva ? iva : 0
     });
 
     // Reset form
@@ -163,16 +165,39 @@ export const ProductosStep: React.FC = () => {
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="iva">IVA (%)</Label>
-            <Input
-              id="iva"
-              type="number"
-              min="0"
-              max="100"
-              value={iva}
-              onChange={(e) => setIva(Number(e.target.value))}
-            />
+          <div className="flex gap-4">
+            <div className="space-y-2 flex-1">
+              <Label htmlFor="iva" className={!aplicarIva ? "text-gray-400" : ""}>IVA (%)</Label>
+              <Input
+                id="iva"
+                type="number"
+                min="0"
+                max="100"
+                value={iva}
+                onChange={(e) => setIva(Number(e.target.value))}
+                disabled={!aplicarIva}
+                className={!aplicarIva ? "bg-gray-100 text-gray-400" : ""}
+              />
+            </div>
+          </div>
+
+          <div className="flex items-start md:items-center gap-2">
+            <div className="flex items-center space-x-2 mt-2">
+              <Checkbox 
+                id="aplicarIva" 
+                checked={aplicarIva} 
+                onCheckedChange={(checked) => setAplicarIva(checked === true)}
+              />
+              <div className="flex items-center space-x-1.5">
+                <Label 
+                  htmlFor="aplicarIva" 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Aplicar IVA (19%)
+                </Label>
+                <BadgePercent className="h-4 w-4 text-primary" />
+              </div>
+            </div>
           </div>
 
           <div className="flex items-end">

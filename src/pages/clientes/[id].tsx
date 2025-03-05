@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -11,6 +10,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
+import { ClienteTimeline } from "@/components/clientes/ClienteTimeline";
 
 type Cliente = {
   id: number;
@@ -23,7 +23,6 @@ type Cliente = {
   intereses: string[];
 };
 
-// Datos de ejemplo - En un caso real, esto vendría de una base de datos
 const clienteEjemplo: Cliente = {
   id: 1,
   nombre: "Juan Pérez",
@@ -41,9 +40,9 @@ export default function ClienteDetalle() {
   const [cliente] = useState<Cliente>(clienteEjemplo);
   const [mensaje, setMensaje] = useState("");
   const [asunto, setAsunto] = useState("");
+  const clienteId = parseInt(id || "1");
 
   const handleEnviarComunicacion = (tipo: string) => {
-    // Aquí iría la lógica para enviar la comunicación
     toast({
       title: "Comunicación enviada",
       description: `Se ha enviado ${tipo} a ${cliente.nombre}`,
@@ -57,7 +56,6 @@ export default function ClienteDetalle() {
       <Navbar />
       <main className="flex-1 p-8">
         <div className="max-w-6xl mx-auto space-y-6">
-          {/* Encabezado con información del cliente */}
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-semibold text-gray-900">{cliente.nombre}</h1>
@@ -91,7 +89,6 @@ export default function ClienteDetalle() {
 
             <TabsContent value="comunicaciones" className="space-y-4">
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {/* Recordatorio */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -137,7 +134,6 @@ export default function ClienteDetalle() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Promoción */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -183,7 +179,6 @@ export default function ClienteDetalle() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Felicitación de cumpleaños */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -229,7 +224,6 @@ export default function ClienteDetalle() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Tips y Consejos */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -275,7 +269,6 @@ export default function ClienteDetalle() {
                   </DialogContent>
                 </Dialog>
 
-                {/* Newsletter */}
                 <Dialog>
                   <DialogTrigger asChild>
                     <Card className="cursor-pointer hover:shadow-md transition-shadow">
@@ -353,17 +346,10 @@ export default function ClienteDetalle() {
             </TabsContent>
 
             <TabsContent value="historial">
-              <Card>
-                <CardHeader>
-                  <CardTitle>Historial de Comunicaciones</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="space-y-4">
-                    {/* Aquí iría el historial de comunicaciones */}
-                    <p className="text-gray-600">No hay comunicaciones registradas.</p>
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold">Línea de Tiempo</h3>
+                <ClienteTimeline clienteId={clienteId} />
+              </div>
             </TabsContent>
           </Tabs>
         </div>

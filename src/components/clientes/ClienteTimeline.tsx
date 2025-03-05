@@ -1,9 +1,8 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
 import { 
   MessageSquare, 
   Phone, 
@@ -14,9 +13,8 @@ import {
   Clock, 
   Check, 
   UserPlus, 
-  GitMerge, 
   ArrowRight,
-  User  // Adding the missing User icon import
+  User
 } from "lucide-react";
 
 type TimelineEventType = 
@@ -47,6 +45,7 @@ export function ClienteTimeline({ clienteId }: ClienteTimelineProps) {
   const [timelineEvents, setTimelineEvents] = useState<TimelineEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [filtro, setFiltro] = useState<string>("todos");
+  const tabsRef = useRef<HTMLDivElement>(null);
 
   // Simulación de datos de línea de tiempo
   useEffect(() => {
@@ -142,6 +141,20 @@ export function ClienteTimeline({ clienteId }: ClienteTimelineProps) {
     fetchTimelineData();
   }, [clienteId]);
 
+  // Prevent scrolling when changing tabs
+  const handleValueChange = (value: string) => {
+    // Store current scroll position
+    const scrollPosition = window.scrollY;
+    
+    // Update filter
+    setFiltro(value);
+    
+    // Restore scroll position after state update
+    setTimeout(() => {
+      window.scrollTo(0, scrollPosition);
+    }, 0);
+  };
+
   const getTipoIcon = (tipo: TimelineEventType) => {
     switch (tipo) {
       case "contacto": return <UserPlus className="h-5 w-5 text-blue-500" />;
@@ -205,8 +218,13 @@ export function ClienteTimeline({ clienteId }: ClienteTimelineProps) {
   return (
     <Card className="overflow-hidden">
       <CardContent className="p-6">
-        <Tabs defaultValue="todos" className="w-full" onValueChange={setFiltro}>
-          <div className="flex items-center justify-between mb-6">
+        <Tabs 
+          defaultValue="todos" 
+          className="w-full" 
+          onValueChange={handleValueChange}
+          ref={tabsRef}
+        >
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-white z-10 pb-2">
             <TabsList className="w-auto overflow-x-auto py-2">
               <TabsTrigger value="todos">Todos</TabsTrigger>
               <TabsTrigger value="contacto">Contactos</TabsTrigger>

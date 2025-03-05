@@ -1,4 +1,3 @@
-
 import { Navbar } from "@/components/layout/Navbar";
 import { 
   BarChart, 
@@ -379,7 +378,7 @@ export default function Index() {
                         data={recaudosData}
                         margin={{
                           top: 5,
-                          right: a30,
+                          right: 30,
                           left: 20,
                           bottom: 5,
                         }}

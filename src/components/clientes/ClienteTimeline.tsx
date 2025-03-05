@@ -15,7 +15,8 @@ import {
   Check, 
   UserPlus, 
   GitMerge, 
-  ArrowRight
+  ArrowRight,
+  User  // Adding the missing User icon import
 } from "lucide-react";
 
 type TimelineEventType = 

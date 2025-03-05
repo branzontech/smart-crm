@@ -1,7 +1,7 @@
-
 import { useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
+import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
 import { 
   Table, 
@@ -145,7 +145,8 @@ const SeguimientoRecaudos = () => {
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
       <div className="main-container">
-        <main className="flex-1 content-container">
+        <Header />
+        <main className="flex-1 content-container pt-[var(--header-height)]">
           <div className="max-w-content">
             <div className="flex justify-between items-center mb-6">
               <div className="flex items-center gap-2">

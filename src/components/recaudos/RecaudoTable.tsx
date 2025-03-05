@@ -9,7 +9,6 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -21,6 +20,7 @@ import {
   TableHeader, 
   TableRow 
 } from "@/components/ui/table";
+import { Checkbox } from "@/components/ui/checkbox";
 import {
   Columns,
   GripVertical,
@@ -32,7 +32,10 @@ import {
   AlertCircle,
   Eye,
   Edit,
-  DollarSign
+  DollarSign,
+  ListChecks,
+  CheckSquare,
+  Square,
 } from "lucide-react";
 
 interface RecaudoTableProps {
@@ -57,12 +60,23 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
 
   // Estado para el drag & drop
   const [columnaDrag, setColumnaDrag] = useState<string | null>(null);
+  const [columnasDropdownOpen, setColumnasDropdownOpen] = useState(false);
+  
+  // Función para seleccionar o deseleccionar todas las columnas
+  const toggleAllColumnas = (checked: boolean) => {
+    setColumnas(prevColumnas => 
+      prevColumnas.map(col => ({
+        ...col,
+        isVisible: checked
+      }))
+    );
+  };
 
   // Función para cambiar visibilidad de columnas
-  const toggleColumnaVisibilidad = (id: string) => {
+  const toggleColumnaVisibilidad = (id: string, checked: boolean) => {
     setColumnas(prevColumnas => 
       prevColumnas.map(col => 
-        col.id === id ? { ...col, isVisible: !col.isVisible } : col
+        col.id === id ? { ...col, isVisible: checked } : col
       )
     );
   };
@@ -94,6 +108,10 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
     setColumnaDrag(null);
   };
 
+  // Verificar si todas las columnas están seleccionadas
+  const allColumnasSelected = columnas.every(col => col.isVisible);
+  const someColumnasSelected = columnas.some(col => col.isVisible) && !allColumnasSelected;
+
   // Obtener columnas ordenadas y visibles
   const columnasOrdenadas = [...columnas]
     .sort((a, b) => a.order - b.order)
@@ -102,24 +120,52 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
   return (
     <div>
       <div className="flex justify-end mb-4">
-        <DropdownMenu>
+        <DropdownMenu open={columnasDropdownOpen} onOpenChange={setColumnasDropdownOpen}>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" size="sm">
-              <Columns className="h-4 w-4 mr-2" />
+              <ListChecks className="h-4 w-4 mr-2" />
               Columnas
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Mostrar columnas</DropdownMenuLabel>
+          <DropdownMenuContent align="end" className="w-56">
+            <DropdownMenuLabel>Configurar columnas</DropdownMenuLabel>
             <DropdownMenuSeparator />
+            
+            <div className="px-2 py-1.5">
+              <div className="flex items-center space-x-2 pb-2">
+                <Checkbox 
+                  id="select-all-columns"
+                  checked={allColumnasSelected}
+                  onCheckedChange={(checked) => toggleAllColumnas(checked === true)}
+                  className={someColumnasSelected ? "bg-muted text-muted-foreground" : ""}
+                />
+                <label 
+                  htmlFor="select-all-columns" 
+                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                >
+                  Seleccionar todas
+                </label>
+              </div>
+            </div>
+            
+            <DropdownMenuSeparator />
+            
             {columnas.map((columna) => (
-              <DropdownMenuCheckboxItem
-                key={columna.id}
-                checked={columna.isVisible}
-                onCheckedChange={() => toggleColumnaVisibilidad(columna.id)}
-              >
-                {columna.header}
-              </DropdownMenuCheckboxItem>
+              <div key={columna.id} className="px-2 py-1.5 hover:bg-muted/50 rounded-sm">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id={`column-${columna.id}`}
+                    checked={columna.isVisible}
+                    onCheckedChange={(checked) => toggleColumnaVisibilidad(columna.id, checked === true)}
+                  />
+                  <label 
+                    htmlFor={`column-${columna.id}`} 
+                    className="flex flex-1 items-center text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+                  >
+                    {columna.header}
+                  </label>
+                </div>
+              </div>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
@@ -287,3 +333,4 @@ export const RecaudoTable = ({ onViewDetail, onChangeStatus, onPayment }: Recaud
     </div>
   );
 };
+

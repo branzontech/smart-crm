@@ -12,6 +12,7 @@ import { Label } from "@/components/ui/label";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface CreateClienteDialogProps {
   onClienteCreated: (cliente: { id: number; nombre: string }) => void;
@@ -22,6 +23,12 @@ export function CreateClienteDialog({ onClienteCreated }: CreateClienteDialogPro
   const [nombre, setNombre] = useState("");
   const [documento, setDocumento] = useState("");
   const [telefono, setTelefono] = useState("");
+  const navigate = useNavigate();
+
+  const goToFullClientForm = () => {
+    setOpen(false);
+    navigate("/clientes/nuevo");
+  };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -97,6 +104,16 @@ export function CreateClienteDialog({ onClienteCreated }: CreateClienteDialogPro
                 onChange={(e) => setTelefono(e.target.value)}
               />
             </div>
+          </div>
+          <div className="flex flex-col space-y-2">
+            <Button
+              type="button"
+              variant="link"
+              className="text-teal hover:text-sage"
+              onClick={goToFullClientForm}
+            >
+              Ir al formulario completo
+            </Button>
           </div>
           <div className="flex justify-end space-x-2">
             <Button

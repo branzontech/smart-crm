@@ -67,7 +67,7 @@ export const ClienteStep: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <h2 className="text-2xl font-semibold">Información del Cliente</h2>
       <p className="text-gray-500">
         Busque un cliente existente o ingrese los datos manualmente.
@@ -75,7 +75,7 @@ export const ClienteStep: React.FC = () => {
 
       <div className="border p-4 rounded-md bg-gray-50 mb-6">
         <Label htmlFor="search" className="mb-2 block">Buscar Cliente</Label>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2">
           <Input
             id="search"
             value={searchTerm}

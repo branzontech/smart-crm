@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -60,21 +59,6 @@ export const CotizacionWizard: React.FC = () => {
     return true;
   };
 
-  const handleSave = () => {
-    // This would connect to a backend service to save the cotizacion
-    toast.success("Cotización guardada correctamente");
-    console.log('Saving cotizacion:', cotizacion);
-  };
-
-  const handlePrint = () => {
-    window.print();
-  };
-
-  const handleSend = () => {
-    toast.success("Cotización enviada por correo electrónico");
-    console.log('Sending cotizacion:', cotizacion);
-  };
-
   const renderStep = () => {
     switch (currentStep) {
       case 'empresa':
@@ -91,13 +75,13 @@ export const CotizacionWizard: React.FC = () => {
   };
 
   return (
-    <Card className="bg-white shadow-md">
+    <Card className="bg-white shadow-md w-full">
       <CardContent className="p-0">
-        <div className="border-b border-gray-200">
-          <nav className="flex">
+        <div className="border-b border-gray-200 overflow-x-auto">
+          <nav className="flex min-w-max">
             <button
               onClick={() => setCurrentStep('empresa')}
-              className={`px-4 py-4 font-medium text-sm flex items-center ${
+              className={`px-4 py-4 font-medium text-sm flex items-center whitespace-nowrap ${
                 currentStep === 'empresa'
                   ? 'border-b-2 border-primary text-primary'
                   : 'text-gray-500 hover:text-gray-700'
@@ -107,7 +91,7 @@ export const CotizacionWizard: React.FC = () => {
             </button>
             <button
               onClick={() => validateEmpresaStep() && setCurrentStep('cliente')}
-              className={`px-4 py-4 font-medium text-sm flex items-center ${
+              className={`px-4 py-4 font-medium text-sm flex items-center whitespace-nowrap ${
                 currentStep === 'cliente'
                   ? 'border-b-2 border-primary text-primary'
                   : 'text-gray-500 hover:text-gray-700'
@@ -117,7 +101,7 @@ export const CotizacionWizard: React.FC = () => {
             </button>
             <button
               onClick={() => validateClienteStep() && setCurrentStep('productos')}
-              className={`px-4 py-4 font-medium text-sm flex items-center ${
+              className={`px-4 py-4 font-medium text-sm flex items-center whitespace-nowrap ${
                 currentStep === 'productos'
                   ? 'border-b-2 border-primary text-primary'
                   : 'text-gray-500 hover:text-gray-700'
@@ -127,7 +111,7 @@ export const CotizacionWizard: React.FC = () => {
             </button>
             <button
               onClick={() => validateProductosStep() && setCurrentStep('preview')}
-              className={`px-4 py-4 font-medium text-sm flex items-center ${
+              className={`px-4 py-4 font-medium text-sm flex items-center whitespace-nowrap ${
                 currentStep === 'preview'
                   ? 'border-b-2 border-primary text-primary'
                   : 'text-gray-500 hover:text-gray-700'
@@ -138,11 +122,11 @@ export const CotizacionWizard: React.FC = () => {
           </nav>
         </div>
 
-        <div className="p-6">
+        <div className="p-4 sm:p-6">
           {renderStep()}
         </div>
 
-        <div className="border-t border-gray-200 px-6 py-4 flex justify-between">
+        <div className="border-t border-gray-200 px-4 sm:px-6 py-4 flex flex-col sm:flex-row justify-between gap-3">
           <Button
             variant="outline"
             onClick={handlePrevious}
@@ -152,25 +136,25 @@ export const CotizacionWizard: React.FC = () => {
             <ArrowLeft className="h-4 w-4" /> Anterior
           </Button>
 
-          <div className="flex gap-2">
+          <div className="flex flex-wrap gap-2 justify-end">
             {currentStep === 'preview' ? (
               <>
                 <Button
                   variant="outline"
-                  onClick={handleSave}
+                  onClick={() => toast.success("Cotización guardada correctamente")}
                   className="flex items-center gap-2"
                 >
                   <Save className="h-4 w-4" /> Guardar
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={handlePrint}
+                  onClick={() => window.print()}
                   className="flex items-center gap-2"
                 >
                   <Printer className="h-4 w-4" /> Imprimir
                 </Button>
                 <Button
-                  onClick={handleSend}
+                  onClick={() => toast.success("Cotización enviada por correo electrónico")}
                   className="flex items-center gap-2 bg-primary text-primary-foreground"
                 >
                   <Send className="h-4 w-4" /> Enviar

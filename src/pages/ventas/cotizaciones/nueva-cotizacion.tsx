@@ -11,10 +11,14 @@ const NuevaCotizacionPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8">
-        <div className="max-w-6xl mx-auto">
+      <main className="flex-1 p-4 sm:p-6 md:p-8 w-full ml-auto transition-all duration-300 ease-in-out" 
+            style={{ 
+              width: 'calc(100% - var(--sidebar-width))',
+              marginLeft: 'var(--sidebar-width)'
+            }}>
+        <div className="max-w-6xl mx-auto w-full">
           <div className="mb-6">
             <Button
               variant="ghost"

@@ -20,7 +20,7 @@ export const EmpresaStep: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <h2 className="text-2xl font-semibold">Información de la Empresa Emisora</h2>
       <p className="text-gray-500">
         Esta información aparecerá en el encabezado de la cotización.
@@ -130,7 +130,7 @@ export const EmpresaStep: React.FC = () => {
                   {format(fechaVencimiento, 'dd/MM/yyyy')}
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
+              <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
                   selected={fechaVencimiento}

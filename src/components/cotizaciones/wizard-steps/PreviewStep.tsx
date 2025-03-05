@@ -37,7 +37,7 @@ export const PreviewStep: React.FC = () => {
   };
 
   return (
-    <div>
+    <div className="w-full">
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-2">Vista Previa de la Cotización</h2>
         <p className="text-gray-500">
@@ -47,7 +47,7 @@ export const PreviewStep: React.FC = () => {
 
       <div className="border rounded-md overflow-hidden mb-6 print:border-none" id="cotizacion-preview">
         {/* Encabezado */}
-        <div className="bg-primary text-primary-foreground p-6 print:bg-primary print:text-primary-foreground">
+        <div className="bg-primary text-primary-foreground p-4 sm:p-6 print:bg-primary print:text-primary-foreground">
           <div className="flex flex-col md:flex-row justify-between items-center gap-4">
             <div className="flex items-center gap-4">
               {empresaEmisor.logo && (
@@ -58,12 +58,12 @@ export const PreviewStep: React.FC = () => {
                 />
               )}
               <div>
-                <h1 className="text-2xl font-bold">{empresaEmisor.nombre}</h1>
+                <h1 className="text-xl sm:text-2xl font-bold">{empresaEmisor.nombre}</h1>
                 <p>NIT: {empresaEmisor.nit}</p>
               </div>
             </div>
-            <div className="text-right">
-              <h2 className="text-xl font-semibold">COTIZACIÓN</h2>
+            <div className="text-center md:text-right mt-4 md:mt-0">
+              <h2 className="text-lg sm:text-xl font-semibold">COTIZACIÓN</h2>
               <p className="font-bold">#{numero}</p>
               <p>Fecha: {format(fechaEmision, 'dd/MM/yyyy', { locale: es })}</p>
               <p>Vence: {format(fechaVencimiento, 'dd/MM/yyyy', { locale: es })}</p>
@@ -72,7 +72,7 @@ export const PreviewStep: React.FC = () => {
         </div>
 
         {/* Información de empresa y cliente */}
-        <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
+        <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
           <div>
             <h3 className="font-semibold text-lg mb-2">Empresa Emisora</h3>
             <div className="space-y-1">
@@ -95,38 +95,40 @@ export const PreviewStep: React.FC = () => {
         </div>
 
         {/* Tabla de productos */}
-        <div className="p-6 bg-white border-t">
+        <div className="p-4 sm:p-6 bg-white border-t">
           <h3 className="font-semibold text-lg mb-4">Detalles de la Cotización</h3>
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Descripción</TableHead>
-                <TableHead className="text-right">Cant.</TableHead>
-                <TableHead className="text-right">Precio Unit.</TableHead>
-                <TableHead className="text-right">IVA</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {productos.map((producto) => (
-                <TableRow key={producto.id}>
-                  <TableCell className="font-medium">{producto.descripcion}</TableCell>
-                  <TableCell className="text-right">{producto.cantidad}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(producto.precioUnitario)}
-                  </TableCell>
-                  <TableCell className="text-right">{producto.iva}%</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(producto.total)}
-                  </TableCell>
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-right">Cant.</TableHead>
+                  <TableHead className="text-right">Precio Unit.</TableHead>
+                  <TableHead className="text-right">IVA</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {productos.map((producto) => (
+                  <TableRow key={producto.id}>
+                    <TableCell className="font-medium">{producto.descripcion}</TableCell>
+                    <TableCell className="text-right">{producto.cantidad}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(producto.precioUnitario)}
+                    </TableCell>
+                    <TableCell className="text-right">{producto.iva}%</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(producto.total)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           {/* Totales */}
           <div className="mt-6 flex justify-end">
-            <div className="w-64 space-y-2">
+            <div className="w-full sm:w-64 space-y-2">
               <div className="flex justify-between">
                 <span className="font-medium">Subtotal:</span>
                 <span>{formatCurrency(subtotal)}</span>
@@ -144,7 +146,7 @@ export const PreviewStep: React.FC = () => {
         </div>
 
         {/* Notas y Firma */}
-        <div className="p-6 bg-gray-50 border-t">
+        <div className="p-4 sm:p-6 bg-gray-50 border-t">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <h3 className="font-semibold text-lg mb-2">Condiciones</h3>

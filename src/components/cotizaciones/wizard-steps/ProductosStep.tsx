@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -119,7 +120,7 @@ export const ProductosStep: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 w-full">
       <h2 className="text-2xl font-semibold">Productos y Servicios</h2>
       <p className="text-gray-500">
         Agregue los productos o servicios que formarán parte de esta cotización.
@@ -203,55 +204,57 @@ export const ProductosStep: React.FC = () => {
       </div>
 
       {productos.length > 0 ? (
-        <div className="border rounded-md overflow-hidden">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Descripción</TableHead>
-                <TableHead className="text-right">Cant.</TableHead>
-                <TableHead className="text-right">Precio Unit.</TableHead>
-                <TableHead className="text-right">IVA</TableHead>
-                <TableHead className="text-right">Total</TableHead>
-                <TableHead className="text-center">Acciones</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {productos.map((producto) => (
-                <TableRow key={producto.id}>
-                  <TableCell className="font-medium">{producto.descripcion}</TableCell>
-                  <TableCell className="text-right">{producto.cantidad}</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(producto.precioUnitario)}
-                  </TableCell>
-                  <TableCell className="text-right">{producto.iva}%</TableCell>
-                  <TableCell className="text-right">
-                    {formatCurrency(producto.total)}
-                  </TableCell>
-                  <TableCell className="text-center">
-                    <div className="flex justify-center gap-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => startEditingProduct(producto.id)}
-                        disabled={!!editingProductId}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleRemoveProducto(producto.id)}
-                        disabled={!!editingProductId}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
+        <div className="border rounded-md overflow-hidden max-w-full">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Descripción</TableHead>
+                  <TableHead className="text-right">Cant.</TableHead>
+                  <TableHead className="text-right">Precio Unit.</TableHead>
+                  <TableHead className="text-right">IVA</TableHead>
+                  <TableHead className="text-right">Total</TableHead>
+                  <TableHead className="text-center">Acciones</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {productos.map((producto) => (
+                  <TableRow key={producto.id}>
+                    <TableCell className="font-medium">{producto.descripcion}</TableCell>
+                    <TableCell className="text-right">{producto.cantidad}</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(producto.precioUnitario)}
+                    </TableCell>
+                    <TableCell className="text-right">{producto.iva}%</TableCell>
+                    <TableCell className="text-right">
+                      {formatCurrency(producto.total)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      <div className="flex justify-center gap-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => startEditingProduct(producto.id)}
+                          disabled={!!editingProductId}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleRemoveProducto(producto.id)}
+                          disabled={!!editingProductId}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
 
           <div className="border-t p-4 bg-gray-50">
             <div className="flex justify-end space-y-2">

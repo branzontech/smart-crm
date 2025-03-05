@@ -63,13 +63,24 @@ export interface Recaudo {
   detalles?: {
     direccion: string;
     telefono: string;
+    fechaEmision?: string;
+    fechaPago?: string;
+    metodoPago: string;
     articulos: Array<{
       nombre: string;
       cantidad: number;
       precio: number;
+      proveedor?: string;
+      iva?: number;
     }>;
-    metodoPago: string;
+    subtotal?: number;
+    totalIva?: number;
     notas: string;
+    infoPago?: {
+      fechaConfirmacion: string;
+      referencia: string;
+      notas?: string;
+    };
   };
 }
 

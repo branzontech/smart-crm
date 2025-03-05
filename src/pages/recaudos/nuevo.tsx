@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -31,8 +30,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Label } from "@/components/ui/label";
 import { CreateClienteDialog } from "@/components/CreateClienteDialog";
 import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
+import { FileUpload } from "@/components/FileUpload";
 
-// Esquema para los artículos
 const articuloSchema = z.object({
   id: z.string().optional(),
   proveedor: z.string().min(1, { message: "El proveedor es requerido" }),
@@ -45,7 +44,6 @@ const articuloSchema = z.object({
   valorIva: z.number().min(0, { message: "El valor del IVA debe ser mayor o igual a 0" }),
 });
 
-// Esquema de validación para el formulario principal
 const formSchema = z.object({
   cliente: z.string().min(1, { message: "Seleccione un cliente" }),
   clienteNombre: z.string().optional(),
@@ -58,6 +56,7 @@ const formSchema = z.object({
   fechaVencimiento: z.string().min(1, { message: "Seleccione una fecha de vencimiento" }),
   estado: z.string().min(1, { message: "Seleccione un estado" }),
   notas: z.string().optional(),
+  archivos: z.array(z.instanceof(File)).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -71,7 +70,6 @@ const NuevoRecaudo = () => {
   const [proveedorQuery, setProveedorQuery] = useState("");
   const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
   const [proveedoresFiltrados, setProveedoresFiltrados] = useState<any[]>([]);
-  
   const [nuevoArticulo, setNuevoArticulo] = useState<{
     proveedor: string;
     nombreProveedor: string;
@@ -85,10 +83,10 @@ const NuevoRecaudo = () => {
     descripcion: "",
     cantidad: 1,
     valorUnitario: 0,
-    tasaIva: 0.19, // Tasa por defecto 19%
+    tasaIva: 0.19,
   });
-  
-  // Lista de clientes (normalmente vendría de una API)
+  const [archivos, setArchivos] = useState<File[]>([]);
+
   const clientes = [
     { id: "1", nombre: "Tech Solutions SA" },
     { id: "2", nombre: "Green Energy Corp" },
@@ -96,8 +94,7 @@ const NuevoRecaudo = () => {
     { id: "4", nombre: "Digital Systems Inc" },
     { id: "5", nombre: "Smart Solutions" },
   ];
-  
-  // Lista de proveedores
+
   const proveedores = [
     { id: "1", nombre: "ProveedorTech SA" },
     { id: "2", nombre: "Insumos Digitales" },
@@ -105,8 +102,7 @@ const NuevoRecaudo = () => {
     { id: "4", nombre: "Componentes XYZ" },
     { id: "5", nombre: "Tecnología Avanzada" },
   ];
-  
-  // Métodos de pago disponibles
+
   const metodosPago = [
     { id: "transferencia", nombre: "Transferencia Bancaria" },
     { id: "efectivo", nombre: "Efectivo" },
@@ -114,28 +110,23 @@ const NuevoRecaudo = () => {
     { id: "tarjeta", nombre: "Tarjeta de Crédito/Débito" },
     { id: "app", nombre: "Aplicación de Pago" },
   ];
-  
-  // Estados de recaudo
+
   const estados = [
     { id: "pendiente", nombre: "Pendiente" },
     { id: "enproceso", nombre: "En Proceso" },
     { id: "pagado", nombre: "Pagado" },
     { id: "vencido", nombre: "Vencido" },
   ];
-  
-  // Tasas de IVA
+
   const tasasIVA = [
     { valor: 0, etiqueta: "0%" },
     { valor: 0.05, etiqueta: "5%" },
     { valor: 0.16, etiqueta: "16%" },
     { valor: 0.19, etiqueta: "19%" },
   ];
-  
-  // Simular obtención del siguiente número de recaudo
+
   useEffect(() => {
-    // En un caso real, esto vendría de la API
     const fetchNextRecaudoNumber = () => {
-      // Simular retraso de API
       setTimeout(() => {
         setNextRecaudoNumber(123);
       }, 500);
@@ -143,7 +134,7 @@ const NuevoRecaudo = () => {
     
     fetchNextRecaudoNumber();
   }, []);
-  
+
   useEffect(() => {
     if (clienteQuery) {
       const filtered = clientes.filter(cliente => 
@@ -154,7 +145,7 @@ const NuevoRecaudo = () => {
       setClientesFiltrados([]);
     }
   }, [clienteQuery]);
-  
+
   useEffect(() => {
     if (proveedorQuery) {
       const filtered = proveedores.filter(proveedor => 
@@ -165,8 +156,7 @@ const NuevoRecaudo = () => {
       setProveedoresFiltrados([]);
     }
   }, [proveedorQuery]);
-  
-  // Configurar el formulario con React Hook Form
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -181,10 +171,10 @@ const NuevoRecaudo = () => {
       fechaVencimiento: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().substring(0, 10),
       estado: "pendiente",
       notas: "",
+      archivos: [],
     },
   });
-  
-  // Cálculos automáticos cuando se actualizan los artículos
+
   const calcularTotales = () => {
     const subtotal = articulos.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
     const iva = articulos.reduce((sum, item) => sum + (item.valorIva || 0), 0);
@@ -195,8 +185,7 @@ const NuevoRecaudo = () => {
     form.setValue('total', total);
     form.setValue('monto', total.toString());
   };
-  
-  // Agregar un nuevo artículo a la lista
+
   const agregarArticulo = () => {
     if (!nuevoArticulo.proveedor || !nuevoArticulo.descripcion) {
       toast.error("El proveedor y la descripción son requeridos");
@@ -221,38 +210,34 @@ const NuevoRecaudo = () => {
     const nuevosArticulos = [...articulos, articulo];
     setArticulos(nuevosArticulos);
     
-    // Resetear el formulario de nuevo artículo
     setNuevoArticulo({
       proveedor: "",
       nombreProveedor: "",
       descripcion: "",
       cantidad: 1,
       valorUnitario: 0,
-      tasaIva: 0.19, // Mantener la tasa de IVA por defecto
+      tasaIva: 0.19,
     });
     
-    // Limpiar la búsqueda de proveedor
     setProveedorQuery("");
     setProveedoresFiltrados([]);
     
-    // Actualizar totales
     setTimeout(() => calcularTotales(), 0);
   };
-  
-  // Eliminar un artículo de la lista
+
   const eliminarArticulo = (id: string) => {
     const nuevosArticulos = articulos.filter(articulo => articulo.id !== id);
     setArticulos(nuevosArticulos);
     setTimeout(() => calcularTotales(), 0);
   };
-  
+
   const seleccionarCliente = (cliente: any) => {
     form.setValue('cliente', cliente.id);
     form.setValue('clienteNombre', cliente.nombre);
     setClienteQuery(cliente.nombre);
     setClientesFiltrados([]);
   };
-  
+
   const seleccionarProveedor = (proveedor: any) => {
     setNuevoArticulo({
       ...nuevoArticulo,
@@ -262,15 +247,13 @@ const NuevoRecaudo = () => {
     setProveedorQuery(proveedor.nombre);
     setProveedoresFiltrados([]);
   };
-  
-  // Aquí está el cambio, de onClienteCreado a onClienteCreated
+
   const handleClienteCreated = (cliente: { id: number; nombre: string }) => {
     form.setValue('cliente', cliente.id.toString());
     form.setValue('clienteNombre', cliente.nombre);
     setClienteQuery(cliente.nombre);
   };
-  
-  // Aquí está el cambio, de onProveedorCreado a onProveedorCreated
+
   const handleProveedorCreated = (proveedor: { id: number; nombre: string }) => {
     setNuevoArticulo({
       ...nuevoArticulo,
@@ -279,7 +262,12 @@ const NuevoRecaudo = () => {
     });
     setProveedorQuery(proveedor.nombre);
   };
-  
+
+  const handleFilesChange = (files: File[]) => {
+    setArchivos(files);
+    form.setValue('archivos', files);
+  };
+
   const onSubmit = (data: FormValues) => {
     if (articulos.length === 0) {
       toast.error("Debe agregar al menos un artículo");
@@ -290,13 +278,12 @@ const NuevoRecaudo = () => {
       ...data,
       numero: `N°000${nextRecaudoNumber}`,
       articulos,
+      archivos,
     };
     
     console.log("Datos del formulario:", recaudoCompleto);
     toast.success("Recaudo creado con éxito");
     
-    // Normalmente aquí enviarías los datos a tu API
-    // Después de guardar, redirigir a la lista de recaudos
     setTimeout(() => {
       navigate("/recaudos");
     }, 1500);
@@ -347,7 +334,6 @@ const NuevoRecaudo = () => {
                               />
                               <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                             </div>
-                            {/* Cambio de onClienteCreado a onClienteCreated */}
                             <CreateClienteDialog onClienteCreated={handleClienteCreated} />
                           </div>
                           
@@ -467,7 +453,6 @@ const NuevoRecaudo = () => {
                       />
                     </div>
                     
-                    {/* Sección de Artículos */}
                     <Card className="border border-gray-200">
                       <CardHeader className="pb-2">
                         <CardTitle className="text-lg">Artículos o Servicios por Proveedor</CardTitle>
@@ -489,7 +474,6 @@ const NuevoRecaudo = () => {
                                     />
                                     <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
                                   </div>
-                                  {/* Cambio de onProveedorCreado a onProveedorCreated */}
                                   <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
                                 </div>
                                 
@@ -628,7 +612,8 @@ const NuevoRecaudo = () => {
                           </div>
                         )}
                         
-                        {/* Resumen de totales */}
+                        <FileUpload onFilesChange={handleFilesChange} />
+                        
                         <div className="mt-4 space-y-2 border-t pt-4">
                           <div className="flex justify-between items-center">
                             <span className="font-medium">Subtotal:</span>
@@ -646,7 +631,6 @@ const NuevoRecaudo = () => {
                       </CardContent>
                     </Card>
                     
-                    {/* Notas adicionales */}
                     <FormField
                       control={form.control}
                       name="notas"

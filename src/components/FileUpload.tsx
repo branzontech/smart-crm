@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Upload, X, File, Image } from "lucide-react";
+import { Upload, X, File, FileImage, FilePdf } from "lucide-react";
 
 interface FileWithPreview extends File {
   preview?: string;
@@ -29,16 +29,19 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
     if (event.target.files) {
       const newFiles = Array.from(event.target.files) as FileWithPreview[];
       
-      // Validar tamaño de archivos (2MB = 2 * 1024 * 1024 bytes)
-      const validFiles = newFiles.filter(file => file.size <= 2 * 1024 * 1024).map(file => {
-        // Crear URL de previsualización para cada archivo
-        return Object.assign(file, {
-          preview: URL.createObjectURL(file)
-        });
+      // Validar tamaño de archivos (5MB = 5 * 1024 * 1024 bytes)
+      const validFiles = newFiles.filter(file => file.size <= 5 * 1024 * 1024).map(file => {
+        // Crear URL de previsualización para imágenes solamente
+        if (file.type.startsWith('image/')) {
+          return Object.assign(file, {
+            preview: URL.createObjectURL(file)
+          });
+        }
+        return file;
       });
       
       if (validFiles.length !== newFiles.length) {
-        alert("Algunos archivos exceden el límite de 2MB y no serán incluidos.");
+        alert("Algunos archivos exceden el límite de 5MB y no serán incluidos.");
       }
 
       setFiles(prev => [...prev, ...validFiles]);
@@ -56,6 +59,16 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
     onFilesChange(updatedFiles);
   };
 
+  const getFileIcon = (file: FileWithPreview) => {
+    if (file.type.startsWith('image/')) {
+      return <FileImage className="w-8 h-8 text-blue-500" />;
+    } else if (file.type === 'application/pdf') {
+      return <FilePdf className="w-8 h-8 text-red-500" />;
+    } else {
+      return <File className="w-8 h-8 text-gray-500" />;
+    }
+  };
+
   return (
     <Card className="mb-6 bg-white/50 backdrop-blur-sm">
       <CardHeader>
@@ -70,14 +83,14 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
                 <p className="mb-2 text-sm text-gray-500">
                   <span className="font-semibold text-teal">Haga clic para cargar</span> o arrastre y suelte
                 </p>
-                <p className="text-xs text-gray-500">Imágenes (máx. 2MB)</p>
+                <p className="text-xs text-gray-500">Imágenes o PDFs (máx. 5MB)</p>
               </div>
               <input 
                 type="file" 
                 className="hidden" 
                 multiple 
                 onChange={handleFileChange}
-                accept="image/*"
+                accept="image/*,.pdf"
               />
             </label>
           </div>
@@ -99,7 +112,7 @@ export function FileUpload({ onFilesChange }: FileUploadProps) {
                     </div>
                   ) : (
                     <div className="flex items-center justify-center aspect-video bg-gray-100">
-                      <Image className="w-8 h-8 text-gray-400" />
+                      {getFileIcon(file)}
                     </div>
                   )}
                   <div className="p-3">

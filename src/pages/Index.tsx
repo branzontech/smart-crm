@@ -1,4 +1,5 @@
 import { Navbar } from "@/components/layout/Navbar";
+import { Header } from "@/components/layout/Header";
 import { 
   BarChart, 
   Bar, 
@@ -149,7 +150,8 @@ export default function Index() {
     <div className="min-h-screen flex bg-gray-50">
       <Navbar />
       <div className="main-container">
-        <main className="flex-1 content-container">
+        <Header />
+        <main className="flex-1 content-container pt-[var(--header-height)]">
           <div className="max-w-content px-4 py-6">
             <h1 className="text-2xl font-semibold text-gray-900 mb-6">Dashboard</h1>
             

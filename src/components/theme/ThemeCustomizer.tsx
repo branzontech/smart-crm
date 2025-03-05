@@ -10,7 +10,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { ColorPicker } from './ColorPicker';
 import { ThemeCard } from './ThemeCard';
 import { useTheme, Theme, ThemeColors } from '@/contexts/ThemeContext';
-import { Paintbrush, Save, Palette, GradientUp } from 'lucide-react';
+import { Paintbrush, Save, Palette, GradientIcon } from 'lucide-react';
 
 export const ThemeCustomizer: React.FC = () => {
   const { currentTheme, themes, setTheme, customizeTheme, addCustomTheme } = useTheme();
@@ -105,7 +105,7 @@ export const ThemeCustomizer: React.FC = () => {
           <CardContent className="space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-2">
-                <GradientUp className="h-4 w-4" />
+                <GradientIcon className="h-4 w-4" />
                 <Label htmlFor="use-gradient">Usar Gradiente</Label>
               </div>
               <Switch

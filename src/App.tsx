@@ -8,6 +8,7 @@ import "./styles/print.css"; // Import print styles
 // Páginas
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
+import Login from "./pages/auth/login";
 
 // Clientes
 import Clientes from "./pages/clientes";
@@ -59,6 +60,9 @@ export default function App() {
       <Router>
         <Routes>
           <Route path="/" element={<Index />} />
+          
+          {/* Rutas de Autenticación */}
+          <Route path="/auth/login" element={<Login />} />
           
           {/* Rutas de Clientes */}
           <Route path="/clientes" element={<Clientes />} />

@@ -1,5 +1,5 @@
 
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import "./App.css";
@@ -59,10 +59,14 @@ export default function App() {
     <ThemeProvider>
       <Router>
         <Routes>
-          <Route path="/" element={<Index />} />
+          {/* Redireccionar la ruta raíz a la página de login */}
+          <Route path="/" element={<Navigate to="/auth/login" replace />} />
           
           {/* Rutas de Autenticación */}
           <Route path="/auth/login" element={<Login />} />
+          
+          {/* Ruta del Dashboard */}
+          <Route path="/dashboard" element={<Index />} />
           
           {/* Rutas de Clientes */}
           <Route path="/clientes" element={<Clientes />} />

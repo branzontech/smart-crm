@@ -31,7 +31,8 @@ const Login = () => {
     setTimeout(() => {
       setIsLoading(false);
       toast.success("¡Bienvenido al sistema!");
-      navigate("/");
+      // Redirigir al dashboard después del login exitoso
+      navigate("/dashboard");
     }, 1500);
   };
 

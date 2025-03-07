@@ -42,8 +42,8 @@ const Login = () => {
           <div className="inline-block p-4 bg-white/10 backdrop-blur-md rounded-full mb-4">
             <LogIn className="h-12 w-12 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white">Bienvenido</h1>
-          <p className="text-white/80 mt-1">Inicia sesión para continuar</p>
+          <h1 className="text-3xl font-bold text-white/80">Bienvenido a Smart CRM</h1>
+          <p className="text-white/70 mt-1">Inicia sesión para continuar</p>
         </div>
 
         <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-xl">
@@ -138,7 +138,7 @@ const Login = () => {
         </Card>
         
         <div className="text-center mt-8 text-white/60 text-sm">
-          © {new Date().getFullYear()} Su Empresa. Todos los derechos reservados.
+          © {new Date().getFullYear()} Branzon Tech. Todos los derechos reservados.
         </div>
       </div>
     </div>

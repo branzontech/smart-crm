@@ -24,7 +24,10 @@ const PaisesPage = () => {
 
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
-      await createPais(data);
+      // Remove descripcion field if it exists in the data
+      const { descripcion, ...paisData } = data as any;
+      await createPais(paisData);
+      handleRefresh(); // Refresh the data after adding
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al crear país: ${error.message}`);
@@ -37,7 +40,10 @@ const PaisesPage = () => {
     data: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      await updatePais(id, data);
+      // Remove descripcion field if it exists in the data
+      const { descripcion, ...paisData } = data as any;
+      await updatePais(id, paisData);
+      handleRefresh(); // Refresh the data after updating
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al actualizar país: ${error.message}`);
@@ -48,6 +54,7 @@ const PaisesPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deletePais(id);
+      handleRefresh(); // Refresh the data after deleting
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar país: ${error.message}`);

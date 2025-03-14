@@ -13,8 +13,13 @@ export interface TipoServicio extends MaestroBase {}
 
 export interface OrigenCliente extends MaestroBase {}
 
-export interface Pais extends MaestroBase {
+// Remove descripcion from Pais since it doesn't exist in the database
+export interface Pais {
+  id: string;
+  nombre: string;
   codigo?: string;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface Ciudad {

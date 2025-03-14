@@ -23,7 +23,10 @@ interface CiudadFormProps {
     id?: string;
     nombre?: string;
     pais_id?: string;
-    pais?: Pais;
+    pais?: {
+      id: string;
+      nombre: string;
+    };
   };
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;

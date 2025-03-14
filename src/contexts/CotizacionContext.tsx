@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Cotizacion, CotizacionStep, ProductoCotizacion, Cliente, EmpresaEmisor } from '@/types/cotizacion';
 
@@ -29,6 +28,9 @@ const defaultCliente: Cliente = {
   telefono: '',
   contacto: '',
   direccion: '',
+  pais_id: '',
+  ciudad_id: '',
+  sector_id: ''
 };
 
 const generateCotizacionNumber = (): string => {
@@ -178,7 +180,6 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     setCurrentStep('empresa');
   };
 
-  // Calculate totals whenever products change
   useEffect(() => {
     calcularTotales();
   }, [cotizacion.productos]);

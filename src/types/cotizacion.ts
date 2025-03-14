@@ -16,6 +16,10 @@ export interface Cliente {
   telefono: string;
   contacto: string;
   direccion: string;
+  // Added these fields to support the form functionality
+  pais_id?: string;
+  ciudad_id?: string;
+  sector_id?: string;
 }
 
 export interface ProductoCotizacion {

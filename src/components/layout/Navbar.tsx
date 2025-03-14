@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -17,7 +16,8 @@ import {
   Settings,
   ChevronDown,
   Store,
-  FileText
+  FileText,
+  Database
 } from "lucide-react";
 import {
   Tooltip,
@@ -66,6 +66,18 @@ const navItems: NavItem[] = [
       { label: "Contratos", path: "/ventas/contratos" },
     ],
   },
+  {
+    label: "Datos Maestros",
+    icon: Database,
+    path: "/maestros",
+    subItems: [
+      { label: "Sectores", path: "/maestros/sectores" },
+      { label: "Tipos de Servicios", path: "/maestros/tipos-servicios" },
+      { label: "Países", path: "/maestros/paises" },
+      { label: "Ciudades", path: "/maestros/ciudades" },
+      { label: "Orígenes de Cliente", path: "/maestros/origenes-cliente" },
+    ],
+  },
   { label: "Reportes", icon: BarChart3, path: "/reportes" },
   { label: "Calendario", icon: Calendar, path: "/calendario" },
   { label: "Comunicaciones", icon: Mail, path: "/comunicaciones" },
@@ -82,39 +94,32 @@ export const Navbar = () => {
   const collapseTimeoutRef = useRef<number | null>(null);
   const sidebarRef = useRef<HTMLDivElement>(null);
 
-  // Function to handle hover expand
   const handleMouseEnter = () => {
     if (isMobile) return;
     
-    // Clear any pending collapse timeout
     if (collapseTimeoutRef.current !== null) {
       window.clearTimeout(collapseTimeoutRef.current);
       collapseTimeoutRef.current = null;
     }
     
-    // Set timeout for expansion to prevent accidental triggers
     expandTimeoutRef.current = window.setTimeout(() => {
       setIsExpanded(true);
     }, 300);
   };
 
-  // Function to handle hover collapse
   const handleMouseLeave = () => {
     if (isMobile) return;
     
-    // Clear any pending expand timeout
     if (expandTimeoutRef.current !== null) {
       window.clearTimeout(expandTimeoutRef.current);
       expandTimeoutRef.current = null;
     }
     
-    // Set timeout for collapse to prevent accidental triggers
     collapseTimeoutRef.current = window.setTimeout(() => {
       setIsExpanded(false);
     }, 500);
   };
 
-  // Clean up timeouts on unmount
   useEffect(() => {
     return () => {
       if (expandTimeoutRef.current !== null) {
@@ -126,7 +131,6 @@ export const Navbar = () => {
     };
   }, []);
 
-  // Actualizar el CSS cuando cambia el estado expandido
   useEffect(() => {
     document.documentElement.style.setProperty(
       '--sidebar-width', 
@@ -137,7 +141,6 @@ export const Navbar = () => {
       setIsExpanded(false);
     }
     
-    // Agregar o quitar la clase expandida del contenedor principal
     const mainContainer = document.querySelector('.main-container');
     if (mainContainer) {
       if (isExpanded) {
@@ -147,7 +150,6 @@ export const Navbar = () => {
       }
     }
     
-    // Actualizar el margen del header cuando cambia el ancho del sidebar
     const header = document.querySelector('header > div');
     if (header) {
       header.classList.remove('ml-20', 'ml-64');
@@ -279,3 +281,4 @@ export const Navbar = () => {
     </aside>
   );
 };
+

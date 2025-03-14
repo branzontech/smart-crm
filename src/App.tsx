@@ -56,6 +56,14 @@ import Configuracion from "./pages/configuracion";
 import CuentasCobro from "./pages/cuentasCobro";
 import NuevaCuentaCobro from "./pages/cuentasCobro/nueva";
 
+// Datos Maestros (nuevo módulo)
+import MaestrosIndex from "./pages/maestros";
+import Sectores from "./pages/maestros/sectores";
+import TiposServicios from "./pages/maestros/tiposServicios";
+import Paises from "./pages/maestros/paises";
+import Ciudades from "./pages/maestros/ciudades";
+import OrigenesCliente from "./pages/maestros/origenesCliente";
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -212,6 +220,38 @@ export default function App() {
             <Route path="/cuentas-cobro/nueva" element={
               <ProtectedRoute>
                 <NuevaCuentaCobro />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Datos Maestros - Protegidas */}
+            <Route path="/maestros" element={
+              <ProtectedRoute>
+                <MaestrosIndex />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/sectores" element={
+              <ProtectedRoute>
+                <Sectores />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/tipos-servicios" element={
+              <ProtectedRoute>
+                <TiposServicios />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/paises" element={
+              <ProtectedRoute>
+                <Paises />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/ciudades" element={
+              <ProtectedRoute>
+                <Ciudades />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/origenes-cliente" element={
+              <ProtectedRoute>
+                <OrigenesCliente />
               </ProtectedRoute>
             } />
             

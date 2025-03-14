@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react";
-import { Bell, Clock, Settings, UserRound } from "lucide-react";
+import { Bell, Clock, LogOut, Settings, UserRound } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -11,10 +11,13 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 
 export const Header = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
 
   // Actualizar la hora cada minuto
   useEffect(() => {
@@ -23,6 +26,17 @@ export const Header = () => {
     }, 60000);
     return () => clearInterval(timer);
   }, []);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast.success("Sesión cerrada correctamente");
+      navigate("/auth/login");
+    } catch (error) {
+      console.error("Error al cerrar sesión:", error);
+      toast.error("Error al cerrar sesión");
+    }
+  };
 
   const notifications = [
     {
@@ -94,14 +108,17 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
-                <span>Juan Pérez</span>
+                <span>{user ? `${user.nombre} ${user.apellido}` : 'Usuario'}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
-              <DropdownMenuItem>Mi Perfil</DropdownMenuItem>
-              <DropdownMenuItem>Preferencias</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/perfil")}>Mi Perfil</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => navigate("/preferencias")}>Preferencias</DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem>Cerrar Sesión</DropdownMenuItem>
+              <DropdownMenuItem onClick={handleLogout} className="text-red-500">
+                <LogOut className="h-4 w-4 mr-2" />
+                Cerrar Sesión
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
 

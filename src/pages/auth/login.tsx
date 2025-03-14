@@ -8,32 +8,66 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, LogIn, User, Key } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
+import { supabase } from "@/integrations/supabase/client";
+import { useAuth } from "@/contexts/AuthContext";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [nombre, setNombre] = useState("");
+  const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!username || !password) {
-      toast.error("Por favor ingresa tu usuario y contraseña");
+    if (!email || !password) {
+      toast.error("Por favor ingresa tu email y contraseña");
       return;
     }
     
     setIsLoading(true);
     
-    // Simulamos login (esto será reemplazado con la autenticación real)
-    setTimeout(() => {
+    try {
+      if (isSignUp) {
+        // Handle sign up
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: {
+              nombre,
+              apellido,
+              username: email.split('@')[0],
+            },
+          },
+        });
+
+        if (error) throw error;
+
+        toast.success("Cuenta creada exitosamente. Por favor inicia sesión.");
+        setIsSignUp(false);
+      } else {
+        // Handle login
+        await login(email, password, rememberMe);
+        toast.success("¡Bienvenido al sistema!");
+        navigate("/dashboard");
+      }
+    } catch (error: any) {
+      console.error("Error de autenticación:", error);
+      toast.error(error.message || "Error al procesar la solicitud");
+    } finally {
       setIsLoading(false);
-      toast.success("¡Bienvenido al sistema!");
-      // Redirigir al dashboard después del login exitoso
-      navigate("/dashboard");
-    }, 1500);
+    }
+  };
+
+  const toggleSignUp = () => {
+    setIsSignUp(!isSignUp);
   };
 
   return (
@@ -44,30 +78,62 @@ const Login = () => {
             <LogIn className="h-12 w-12 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white/80">Bienvenido a Smart CRM</h1>
-          <p className="text-white/70 mt-1">Inicia sesión para continuar</p>
+          <p className="text-white/70 mt-1">
+            {isSignUp ? "Crea una cuenta para continuar" : "Inicia sesión para continuar"}
+          </p>
         </div>
 
         <Card className="backdrop-blur-md bg-white/10 border-white/20 shadow-xl">
           <CardHeader className="space-y-1">
-            <CardTitle className="text-2xl font-bold text-center text-white">Iniciar Sesión</CardTitle>
+            <CardTitle className="text-2xl font-bold text-center text-white">
+              {isSignUp ? "Crear Cuenta" : "Iniciar Sesión"}
+            </CardTitle>
             <CardDescription className="text-center text-white/70">
-              Ingresa tus credenciales para acceder
+              {isSignUp
+                ? "Ingresa tus datos para registrarte"
+                : "Ingresa tus credenciales para acceder"}
             </CardDescription>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSubmit} className="space-y-4">
+              {isSignUp && (
+                <>
+                  <div className="space-y-2">
+                    <Label htmlFor="nombre" className="text-white">Nombre</Label>
+                    <Input
+                      id="nombre"
+                      type="text"
+                      value={nombre}
+                      onChange={(e) => setNombre(e.target.value)}
+                      placeholder="Tu nombre"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 hover:bg-white/20 focus:bg-white/20"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="apellido" className="text-white">Apellido</Label>
+                    <Input
+                      id="apellido"
+                      type="text"
+                      value={apellido}
+                      onChange={(e) => setApellido(e.target.value)}
+                      placeholder="Tu apellido"
+                      className="bg-white/10 border-white/20 text-white placeholder:text-white/50 hover:bg-white/20 focus:bg-white/20"
+                    />
+                  </div>
+                </>
+              )}
               <div className="space-y-2">
-                <Label htmlFor="username" className="text-white">Usuario</Label>
+                <Label htmlFor="email" className="text-white">Email</Label>
                 <div className="relative">
                   <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                     <User className="h-5 w-5 text-white/60" />
                   </div>
                   <Input
-                    id="username"
-                    type="text"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Nombre de usuario"
+                    id="email"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="tucorreo@ejemplo.com"
                     className="pl-10 bg-white/10 border-white/20 text-white placeholder:text-white/50 hover:bg-white/20 focus:bg-white/20"
                   />
                 </div>
@@ -101,17 +167,19 @@ const Login = () => {
                   </div>
                 </div>
               </div>
-              <div className="flex items-center space-x-2">
-                <Checkbox
-                  id="remember-me"
-                  checked={rememberMe}
-                  onCheckedChange={(checked) => setRememberMe(!!checked)}
-                  className="data-[state=checked]:bg-white/80 data-[state=checked]:text-gray-800 border-white/50"
-                />
-                <Label htmlFor="remember-me" className="text-sm text-white cursor-pointer hover:underline">
-                  Recordarme
-                </Label>
-              </div>
+              {!isSignUp && (
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="remember-me"
+                    checked={rememberMe}
+                    onCheckedChange={(checked) => setRememberMe(!!checked)}
+                    className="data-[state=checked]:bg-white/80 data-[state=checked]:text-gray-800 border-white/50"
+                  />
+                  <Label htmlFor="remember-me" className="text-sm text-white cursor-pointer hover:underline">
+                    Recordarme
+                  </Label>
+                </div>
+              )}
               <Button
                 type="submit"
                 disabled={isLoading}
@@ -120,21 +188,31 @@ const Login = () => {
                 {isLoading ? (
                   <span className="flex items-center gap-1">
                     <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent"></span>
-                    Iniciando...
+                    {isSignUp ? "Registrando..." : "Iniciando..."}
                   </span>
                 ) : (
                   <span className="flex items-center gap-1">
                     <LogIn className="h-4 w-4" />
-                    Iniciar Sesión
+                    {isSignUp ? "Registrarse" : "Iniciar Sesión"}
                   </span>
                 )}
               </Button>
             </form>
           </CardContent>
           <CardFooter className="flex flex-col space-y-4 text-center">
-            <div className="text-white/70 text-sm hover:text-white transition-colors cursor-pointer">
-              ¿Olvidaste tu contraseña?
+            <div
+              onClick={toggleSignUp}
+              className="text-white/70 text-sm hover:text-white transition-colors cursor-pointer"
+            >
+              {isSignUp
+                ? "¿Ya tienes una cuenta? Inicia sesión"
+                : "¿No tienes cuenta? Regístrate"}
             </div>
+            {!isSignUp && (
+              <div className="text-white/70 text-sm hover:text-white transition-colors cursor-pointer">
+                ¿Olvidaste tu contraseña?
+              </div>
+            )}
           </CardFooter>
         </Card>
         

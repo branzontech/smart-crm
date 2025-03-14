@@ -21,7 +21,10 @@ export interface Ciudad {
   id: string;
   nombre: string;
   pais_id: string;
-  pais?: Pais;
+  pais?: {
+    id: string;
+    nombre: string;
+  };
   created_at: string;
   updated_at: string;
 }

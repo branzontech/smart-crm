@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +45,7 @@ export function MaestroForm({ initialData, onSubmit, onCancel, tipo, includeCodi
   const form = useForm({
     resolver: zodResolver(formSchema(includeCodigo)),
     defaultValues: {
-      id: initialData?.id || "",
+      id: initialData?.id || undefined,
       nombre: initialData?.nombre || "",
       descripcion: initialData?.descripcion || "",
       ...(includeCodigo && { codigo: initialData?.codigo || "" }),
@@ -56,7 +55,17 @@ export function MaestroForm({ initialData, onSubmit, onCancel, tipo, includeCodi
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(data);
+      const cleanedData = Object.fromEntries(
+        Object.entries(data)
+          .filter(([key, value]) => {
+            if (key === 'id') {
+              return value !== "" && value !== undefined;
+            }
+            return true;
+          })
+      );
+      
+      await onSubmit(cleanedData);
       toast.success("Datos guardados correctamente");
     } catch (error: any) {
       toast.error(`Error al guardar: ${error.message}`);

@@ -24,10 +24,23 @@ const OrigenesClientePage = () => {
 
   const handleAdd = async (data: Omit<OrigenCliente, "id" | "created_at" | "updated_at">) => {
     try {
-      await createOrigenCliente(data);
+      // Remove any id field if it exists (let Supabase generate it)
+      const { id, ...origenClienteData } = data as any;
+      
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(origenClienteData).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Saving origen cliente with data:", cleanedData); // For debugging
+      
+      await createOrigenCliente(cleanedData);
+      handleRefresh();
+      toast.success("Origen de cliente creado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al crear origen de cliente: ${error.message}`);
+      console.error("Error creating origen cliente:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -37,10 +50,20 @@ const OrigenesClientePage = () => {
     data: Partial<Omit<OrigenCliente, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      await updateOrigenCliente(id, data);
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(data as any).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Updating origen cliente with ID:", id, "and data:", cleanedData); // For debugging
+      
+      await updateOrigenCliente(id, cleanedData);
+      handleRefresh();
+      toast.success("Origen de cliente actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al actualizar origen de cliente: ${error.message}`);
+      console.error("Error updating origen cliente:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -48,6 +71,8 @@ const OrigenesClientePage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteOrigenCliente(id);
+      handleRefresh();
+      toast.success("Origen de cliente eliminado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar origen de cliente: ${error.message}`);

@@ -1,5 +1,5 @@
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MaestroTable } from "@/components/maestros/MaestroTable";
 import { Layout } from "@/components/layout/Layout";
@@ -13,7 +13,6 @@ const SectoresPage = () => {
   const {
     data: sectores = [],
     isLoading,
-    refetch,
   } = useQuery({
     queryKey: ["sectores", refresh],
     queryFn: fetchSectores,
@@ -25,10 +24,23 @@ const SectoresPage = () => {
 
   const handleAdd = async (data: Omit<Sector, "id" | "created_at" | "updated_at">) => {
     try {
-      await createSector(data);
+      // Remove any id field if it exists (let Supabase generate it)
+      const { id, ...sectorData } = data as any;
+      
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(sectorData).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Saving sector with data:", cleanedData); // For debugging
+      
+      await createSector(cleanedData);
+      handleRefresh();
+      toast.success("Sector creado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al crear sector: ${error.message}`);
+      console.error("Error creating sector:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -38,10 +50,20 @@ const SectoresPage = () => {
     data: Partial<Omit<Sector, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      await updateSector(id, data);
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(data as any).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Updating sector with ID:", id, "and data:", cleanedData); // For debugging
+      
+      await updateSector(id, cleanedData);
+      handleRefresh();
+      toast.success("Sector actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al actualizar sector: ${error.message}`);
+      console.error("Error updating sector:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -49,6 +71,8 @@ const SectoresPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteSector(id);
+      handleRefresh();
+      toast.success("Sector eliminado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar sector: ${error.message}`);

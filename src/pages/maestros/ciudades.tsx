@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CiudadTable } from "@/components/maestros/CiudadTable";
@@ -24,10 +23,27 @@ const CiudadesPage = () => {
 
   const handleAdd = async (data: Omit<Ciudad, "id" | "created_at" | "updated_at" | "pais">) => {
     try {
-      await createCiudad(data);
+      const { id, ...ciudadData } = data as any;
+      
+      if (!ciudadData.pais_id || ciudadData.pais_id === "") {
+        throw new Error("El país es requerido");
+      }
+      
+      const cleanedData = Object.fromEntries(
+        Object.entries(ciudadData).filter(([key, value]) => 
+          key === 'nombre' || (value !== "" && value !== undefined)
+        )
+      );
+      
+      console.log("Saving ciudad with data:", cleanedData);
+      
+      await createCiudad(cleanedData);
+      handleRefresh();
+      toast.success("Ciudad creada exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al crear ciudad: ${error.message}`);
+      console.error("Error creating ciudad:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -37,10 +53,21 @@ const CiudadesPage = () => {
     data: Partial<Omit<Ciudad, "id" | "created_at" | "updated_at" | "pais">>
   ) => {
     try {
-      await updateCiudad(id, data);
+      const cleanedData = Object.fromEntries(
+        Object.entries(data as any).filter(([key, value]) => 
+          key === 'nombre' || (value !== "" && value !== undefined)
+        )
+      );
+      
+      console.log("Updating ciudad with ID:", id, "and data:", cleanedData);
+      
+      await updateCiudad(id, cleanedData);
+      handleRefresh();
+      toast.success("Ciudad actualizada exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al actualizar ciudad: ${error.message}`);
+      console.error("Error updating ciudad:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -48,6 +75,8 @@ const CiudadesPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteCiudad(id);
+      handleRefresh();
+      toast.success("Ciudad eliminada exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar ciudad: ${error.message}`);

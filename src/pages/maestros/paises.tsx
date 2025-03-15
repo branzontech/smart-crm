@@ -24,8 +24,8 @@ const PaisesPage = () => {
 
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
-      // Explicitly omit the codigo field as it should be auto-incremented by the database
-      const { codigo, ...paisData } = data as any;
+      // Explicitly omit the codigo field and any empty UUID fields
+      const { codigo, id, ...paisData } = data as any;
       
       console.log("Saving país with data:", paisData); // For debugging
       
@@ -35,7 +35,7 @@ const PaisesPage = () => {
       return Promise.resolve();
     } catch (error: any) {
       console.error("Error creating país:", error);
-      toast.error(`Error al crear país: ${error.message}`);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -45,18 +45,23 @@ const PaisesPage = () => {
     data: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      // Explicitly omit the codigo field as it should not be updated
+      // Explicitly omit the codigo field and any empty UUID fields
       const { codigo, ...paisData } = data as any;
       
-      console.log("Updating país with data:", paisData); // For debugging
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(paisData).filter(([_, value]) => value !== "")
+      );
       
-      await updatePais(id, paisData);
+      console.log("Updating país with ID:", id, "and data:", cleanedData); // For debugging
+      
+      await updatePais(id, cleanedData);
       handleRefresh();
       toast.success("País actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       console.error("Error updating país:", error);
-      toast.error(`Error al actualizar país: ${error.message}`);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -84,7 +89,7 @@ const PaisesPage = () => {
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           tipo="pais"
-          includeCodigo={false} // Keep this false so the code field isn't shown in the form
+          includeCodigo={false}
         />
       </div>
     </Layout>

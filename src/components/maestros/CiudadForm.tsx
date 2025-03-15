@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -46,7 +45,7 @@ export function CiudadForm({ initialData, onSubmit, onCancel }: CiudadFormProps)
   const form = useForm({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      id: initialData?.id || "",
+      id: initialData?.id || undefined,
       nombre: initialData?.nombre || "",
       pais_id: initialData?.pais_id || "",
     },
@@ -72,7 +71,19 @@ export function CiudadForm({ initialData, onSubmit, onCancel }: CiudadFormProps)
   const handleSubmit = async (data: any) => {
     setIsSubmitting(true);
     try {
-      await onSubmit(data);
+      const cleanedData = Object.fromEntries(
+        Object.entries(data)
+          .filter(([key, value]) => {
+            if (key === 'id') {
+              return value !== "" && value !== undefined;
+            }
+            return true;
+          })
+      );
+      
+      console.log("Submitting ciudad data:", cleanedData);
+      
+      await onSubmit(cleanedData);
       toast.success("Ciudad guardada correctamente");
     } catch (error: any) {
       toast.error(`Error al guardar: ${error.message}`);

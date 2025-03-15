@@ -24,10 +24,23 @@ const TiposServiciosPage = () => {
 
   const handleAdd = async (data: Omit<TipoServicio, "id" | "created_at" | "updated_at">) => {
     try {
-      await createTipoServicio(data);
+      // Remove any id field if it exists (let Supabase generate it)
+      const { id, ...tipoServicioData } = data as any;
+      
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(tipoServicioData).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Saving tipo servicio with data:", cleanedData); // For debugging
+      
+      await createTipoServicio(cleanedData);
+      handleRefresh();
+      toast.success("Tipo de servicio creado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al crear tipo de servicio: ${error.message}`);
+      console.error("Error creating tipo servicio:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -37,10 +50,20 @@ const TiposServiciosPage = () => {
     data: Partial<Omit<TipoServicio, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      await updateTipoServicio(id, data);
+      // Filter out any empty string values that might be for UUID fields
+      const cleanedData = Object.fromEntries(
+        Object.entries(data as any).filter(([_, value]) => value !== "")
+      );
+      
+      console.log("Updating tipo servicio with ID:", id, "and data:", cleanedData); // For debugging
+      
+      await updateTipoServicio(id, cleanedData);
+      handleRefresh();
+      toast.success("Tipo de servicio actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
-      toast.error(`Error al actualizar tipo de servicio: ${error.message}`);
+      console.error("Error updating tipo servicio:", error);
+      toast.error(`Error al guardar: ${error.message}`);
       return Promise.reject(error);
     }
   };
@@ -48,6 +71,8 @@ const TiposServiciosPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deleteTipoServicio(id);
+      handleRefresh();
+      toast.success("Tipo de servicio eliminado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar tipo de servicio: ${error.message}`);

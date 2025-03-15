@@ -1,73 +1,38 @@
 
-import { zodResolver } from "@hookform/resolvers/zod";
-import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft, Building2 } from "lucide-react";
-import {
-  Form,
-  FormControl,
-  FormDescription,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from "@/components/ui/form";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-
-const empresaSchema = z.object({
-  nombre: z.string().min(2, "El nombre debe tener al menos 2 caracteres"),
-  industria: z.string().min(2, "La industria es requerida"),
-  empleados: z.string().min(1, "El número de empleados es requerido"),
-  ciudad: z.string().min(2, "La ciudad es requerida"),
-  direccion: z.string().min(5, "La dirección es requerida"),
-  telefono: z.string().min(8, "El teléfono es requerido"),
-  sitioWeb: z.string().url("Debe ser una URL válida").optional(),
-  descripcion: z.string().optional(),
-  periodoVencimientoFacturas: z.string().min(1, "El periodo de vencimiento es requerido"),
-});
-
-type EmpresaForm = z.infer<typeof empresaSchema>;
-
-const periodosVencimiento = [
-  "15 días",
-  "30 días",
-  "45 días",
-  "60 días",
-  "90 días",
-];
+import { EmpresaForm, EmpresaFormValues } from "@/components/empresas/EmpresaForm";
+import { createEmpresa } from "@/services/empresaService";
 
 export default function NuevaEmpresa() {
   const navigate = useNavigate();
-  const form = useForm<EmpresaForm>({
-    resolver: zodResolver(empresaSchema),
-    defaultValues: {
-      periodoVencimientoFacturas: "30 días",
-      sitioWeb: "",
-      descripcion: "",
-    },
-  });
 
-  const onSubmit = async (data: EmpresaForm) => {
+  const handleSubmit = async (data: EmpresaFormValues) => {
     try {
-      console.log(data);
+      // Transformar los datos para coincidir con la estructura de la tabla
+      const empresaData = {
+        nombre: data.nombre,
+        industria: data.industria,
+        empleados: parseInt(data.empleados),
+        ciudad: data.ciudad,
+        direccion: data.direccion,
+        telefono: data.telefono,
+        sitio_web: data.sitioWeb || undefined,
+        descripcion: data.descripcion || undefined,
+        periodo_vencimiento_facturas: data.periodoVencimientoFacturas,
+      };
+      
+      await createEmpresa(empresaData);
       toast.success("Empresa creada exitosamente");
       navigate("/empresas");
-    } catch (error) {
-      toast.error("Error al crear la empresa");
+    } catch (error: any) {
+      toast.error(`Error al crear la empresa: ${error.message}`);
+      throw error; // Re-lanzar el error para que el componente EmpresaForm lo maneje
     }
   };
 
@@ -96,163 +61,11 @@ export default function NuevaEmpresa() {
                 </div>
               </CardHeader>
               <CardContent>
-                <Form {...form}>
-                  <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                      <FormField
-                        control={form.control}
-                        name="nombre"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Nombre de la Empresa</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Empresa S.A." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="industria"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Industria</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Tecnología, Manufactura, etc." {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="empleados"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Número de Empleados</FormLabel>
-                            <FormControl>
-                              <Input type="number" placeholder="100" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="ciudad"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Ciudad</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Buenos Aires" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="direccion"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Dirección</FormLabel>
-                            <FormControl>
-                              <Input placeholder="Av. Principal 123" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="telefono"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Teléfono</FormLabel>
-                            <FormControl>
-                              <Input placeholder="+54 11 1234-5678" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="sitioWeb"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Sitio Web</FormLabel>
-                            <FormControl>
-                              <Input placeholder="https://www.empresa.com" {...field} />
-                            </FormControl>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                      <FormField
-                        control={form.control}
-                        name="periodoVencimientoFacturas"
-                        render={({ field }) => (
-                          <FormItem>
-                            <FormLabel>Periodo de Vencimiento de Facturas</FormLabel>
-                            <Select
-                              onValueChange={field.onChange}
-                              defaultValue={field.value}
-                            >
-                              <FormControl>
-                                <SelectTrigger>
-                                  <SelectValue placeholder="Seleccione un periodo" />
-                                </SelectTrigger>
-                              </FormControl>
-                              <SelectContent>
-                                {periodosVencimiento.map((periodo) => (
-                                  <SelectItem key={periodo} value={periodo}>
-                                    {periodo}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
-                            <FormDescription>
-                              Este periodo se utilizará para calcular fechas de vencimiento y alertas
-                            </FormDescription>
-                            <FormMessage />
-                          </FormItem>
-                        )}
-                      />
-                    </div>
-                    <FormField
-                      control={form.control}
-                      name="descripcion"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Descripción</FormLabel>
-                          <FormControl>
-                            <Textarea
-                              placeholder="Breve descripción de la empresa..."
-                              className="min-h-[100px]"
-                              {...field}
-                            />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                    <div className="flex justify-end">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="mr-2"
-                        onClick={() => navigate("/empresas")}
-                      >
-                        Cancelar
-                      </Button>
-                      <Button type="submit" className="bg-teal hover:bg-sage text-white">
-                        Crear Empresa
-                      </Button>
-                    </div>
-                  </form>
-                </Form>
+                <EmpresaForm 
+                  onSubmit={handleSubmit} 
+                  submitButtonText="Crear Empresa" 
+                  onCancel={() => navigate("/empresas")}
+                />
               </CardContent>
             </Card>
           </div>

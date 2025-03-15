@@ -25,9 +25,16 @@ const PaisesPage = () => {
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
       // Remove descripcion field if it exists in the data
+      // Ensure we're not passing an empty string for código which could cause UUID conversion issues
       const { descripcion, ...paisData } = data as any;
-      await createPais(paisData);
+      const cleanData = {
+        ...paisData,
+        codigo: paisData.codigo || null // Ensure código is null if empty
+      };
+      
+      await createPais(cleanData);
       handleRefresh(); // Refresh the data after adding
+      toast.success("País creado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al crear país: ${error.message}`);
@@ -41,9 +48,16 @@ const PaisesPage = () => {
   ) => {
     try {
       // Remove descripcion field if it exists in the data
+      // Ensure we're not passing an empty string for código which could cause UUID conversion issues
       const { descripcion, ...paisData } = data as any;
-      await updatePais(id, paisData);
+      const cleanData = {
+        ...paisData,
+        codigo: paisData.codigo || null // Ensure código is null if empty
+      };
+      
+      await updatePais(id, cleanData);
       handleRefresh(); // Refresh the data after updating
+      toast.success("País actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al actualizar país: ${error.message}`);
@@ -55,6 +69,7 @@ const PaisesPage = () => {
     try {
       await deletePais(id);
       handleRefresh(); // Refresh the data after deleting
+      toast.success("País eliminado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
       toast.error(`Error al eliminar país: ${error.message}`);

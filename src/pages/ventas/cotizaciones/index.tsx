@@ -4,8 +4,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, Check, MoreHorizontal, Loader2 } from "lucide-react";
-import { Card } from "@/components/ui/card";
+import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, MoreHorizontal, Loader2 } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -71,6 +70,7 @@ const CotizacionesIndex = () => {
       try {
         setIsLoading(true);
         const data = await getAllCotizaciones();
+        console.log("Cotizaciones obtenidas:", data);
         setCotizaciones(data);
       } catch (error) {
         console.error("Error fetching cotizaciones:", error);
@@ -105,7 +105,7 @@ const CotizacionesIndex = () => {
         clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         cotizacion.numero.toLowerCase().includes(searchTerm.toLowerCase());
       
-      const matchesEstado = filtroEstado === null || 
+      const matchesEstado = filtroEstado === null || filtroEstado === "" || 
         cotizacion.estado === filtroEstado;
       
       return matchesSearch && matchesEstado;
@@ -226,7 +226,10 @@ const CotizacionesIndex = () => {
                 </div>
                 <div className="w-full md:w-1/3">
                   <Label htmlFor="estado" className="mb-2 block">Estado</Label>
-                  <Select value={filtroEstado || ""} onValueChange={(value) => setFiltroEstado(value || null)}>
+                  <Select 
+                    value={filtroEstado || ""} 
+                    onValueChange={(value) => setFiltroEstado(value === "" ? null : value)}
+                  >
                     <SelectTrigger id="estado" className="w-full">
                       <SelectValue placeholder="Todos los estados" />
                     </SelectTrigger>
@@ -394,76 +397,76 @@ const CotizacionesIndex = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {filteredCotizaciones.map((cotizacion) => (
-                        <TableRow 
-                          key={cotizacion.id} 
-                          className={selectedCotizaciones.includes(cotizacion.id || '') ? "bg-mint/10" : ""}
-                        >
-                          <TableCell>
-                            <div className="flex items-center justify-center">
-                              <input
-                                type="checkbox"
-                                checked={selectedCotizaciones.includes(cotizacion.id || '')}
-                                onChange={() => cotizacion.id && toggleSelection(cotizacion.id)}
-                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                              />
-                            </div>
-                          </TableCell>
-                          
-                          {visibleColumns.cliente && (
-                            <TableCell className="font-medium">{cotizacion.cliente.nombre}</TableCell>
-                          )}
-                          
-                          {visibleColumns.numero && (
-                            <TableCell>{cotizacion.numero}</TableCell>
-                          )}
-                          
-                          {visibleColumns.monto && (
-                            <TableCell className="text-right">{formatCurrency(cotizacion.total)}</TableCell>
-                          )}
-                          
-                          {visibleColumns.estado && (
+                      {filteredCotizaciones.length > 0 ? (
+                        filteredCotizaciones.map((cotizacion) => (
+                          <TableRow 
+                            key={cotizacion.id} 
+                            className={selectedCotizaciones.includes(cotizacion.id || '') ? "bg-mint/10" : ""}
+                          >
                             <TableCell>
-                              <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
-                                {getEstadoDisplayName(cotizacion.estado)}
-                              </span>
+                              <div className="flex items-center justify-center">
+                                <input
+                                  type="checkbox"
+                                  checked={selectedCotizaciones.includes(cotizacion.id || '')}
+                                  onChange={() => cotizacion.id && toggleSelection(cotizacion.id)}
+                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                                />
+                              </div>
                             </TableCell>
-                          )}
-                          
-                          {visibleColumns.fechaEmision && (
-                            <TableCell>{formatDate(cotizacion.fechaEmision)}</TableCell>
-                          )}
-                          
-                          {visibleColumns.validezHasta && (
-                            <TableCell>{formatDate(cotizacion.fechaVencimiento)}</TableCell>
-                          )}
-                          
-                          <TableCell>
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" className="h-8 w-8 p-0">
-                                  <span className="sr-only">Abrir menú</span>
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end">
-                                <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
-                                  Ver detalles
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
-                                  Editar
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem className="text-red-600">
-                                  Eliminar
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </TableCell>
-                        </TableRow>
-                      ))}
-                      
-                      {filteredCotizaciones.length === 0 && (
+                            
+                            {visibleColumns.cliente && (
+                              <TableCell className="font-medium">{cotizacion.cliente.nombre}</TableCell>
+                            )}
+                            
+                            {visibleColumns.numero && (
+                              <TableCell>{cotizacion.numero}</TableCell>
+                            )}
+                            
+                            {visibleColumns.monto && (
+                              <TableCell className="text-right">{formatCurrency(cotizacion.total)}</TableCell>
+                            )}
+                            
+                            {visibleColumns.estado && (
+                              <TableCell>
+                                <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
+                                  {getEstadoDisplayName(cotizacion.estado)}
+                                </span>
+                              </TableCell>
+                            )}
+                            
+                            {visibleColumns.fechaEmision && (
+                              <TableCell>{formatDate(cotizacion.fechaEmision)}</TableCell>
+                            )}
+                            
+                            {visibleColumns.validezHasta && (
+                              <TableCell>{formatDate(cotizacion.fechaVencimiento)}</TableCell>
+                            )}
+                            
+                            <TableCell>
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button variant="ghost" className="h-8 w-8 p-0">
+                                    <span className="sr-only">Abrir menú</span>
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end">
+                                  <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
+                                    Ver detalles
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
+                                    Editar
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem className="text-red-600">
+                                    Eliminar
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      ) : (
                         <TableRow>
                           <TableCell colSpan={
                             1 + // Checkbox column

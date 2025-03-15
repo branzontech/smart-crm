@@ -87,6 +87,8 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
       estado: cotizacion.estado
     };
 
+    console.log("Guardando cotización:", cotizacionDB);
+
     // First, insert the main quotation record
     const { data: cotizacionData, error: cotizacionError } = await supabase
       .from("cotizaciones")
@@ -198,6 +200,8 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
 
     if (error) throw error;
     
+    console.log("Datos obtenidos de cotizaciones:", data);
+    
     // Ensure data is an array
     const cotizaciones = Array.isArray(data) ? data : [];
 
@@ -209,7 +213,7 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
       fechaVencimiento: new Date(item.fecha_vencimiento),
       empresaEmisor: item.empresa_emisor as any,
       cliente: item.cliente as any,
-      productos: [],
+      productos: [], // No cargamos los productos en la lista para mayor rendimiento
       subtotal: item.subtotal,
       totalIva: item.total_iva,
       total: item.total,

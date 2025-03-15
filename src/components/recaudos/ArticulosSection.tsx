@@ -40,6 +40,7 @@ export function ArticulosSection({
     tasa_iva: 0,
   });
 
+  // Ya no necesitamos esta función ya que el cálculo se hace en RecaudoSummary
   const calcularTotales = () => {
     console.log("Calculando totales con", articulos.length, "artículos");
     
@@ -103,16 +104,11 @@ export function ArticulosSection({
     });
     
     setProveedorQuery("");
-    
-    // Cálculo inmediato de totales usando el nuevo array
-    calcularTotales();
   };
 
   const eliminarArticulo = (id: string) => {
     const nuevosArticulos = articulos.filter(articulo => articulo.id !== id);
     setArticulos(nuevosArticulos);
-    // Cálculo inmediato de totales usando el nuevo array
-    calcularTotales();
   };
 
   return (
@@ -136,7 +132,11 @@ export function ArticulosSection({
         
         <FileUpload onFilesChange={onFilesChange} />
         
-        <RecaudoSummary watch={watch} />
+        <RecaudoSummary 
+          watch={watch} 
+          articulos={articulos} 
+          setValue={setValue} 
+        />
       </CardContent>
     </Card>
   );

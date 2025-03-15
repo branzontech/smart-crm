@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { safePropertyExtract, handleSupabaseError } from "@/utils/supabaseHelpers";
 
 export interface Empresa {
   id: string;
@@ -41,7 +42,7 @@ export const createEmpresa = async (empresa: Omit<Empresa, "id" | "created_at" |
     // Ensure proper type conversion
     return data as unknown as Empresa;
   } catch (error: any) {
-    toast.error(`Error al crear empresa: ${error.message}`);
+    handleSupabaseError(error, "Error al crear empresa");
     throw error;
   }
 };
@@ -77,17 +78,26 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
         .eq("id", empresa.ciudad)
         .single();
       
+      // Safely extract properties using our utility function
+      const industriaNombre = industriaError 
+        ? 'No disponible' 
+        : safePropertyExtract(industriaData, 'nombre' as any, 'No disponible');
+        
+      const ciudadNombre = ciudadError
+        ? 'No disponible'
+        : safePropertyExtract(ciudadData, 'nombre' as any, 'No disponible');
+      
       return {
         ...empresa,
-        industria_nombre: industriaError ? 'No disponible' : industriaData?.nombre || 'No disponible',
-        ciudad_nombre: ciudadError ? 'No disponible' : ciudadData?.nombre || 'No disponible'
+        industria_nombre: industriaNombre,
+        ciudad_nombre: ciudadNombre
       };
     }));
     
     // Ensure proper type conversion
     return empresasFormateadas as unknown as Empresa[];
   } catch (error: any) {
-    toast.error(`Error al obtener empresas: ${error.message}`);
+    handleSupabaseError(error, "Error al obtener empresas");
     return [];
   }
 };
@@ -125,17 +135,26 @@ export const fetchEmpresaById = async (id: string): Promise<Empresa | null> => {
       .eq("id", empresaData.ciudad)
       .single();
     
+    // Safely extract properties using our utility function
+    const industriaNombre = industriaError
+      ? 'No disponible'
+      : safePropertyExtract(industriaData, 'nombre' as any, 'No disponible');
+      
+    const ciudadNombre = ciudadError
+      ? 'No disponible'
+      : safePropertyExtract(ciudadData, 'nombre' as any, 'No disponible');
+    
     // Merge all data
     const empresaFormateada = {
       ...empresaData,
-      industria_nombre: industriaError ? 'No disponible' : industriaData?.nombre || 'No disponible',
-      ciudad_nombre: ciudadError ? 'No disponible' : ciudadData?.nombre || 'No disponible'
+      industria_nombre: industriaNombre,
+      ciudad_nombre: ciudadNombre
     };
     
     // Ensure proper type conversion
     return empresaFormateada as unknown as Empresa;
   } catch (error: any) {
-    toast.error(`Error al obtener empresa: ${error.message}`);
+    handleSupabaseError(error, "Error al obtener empresa");
     return null;
   }
 };
@@ -158,7 +177,7 @@ export const updateEmpresa = async (id: string, empresa: Partial<Omit<Empresa, "
     // Ensure proper type conversion
     return data as unknown as Empresa;
   } catch (error: any) {
-    toast.error(`Error al actualizar empresa: ${error.message}`);
+    handleSupabaseError(error, "Error al actualizar empresa");
     return null;
   }
 };

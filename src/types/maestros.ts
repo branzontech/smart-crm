@@ -34,3 +34,9 @@ export interface Ciudad {
   created_at: string;
   updated_at: string;
 }
+
+// Utility interface for handling Supabase joins
+export interface RelationshipResponse<T> {
+  data: T | null;
+  error: Error | null;
+}

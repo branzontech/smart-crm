@@ -1,14 +1,13 @@
-
 import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { ArrowLeft, Building2, Loader2 } from "lucide-react";
+import { Building2, Loader2 } from "lucide-react";
 import { fetchEmpresaById, updateEmpresa, Empresa } from "@/services/empresaService";
 import { EmpresaForm, EmpresaFormValues } from "@/components/empresas/EmpresaForm";
 import { toast } from "sonner";
+import { EmpresaBreadcrumbs } from "@/components/empresas/EmpresaBreadcrumbs";
 
 export default function EditarEmpresa() {
   const { id } = useParams<{ id: string }>();
@@ -125,16 +124,7 @@ export default function EditarEmpresa() {
         <Header />
         <main className="content-container overflow-y-auto">
           <div className="max-w-content">
-            <div className="mb-6">
-              <Button
-                variant="ghost"
-                className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
-                onClick={() => navigate(`/empresas/${id}`)}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver a detalles
-              </Button>
-            </div>
+            <EmpresaBreadcrumbs nombreEmpresa={empresa.nombre} />
             
             <Card>
               <CardHeader className="space-y-1">

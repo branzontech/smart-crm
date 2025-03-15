@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -32,7 +33,7 @@ import { CreateClienteDialog } from "@/components/CreateClienteDialog";
 import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
 import { FileUpload } from "@/components/FileUpload";
 import { getClientes } from "@/services/clientesService";
-import { getNextRecaudoNumber, createRecaudo, ArticuloRecaudo } from "@/services/recaudosService";
+import { getNextRecaudoNumber, createRecaudo, ArticuloRecaudo } from "@/services/recaudos";
 import { supabase } from "@/integrations/supabase/client";
 
 const articuloSchema = z.object({

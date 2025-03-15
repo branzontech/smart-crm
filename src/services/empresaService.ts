@@ -64,14 +64,14 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
     // Process each empresa to fetch related data
     const empresasFormateadas = await Promise.all(empresas.map(async (empresa) => {
       // Fetch industria name
-      const { data: industriaData } = await supabase
+      const { data: industriaData, error: industriaError } = await supabase
         .from("sectores" as any)
         .select("nombre")
         .eq("id", empresa.industria)
         .single();
       
       // Fetch ciudad name
-      const { data: ciudadData } = await supabase
+      const { data: ciudadData, error: ciudadError } = await supabase
         .from("ciudades" as any)
         .select("nombre")
         .eq("id", empresa.ciudad)
@@ -79,8 +79,8 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
       
       return {
         ...empresa,
-        industria_nombre: industriaData?.nombre || 'No disponible',
-        ciudad_nombre: ciudadData?.nombre || 'No disponible'
+        industria_nombre: industriaError ? 'No disponible' : industriaData?.nombre || 'No disponible',
+        ciudad_nombre: ciudadError ? 'No disponible' : ciudadData?.nombre || 'No disponible'
       };
     }));
     
@@ -113,13 +113,13 @@ export const fetchEmpresaById = async (id: string): Promise<Empresa | null> => {
     const empresaData = data as any;
     
     // Now fetch related data
-    const { data: industriaData } = await supabase
+    const { data: industriaData, error: industriaError } = await supabase
       .from("sectores" as any)
       .select("nombre")
       .eq("id", empresaData.industria)
       .single();
     
-    const { data: ciudadData } = await supabase
+    const { data: ciudadData, error: ciudadError } = await supabase
       .from("ciudades" as any)
       .select("nombre") 
       .eq("id", empresaData.ciudad)
@@ -128,8 +128,8 @@ export const fetchEmpresaById = async (id: string): Promise<Empresa | null> => {
     // Merge all data
     const empresaFormateada = {
       ...empresaData,
-      industria_nombre: industriaData?.nombre || 'No disponible',
-      ciudad_nombre: ciudadData?.nombre || 'No disponible'
+      industria_nombre: industriaError ? 'No disponible' : industriaData?.nombre || 'No disponible',
+      ciudad_nombre: ciudadError ? 'No disponible' : ciudadData?.nombre || 'No disponible'
     };
     
     // Ensure proper type conversion

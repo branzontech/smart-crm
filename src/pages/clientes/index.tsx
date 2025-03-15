@@ -213,7 +213,7 @@ export default function ClientesPage() {
                         {filteredClientes.map((cliente) => (
                           <TableRow key={cliente.id}>
                             <TableCell className="font-medium">
-                              {cliente.tipoPersona === 'natural'
+                              {cliente.tipo_persona === 'natural'
                                 ? `${cliente.nombre} ${cliente.apellidos || ''}`
                                 : cliente.nombre}
                             </TableCell>
@@ -221,12 +221,12 @@ export default function ClientesPage() {
                               <div className="flex flex-col">
                                 <span>{cliente.documento}</span>
                                 <span className="text-xs text-gray-500">
-                                  {getTipoPersonaLabel(cliente.tipoPersona)}
+                                  {getTipoPersonaLabel(cliente.tipo_persona)}
                                 </span>
                               </div>
                             </TableCell>
                             <TableCell>
-                              {cliente.tipoPersona === 'juridica' 
+                              {cliente.tipo_persona === 'juridica' 
                                 ? 'Empresa' 
                                 : cliente.empresa 
                                   ? cliente.empresa 

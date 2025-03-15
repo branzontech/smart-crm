@@ -15,30 +15,35 @@ export const EmpresaStep: React.FC = () => {
   const { cotizacion, updateEmpresaEmisor, updateFechaVencimiento } = useCotizacion();
   const { empresaEmisor, fechaEmision, fechaVencimiento } = cotizacion;
   const [isLoading, setIsLoading] = useState(true);
+  const [hasLoadedData, setHasLoadedData] = useState(false); // Flag para controlar la carga única
 
   useEffect(() => {
-    const loadCompanyData = async () => {
-      setIsLoading(true);
-      try {
-        const config = await fetchCompanyConfig();
-        if (config) {
-          updateEmpresaEmisor({
-            nombre: config.razon_social,
-            nit: config.nit,
-            telefono: config.telefono,
-            direccion: config.direccion,
-            logo: config.logo_path
-          });
+    // Solo cargar los datos si no se han cargado previamente
+    if (!hasLoadedData) {
+      const loadCompanyData = async () => {
+        setIsLoading(true);
+        try {
+          const config = await fetchCompanyConfig();
+          if (config) {
+            updateEmpresaEmisor({
+              nombre: config.razon_social,
+              nit: config.nit,
+              telefono: config.telefono,
+              direccion: config.direccion,
+              logo: config.logo_path
+            });
+          }
+        } catch (error) {
+          console.error('Error loading company config:', error);
+        } finally {
+          setIsLoading(false);
+          setHasLoadedData(true); // Marcar que los datos ya se cargaron
         }
-      } catch (error) {
-        console.error('Error loading company config:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
+      };
 
-    loadCompanyData();
-  }, [updateEmpresaEmisor]);
+      loadCompanyData();
+    }
+  }, [hasLoadedData, updateEmpresaEmisor]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;

@@ -1,5 +1,5 @@
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Cotizacion, CotizacionStep, ProductoCotizacion, Cliente, EmpresaEmisor } from '@/types/cotizacion';
 import { generateCotizacionNumber } from '@/services/cotizacionService';
 
@@ -60,19 +60,20 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   const [cotizacion, setCotizacion] = useState<Cotizacion>(createDefaultCotizacion());
   const [currentStep, setCurrentStep] = useState<CotizacionStep>('empresa');
 
-  const updateEmpresaEmisor = (empresa: Partial<EmpresaEmisor>) => {
+  // Usamos useCallback para evitar recreaciones innecesarias de las funciones
+  const updateEmpresaEmisor = useCallback((empresa: Partial<EmpresaEmisor>) => {
     setCotizacion(prev => ({
       ...prev,
       empresaEmisor: { ...prev.empresaEmisor, ...empresa }
     }));
-  };
+  }, []);
 
-  const updateCliente = (cliente: Partial<Cliente>) => {
+  const updateCliente = useCallback((cliente: Partial<Cliente>) => {
     setCotizacion(prev => ({
       ...prev,
       cliente: { ...prev.cliente, ...cliente }
     }));
-  };
+  }, []);
 
   const calcularTotalProducto = (
     cantidad: number,
@@ -84,7 +85,7 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
     return subtotal + ivaAmount;
   };
 
-  const addProducto = (producto: Omit<ProductoCotizacion, 'total'>) => {
+  const addProducto = useCallback((producto: Omit<ProductoCotizacion, 'total'>) => {
     const total = calcularTotalProducto(
       producto.cantidad,
       producto.precioUnitario,
@@ -100,11 +101,9 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       ...prev,
       productos: [...prev.productos, newProducto]
     }));
-    
-    calcularTotales();
-  };
+  }, []);
 
-  const updateProducto = (
+  const updateProducto = useCallback((
     id: string,
     updates: Partial<Omit<ProductoCotizacion, 'total'>>
   ) => {
@@ -127,27 +126,23 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         productos: updatedProductos
       };
     });
-    
-    calcularTotales();
-  };
+  }, []);
 
-  const removeProducto = (id: string) => {
+  const removeProducto = useCallback((id: string) => {
     setCotizacion(prev => ({
       ...prev,
       productos: prev.productos.filter(p => p.id !== id)
     }));
-    
-    calcularTotales();
-  };
+  }, []);
 
-  const updateFechaVencimiento = (fecha: Date) => {
+  const updateFechaVencimiento = useCallback((fecha: Date) => {
     setCotizacion(prev => ({
       ...prev,
       fechaVencimiento: fecha
     }));
-  };
+  }, []);
 
-  const calcularTotales = () => {
+  const calcularTotales = useCallback(() => {
     setCotizacion(prev => {
       const subtotal = prev.productos.reduce(
         (sum, product) => sum + (product.cantidad * product.precioUnitario),
@@ -167,16 +162,16 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         total: subtotal + totalIva
       };
     });
-  };
+  }, []);
 
-  const resetCotizacion = () => {
+  const resetCotizacion = useCallback(() => {
     setCotizacion(createDefaultCotizacion());
     setCurrentStep('empresa');
-  };
+  }, []);
 
   useEffect(() => {
     calcularTotales();
-  }, [cotizacion.productos]);
+  }, [cotizacion.productos, calcularTotales]);
 
   const value: CotizacionContextType = {
     cotizacion,

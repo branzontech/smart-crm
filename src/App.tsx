@@ -25,6 +25,8 @@ import NuevaEmpresa from "./pages/empresas/nuevo";
 
 // Proveedores
 import Proveedores from "./pages/proveedores";
+import DetalleProveedor from "./pages/proveedores/[id]";
+import EditarProveedor from "./pages/proveedores/[id]/editar";
 import NuevoProveedor from "./pages/proveedores/nuevo";
 
 // Recaudos
@@ -134,6 +136,16 @@ export default function App() {
             <Route path="/proveedores/nuevo" element={
               <ProtectedRoute>
                 <NuevoProveedor />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores/:id" element={
+              <ProtectedRoute>
+                <DetalleProveedor />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores/:id/editar" element={
+              <ProtectedRoute>
+                <EditarProveedor />
               </ProtectedRoute>
             } />
             

@@ -7,7 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Loader2, Search } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchPaises, fetchCiudades, fetchSectores } from '@/services/maestrosService';
-import { Pais, Ciudad, Sector } from '@/types/maestros';
+import { Pais, Ciudad, Sector, Cliente as ClienteType } from '@/types/maestros';
+import { getClientes } from '@/services/clientesService';
 import {
   Select,
   SelectContent,
@@ -16,38 +17,12 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-// Mockup clients data for search functionality
-const mockClientes = [
-  {
-    id: '1',
-    nombre: 'Empresa ABC',
-    nit: '800.123.456-1',
-    telefono: '+57 (1) 234-5678',
-    contacto: 'Juan Pérez',
-    direccion: 'Calle 123 #45-67, Bogotá',
-    pais_id: '',
-    ciudad_id: '',
-    sector_id: ''
-  },
-  {
-    id: '2',
-    nombre: 'Comercial XYZ',
-    nit: '900.456.789-2',
-    telefono: '+57 (1) 987-6543',
-    contacto: 'María López',
-    direccion: 'Av. Principal #89-12, Medellín',
-    pais_id: '',
-    ciudad_id: '',
-    sector_id: ''
-  }
-];
-
 export const ClienteStep: React.FC = () => {
   const { cotizacion, updateCliente } = useCotizacion();
   const { cliente } = cotizacion;
   
   const [searchTerm, setSearchTerm] = useState('');
-  const [searchResults, setSearchResults] = useState<typeof mockClientes>([]);
+  const [searchResults, setSearchResults] = useState<ClienteType[]>([]);
   const [showResults, setShowResults] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   
@@ -98,7 +73,7 @@ export const ClienteStep: React.FC = () => {
     }
   }, [cliente.pais_id, ciudades, updateCliente]);
 
-  const handleSearch = () => {
+  const handleSearch = async () => {
     if (!searchTerm) {
       toast.error('Ingrese un término de búsqueda');
       return;
@@ -106,25 +81,47 @@ export const ClienteStep: React.FC = () => {
     
     setIsLoading(true);
     
-    // In a real app, this would be an API call
-    setTimeout(() => {
-      const results = mockClientes.filter(
-        c => c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
-             c.nit.replace(/[.-]/g, '').includes(searchTerm.replace(/[.-]/g, ''))
-      );
+    try {
+      const { data: clientes, error } = await getClientes();
       
-      setSearchResults(results);
-      setShowResults(true);
-      setIsLoading(false);
+      if (error) throw error;
       
-      if (results.length === 0) {
-        toast.info('No se encontraron clientes con ese criterio');
+      if (clientes) {
+        const results = clientes.filter(
+          c => c.nombre.toLowerCase().includes(searchTerm.toLowerCase()) || 
+               c.documento.replace(/[.-]/g, '').includes(searchTerm.replace(/[.-]/g, ''))
+        );
+        
+        setSearchResults(results);
+        setShowResults(true);
+        
+        if (results.length === 0) {
+          toast.info('No se encontraron clientes con ese criterio');
+        }
       }
-    }, 500);
+    } catch (error) {
+      console.error("Error al buscar clientes:", error);
+      toast.error("Error al buscar clientes");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const selectCliente = (selectedCliente: typeof mockClientes[0]) => {
-    updateCliente(selectedCliente);
+  const selectCliente = (selectedCliente: ClienteType) => {
+    // Transformar el cliente de la base de datos al formato requerido por la cotización
+    const clienteData = {
+      id: selectedCliente.id,
+      nombre: selectedCliente.nombre,
+      nit: selectedCliente.documento,
+      telefono: selectedCliente.telefono,
+      contacto: selectedCliente.tipo_persona === 'juridica' ? selectedCliente.cargo || '' : `${selectedCliente.nombre} ${selectedCliente.apellidos || ''}`,
+      direccion: selectedCliente.direccion,
+      pais_id: selectedCliente.pais_id,
+      ciudad_id: selectedCliente.ciudad_id,
+      sector_id: selectedCliente.sector_id
+    };
+    
+    updateCliente(clienteData);
     setShowResults(false);
     toast.success(`Cliente ${selectedCliente.nombre} seleccionado`);
   };
@@ -161,7 +158,7 @@ export const ClienteStep: React.FC = () => {
             id="search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Buscar por nombre o NIT"
+            placeholder="Buscar por nombre o documento"
             className="flex-1"
           />
           <Button onClick={handleSearch} type="button" className="shrink-0" disabled={isLoading}>
@@ -183,8 +180,13 @@ export const ClienteStep: React.FC = () => {
               {searchResults.map((result) => (
                 <div key={result.id} className="p-3 hover:bg-gray-50 cursor-pointer" onClick={() => selectCliente(result)}>
                   <div className="font-medium">{result.nombre}</div>
-                  <div className="text-sm text-gray-500">NIT: {result.nit}</div>
-                  <div className="text-sm text-gray-500">Contacto: {result.contacto}</div>
+                  <div className="text-sm text-gray-500">Documento: {result.documento}</div>
+                  <div className="text-sm text-gray-500">
+                    {result.tipo_persona === 'juridica' 
+                      ? `Contacto: ${result.cargo || 'No especificado'}`
+                      : `${result.apellidos || ''}`
+                    }
+                  </div>
                 </div>
               ))}
             </div>

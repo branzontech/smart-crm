@@ -84,17 +84,26 @@ const EmpresasIndex = () => {
                             className="hover:bg-gray-50 transition-colors duration-150"
                           >
                             <TableCell className="font-medium">{empresa.nombre}</TableCell>
-                            <TableCell>{empresa.industria}</TableCell>
+                            <TableCell>{empresa.industria_nombre || 'No disponible'}</TableCell>
                             <TableCell>{empresa.empleados}</TableCell>
-                            <TableCell>{empresa.ciudad}</TableCell>
+                            <TableCell>{empresa.ciudad_nombre || 'No disponible'}</TableCell>
                             <TableCell>
-                              <Button
-                                variant="ghost"
-                                className="text-teal hover:text-sage hover:bg-mint/20"
-                                onClick={() => navigate(`/empresas/${empresa.id}`)}
-                              >
-                                Ver detalles
-                              </Button>
+                              <div className="flex gap-2">
+                                <Button
+                                  variant="ghost"
+                                  className="text-teal hover:text-sage hover:bg-mint/20"
+                                  onClick={() => navigate(`/empresas/${empresa.id}`)}
+                                >
+                                  Ver detalles
+                                </Button>
+                                <Button
+                                  variant="ghost"
+                                  className="text-amber-600 hover:text-amber-700 hover:bg-amber-50"
+                                  onClick={() => navigate(`/empresas/${empresa.id}/editar`)}
+                                >
+                                  Editar
+                                </Button>
+                              </div>
                             </TableCell>
                           </TableRow>
                         ))

@@ -278,6 +278,53 @@ export type Database = {
         }
         Relationships: []
       }
+      proveedores: {
+        Row: {
+          contacto: string
+          created_at: string
+          descripcion: string | null
+          documento: string
+          id: string
+          nombre: string
+          sector_id: string | null
+          tipo_documento: string
+          tipo_proveedor: string
+          updated_at: string
+        }
+        Insert: {
+          contacto: string
+          created_at?: string
+          descripcion?: string | null
+          documento: string
+          id?: string
+          nombre: string
+          sector_id?: string | null
+          tipo_documento: string
+          tipo_proveedor: string
+          updated_at?: string
+        }
+        Update: {
+          contacto?: string
+          created_at?: string
+          descripcion?: string | null
+          documento?: string
+          id?: string
+          nombre?: string
+          sector_id?: string | null
+          tipo_documento?: string
+          tipo_proveedor?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proveedores_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectores"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       sectores: {
         Row: {
           created_at: string

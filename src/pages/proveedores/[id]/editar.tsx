@@ -1,12 +1,13 @@
 
+import { useState, useEffect } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { Navbar } from "@/components/layout/Navbar";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { ArrowLeft, Building2, Save } from "lucide-react";
+import { useNavigate, useParams } from "react-router-dom";
+import { ArrowLeft, Building2, Save, Loader2 } from "lucide-react";
 import {
   Form,
   FormControl,
@@ -25,62 +26,101 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { createProveedor } from "@/services/proveedoresService";
+import { getProveedorById, updateProveedor } from "@/services/proveedoresService";
 import { useQuery } from "@tanstack/react-query";
 import { fetchSectores } from "@/services/maestrosService";
-import { Loader2 } from "lucide-react";
 
 const proveedorSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
-  tipoDocumento: z.string().min(2, "El tipo de documento es requerido"),
+  tipo_documento: z.string().min(2, "El tipo de documento es requerido"),
   documento: z.string().min(5, "El documento es requerido"),
   contacto: z.string().min(7, "El número de contacto es requerido"),
-  tipoProveedor: z.string().min(2, "El tipo de proveedor es requerido"),
+  tipo_proveedor: z.string().min(2, "El tipo de proveedor es requerido"),
   sector_id: z.string().optional(),
   descripcion: z.string().optional(),
 });
 
-type ProveedorForm = z.infer<typeof proveedorSchema>;
+type ProveedorFormValues = z.infer<typeof proveedorSchema>;
 
-export default function NuevoProveedor() {
+export default function EditarProveedor() {
+  const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isLoading, setIsLoading] = useState(true);
   
-  // Fetch sectors from the database
+  // Fetch sectors
   const { data: sectores = [], isLoading: isLoadingSectores } = useQuery({
     queryKey: ["sectores"],
     queryFn: fetchSectores,
   });
   
-  const form = useForm<ProveedorForm>({
+  const form = useForm<ProveedorFormValues>({
     resolver: zodResolver(proveedorSchema),
     defaultValues: {
-      tipoDocumento: "NIT",
-      tipoProveedor: "",
+      nombre: "",
+      tipo_documento: "",
+      documento: "",
+      contacto: "",
+      tipo_proveedor: "",
       descripcion: "",
     },
   });
 
-  const onSubmit = async (data: ProveedorForm) => {
+  useEffect(() => {
+    if (id) {
+      loadProveedor(id);
+    }
+  }, [id]);
+
+  const loadProveedor = async (proveedorId: string) => {
+    setIsLoading(true);
     try {
-      // Map form data to database structure
-      const proveedorData = {
-        nombre: data.nombre,
-        tipo_documento: data.tipoDocumento,
-        documento: data.documento,
-        contacto: data.contacto,
-        tipo_proveedor: data.tipoProveedor,
-        sector_id: data.sector_id,
-        descripcion: data.descripcion,
-      };
+      const proveedor = await getProveedorById(proveedorId);
       
-      await createProveedor(proveedorData);
-      toast.success("Proveedor creado exitosamente");
-      navigate("/proveedores");
+      form.reset({
+        nombre: proveedor.nombre,
+        tipo_documento: proveedor.tipo_documento,
+        documento: proveedor.documento,
+        contacto: proveedor.contacto,
+        tipo_proveedor: proveedor.tipo_proveedor,
+        sector_id: proveedor.sector_id,
+        descripcion: proveedor.descripcion || "",
+      });
     } catch (error: any) {
-      console.error("Error creating provider:", error);
-      toast.error(`Error al crear el proveedor: ${error.message}`);
+      toast.error(`Error al cargar el proveedor: ${error.message}`);
+      console.error("Error loading proveedor:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
+
+  const onSubmit = async (data: ProveedorFormValues) => {
+    if (!id) return;
+    
+    try {
+      await updateProveedor(id, data);
+      toast.success("Proveedor actualizado exitosamente");
+      navigate(`/proveedores/${id}`);
+    } catch (error: any) {
+      console.error("Error updating proveedor:", error);
+      toast.error(`Error al actualizar el proveedor: ${error.message}`);
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex bg-gray-50">
+        <Navbar />
+        <div className="main-container">
+          <main className="flex-1 content-container">
+            <div className="max-w-content flex justify-center items-center h-full">
+              <Loader2 className="h-8 w-8 animate-spin text-teal" />
+              <span className="ml-2">Cargando datos del proveedor...</span>
+            </div>
+          </main>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -92,10 +132,10 @@ export default function NuevoProveedor() {
               <Button
                 variant="ghost"
                 className="text-teal hover:text-sage hover:bg-mint/20 mb-4"
-                onClick={() => navigate("/proveedores")}
+                onClick={() => navigate(`/proveedores/${id}`)}
               >
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Volver al listado
+                Volver a detalles
               </Button>
             </div>
 
@@ -103,7 +143,7 @@ export default function NuevoProveedor() {
               <CardHeader className="space-y-1">
                 <div className="flex items-center gap-2">
                   <Building2 className="h-6 w-6 text-teal" />
-                  <CardTitle className="text-2xl">Nuevo Proveedor</CardTitle>
+                  <CardTitle className="text-2xl">Editar Proveedor</CardTitle>
                 </div>
               </CardHeader>
               <CardContent>
@@ -126,11 +166,11 @@ export default function NuevoProveedor() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
-                        name="tipoDocumento"
+                        name="tipo_documento"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Tipo de Documento</FormLabel>
-                            <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <Select onValueChange={field.onChange} value={field.value}>
                               <FormControl>
                                 <SelectTrigger>
                                   <SelectValue placeholder="Seleccione tipo de documento" />
@@ -184,7 +224,7 @@ export default function NuevoProveedor() {
                             <FormLabel>Sector</FormLabel>
                             <Select 
                               onValueChange={field.onChange} 
-                              defaultValue={field.value}
+                              value={field.value}
                               disabled={isLoadingSectores}
                             >
                               <FormControl>
@@ -215,11 +255,11 @@ export default function NuevoProveedor() {
                     
                     <FormField
                       control={form.control}
-                      name="tipoProveedor"
+                      name="tipo_proveedor"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Tipo de Proveedor</FormLabel>
-                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <Select onValueChange={field.onChange} value={field.value}>
                             <FormControl>
                               <SelectTrigger>
                                 <SelectValue placeholder="Seleccione el tipo de industria" />
@@ -258,7 +298,7 @@ export default function NuevoProveedor() {
 
                     <Button type="submit" className="w-full bg-teal hover:bg-sage">
                       <Save className="mr-2 h-4 w-4" />
-                      Guardar Proveedor
+                      Guardar Cambios
                     </Button>
                   </form>
                 </Form>

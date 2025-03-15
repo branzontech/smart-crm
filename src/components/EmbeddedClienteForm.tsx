@@ -33,6 +33,7 @@ import {
 import { fetchSectores, fetchPaises } from "@/services/maestrosService";
 import { Sector, Pais } from "@/types/maestros";
 import { createCliente, ClienteForm } from "@/services/clientesService";
+import { fetchEmpresas, Empresa } from "@/services/empresaService";
 
 const clienteSimpleSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
@@ -41,6 +42,7 @@ const clienteSimpleSchema = z.object({
   telefono: z.string().optional(),
   sector: z.string().min(2, "El sector es requerido"),
   pais: z.string().min(2, "El país es requerido"),
+  empresa: z.string().optional(),
 });
 
 type ClienteSimpleForm = z.infer<typeof clienteSimpleSchema>;
@@ -54,6 +56,7 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
   const [isLoading, setIsLoading] = useState(false);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [paises, setPaises] = useState<Pais[]>([]);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [isLoadingMaestros, setIsLoadingMaestros] = useState(false);
   const navigate = useNavigate();
 
@@ -66,6 +69,7 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
       telefono: "",
       sector: "",
       pais: "",
+      empresa: "",
     },
   });
 
@@ -75,13 +79,15 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
       const loadMaestros = async () => {
         setIsLoadingMaestros(true);
         try {
-          const [sectoresData, paisesData] = await Promise.all([
+          const [sectoresData, paisesData, empresasData] = await Promise.all([
             fetchSectores(),
             fetchPaises(),
+            fetchEmpresas(),
           ]);
           
           setSectores(sectoresData);
           setPaises(paisesData);
+          setEmpresas(empresasData);
         } catch (error) {
           console.error("Error al cargar datos maestros:", error);
           toast.error("Error al cargar datos de referencia");
@@ -117,6 +123,7 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
         direccion: "Por definir", // Valores por defecto
         ciudad: data.pais, // Usamos el mismo país como ciudad temporalmente
         origen: data.sector, // Usamos el sector como origen temporalmente
+        empresa: data.empresa, // Usamos la empresa seleccionada
       };
 
       const result = await createCliente(clienteCompleto);
@@ -196,6 +203,34 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
                           {...field}
                         />
                       </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                
+                <FormField
+                  control={form.control}
+                  name="empresa"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Empresa</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        value={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona una empresa" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {empresas.map((empresa) => (
+                            <SelectItem key={empresa.id} value={empresa.id}>
+                              {empresa.nombre}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                       <FormMessage />
                     </FormItem>
                   )}

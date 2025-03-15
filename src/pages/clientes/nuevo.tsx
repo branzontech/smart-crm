@@ -32,6 +32,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchSectores, fetchTiposServicios, fetchPaises, fetchCiudades, fetchOrigenesCliente } from "@/services/maestrosService";
 import { Sector, TipoServicio, Pais, Ciudad, OrigenCliente } from "@/types/maestros";
 import { createCliente, ClienteForm } from "@/services/clientesService";
+import { fetchEmpresas, Empresa } from "@/services/empresaService";
 
 const clienteSchema = z.object({
   tipoPersona: z.enum(["natural", "juridica"]),
@@ -71,6 +72,7 @@ export default function NuevoCliente() {
   const [origenesCliente, setOrigenesCliente] = useState<OrigenCliente[]>([]);
   const [ciudadesFiltradas, setCiudadesFiltradas] = useState<Ciudad[]>([]);
   const [isLoadingMaestros, setIsLoadingMaestros] = useState(true);
+  const [empresas, setEmpresas] = useState<Empresa[]>([]); // Estado para las empresas
 
   const form = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteSchema),
@@ -92,12 +94,13 @@ export default function NuevoCliente() {
     const loadMaestros = async () => {
       setIsLoadingMaestros(true);
       try {
-        const [sectoresData, tiposServicioData, paisesData, ciudadesData, origenesData] = await Promise.all([
+        const [sectoresData, tiposServicioData, paisesData, ciudadesData, origenesData, empresasData] = await Promise.all([
           fetchSectores(),
           fetchTiposServicios(),
           fetchPaises(),
           fetchCiudades(),
-          fetchOrigenesCliente()
+          fetchOrigenesCliente(),
+          fetchEmpresas() // Cargar las empresas existentes
         ]);
         
         setSectores(sectoresData);
@@ -105,6 +108,7 @@ export default function NuevoCliente() {
         setPaises(paisesData);
         setCiudades(ciudadesData);
         setOrigenesCliente(origenesData);
+        setEmpresas(empresasData); // Guardar las empresas
       } catch (error) {
         console.error("Error al cargar datos maestros:", error);
         toast.error("Error al cargar datos de referencia");
@@ -374,9 +378,23 @@ export default function NuevoCliente() {
                                 render={({ field }) => (
                                   <FormItem>
                                     <FormLabel>Empresa</FormLabel>
-                                    <FormControl>
-                                      <Input placeholder="Empresa S.A." {...field} />
-                                    </FormControl>
+                                    <Select
+                                      onValueChange={field.onChange}
+                                      value={field.value}
+                                    >
+                                      <FormControl>
+                                        <SelectTrigger>
+                                          <SelectValue placeholder="Selecciona una empresa" />
+                                        </SelectTrigger>
+                                      </FormControl>
+                                      <SelectContent>
+                                        {empresas.map((empresa) => (
+                                          <SelectItem key={empresa.id} value={empresa.id}>
+                                            {empresa.nombre}
+                                          </SelectItem>
+                                        ))}
+                                      </SelectContent>
+                                    </Select>
                                     <FormMessage />
                                   </FormItem>
                                 )}

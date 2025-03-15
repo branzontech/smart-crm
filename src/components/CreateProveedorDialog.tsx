@@ -39,7 +39,7 @@ export function CreateProveedorDialog({ onProveedorCreated }: CreateProveedorDia
   };
 
   return (
-    <Drawer open={open} onOpenChange={setOpen} direction="left">
+    <Drawer open={open} onOpenChange={setOpen} direction="right">
       <DrawerTrigger asChild>
         <Button
           type="button"
@@ -50,7 +50,7 @@ export function CreateProveedorDialog({ onProveedorCreated }: CreateProveedorDia
           Nuevo Proveedor
         </Button>
       </DrawerTrigger>
-      <DrawerContent className="h-[90vh] pt-6 w-1/2 left-0 right-auto">
+      <DrawerContent className="h-screen pt-6 w-1/2 right-0 left-auto">
         <DrawerHeader className="max-w-4xl mx-auto w-full">
           <DrawerTitle className="text-xl">Crear Nuevo Proveedor</DrawerTitle>
         </DrawerHeader>

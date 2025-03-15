@@ -6,7 +6,24 @@ import { toast } from "sonner";
 import { Json } from "@/integrations/supabase/types";
 
 // Generate a quotation number
-export const generateCotizacionNumber = (): string => {
+export const generateCotizacionNumber = async (): Promise<string> => {
+  // Try to get a sequence-based number from the database first
+  try {
+    const { data, error } = await supabase.rpc('get_next_cotizacion_numero');
+    
+    if (error) {
+      console.error("Error getting cotización number:", error);
+      throw error;
+    }
+    
+    if (data) {
+      return data;
+    }
+  } catch (error) {
+    console.warn("Fallback to client-side generation due to error:", error);
+  }
+  
+  // Fallback to client-side generation
   const date = new Date();
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -14,9 +31,47 @@ export const generateCotizacionNumber = (): string => {
   return `COT-${year}${month}-${random}`;
 };
 
+// Validate cotizacion before saving
+const validateCotizacion = (cotizacion: Cotizacion): { isValid: boolean, errors: string[] } => {
+  const errors: string[] = [];
+  
+  // Validate empresa emisor
+  if (!cotizacion.empresaEmisor.nombre) errors.push("Nombre de empresa emisora requerido");
+  if (!cotizacion.empresaEmisor.nit) errors.push("NIT de empresa emisora requerido");
+  
+  // Validate cliente
+  if (!cotizacion.cliente.nombre) errors.push("Nombre de cliente requerido");
+  if (!cotizacion.cliente.nit) errors.push("NIT de cliente requerido");
+  
+  // Validate productos
+  if (cotizacion.productos.length === 0) {
+    errors.push("Debe agregar al menos un producto");
+  } else {
+    cotizacion.productos.forEach((producto, index) => {
+      if (!producto.descripcion) errors.push(`Descripción del producto ${index + 1} requerida`);
+      if (producto.cantidad <= 0) errors.push(`Cantidad del producto ${index + 1} inválida`);
+      if (producto.precioUnitario < 0) errors.push(`Precio unitario del producto ${index + 1} inválido`);
+    });
+  }
+  
+  return {
+    isValid: errors.length === 0,
+    errors
+  };
+};
+
 // Save quotation to database
 export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | null> => {
   try {
+    // Validate cotizacion before saving
+    const { isValid, errors } = validateCotizacion(cotizacion);
+    
+    if (!isValid) {
+      const errorMessage = errors.join(", ");
+      toast.error(`Error de validación: ${errorMessage}`);
+      return null;
+    }
+    
     // Convert our application types to database types
     const cotizacionDB = {
       numero: cotizacion.numero,

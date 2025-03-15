@@ -1,29 +1,42 @@
 
-import React, { useRef } from 'react';
+import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Save, Printer, Download } from 'lucide-react';
+import { saveCotizacion } from '@/services/cotizacionService';
+import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Button } from '@/components/ui/button';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export const PreviewStep: React.FC = () => {
-  const { cotizacion, updateEmpresaEmisor } = useCotizacion();
-  const { 
-    empresaEmisor, 
-    cliente, 
-    productos, 
-    numero, 
-    fechaEmision, 
-    fechaVencimiento,
-    subtotal,
-    totalIva,
-    total
-  } = cotizacion;
-
-  const signatureRef = useRef<HTMLDivElement>(null);
-
+  const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
+  
+  const handleBack = () => {
+    setCurrentStep('productos');
+  };
+  
+  const handleSave = async () => {
+    setIsSaving(true);
+    
+    try {
+      const cotizacionId = await saveCotizacion(cotizacion);
+      
+      if (cotizacionId) {
+        toast.success("Cotización guardada correctamente");
+        navigate(`/ventas/cotizaciones`);
+      }
+    } catch (error) {
+      console.error("Error al guardar la cotización:", error);
+      toast.error("Error al guardar la cotización");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+  
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
@@ -31,165 +44,187 @@ export const PreviewStep: React.FC = () => {
       minimumFractionDigits: 0
     }).format(value);
   };
-
-  const handleFirmaNombreChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    updateEmpresaEmisor({ firmaNombre: e.target.value });
+  
+  const formatDate = (date: Date) => {
+    return format(date, "dd 'de' MMMM 'de' yyyy", { locale: es });
   };
+  
+  // Validate if all required data is present
+  const validateCotizacion = () => {
+    const errors = [];
+    
+    // Validate empresa emisora
+    if (!cotizacion.empresaEmisor.nombre) {
+      errors.push("Falta el nombre de la empresa emisora");
+    }
+    
+    // Validate cliente
+    if (!cotizacion.cliente.nombre) {
+      errors.push("Falta el nombre del cliente");
+    }
+    
+    // Validate productos
+    if (cotizacion.productos.length === 0) {
+      errors.push("No ha agregado productos a la cotización");
+    }
+    
+    return errors;
+  };
+  
+  const errors = validateCotizacion();
+  const hasErrors = errors.length > 0;
 
   return (
-    <div className="w-full">
-      <div className="mb-6">
-        <h2 className="text-2xl font-semibold mb-2">Vista Previa de la Cotización</h2>
-        <p className="text-gray-500">
-          Revise todos los detalles antes de enviar o imprimir.
-        </p>
-      </div>
-
-      <div className="border rounded-md overflow-hidden mb-6 print:border-none" id="cotizacion-preview">
-        {/* Encabezado */}
-        <div className="bg-primary text-primary-foreground p-4 sm:p-6 print:bg-primary print:text-primary-foreground">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex items-center gap-4">
-              {empresaEmisor.logo && (
-                <img 
-                  src={empresaEmisor.logo} 
-                  alt="Logo"
-                  className="h-16 w-auto object-contain"
-                />
-              )}
-              <div>
-                <h1 className="text-xl sm:text-2xl font-bold">{empresaEmisor.nombre}</h1>
-                <p>NIT: {empresaEmisor.nit}</p>
-              </div>
+    <div className="space-y-6 w-full">
+      <h2 className="text-2xl font-semibold">Previsualización de Cotización</h2>
+      <p className="text-gray-500">
+        Verifique la información de la cotización antes de guardar.
+      </p>
+      
+      {hasErrors && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertDescription>
+            <div className="font-medium mb-2">Por favor corrija los siguientes errores antes de guardar:</div>
+            <ul className="list-disc pl-5">
+              {errors.map((error, index) => (
+                <li key={index}>{error}</li>
+              ))}
+            </ul>
+          </AlertDescription>
+        </Alert>
+      )}
+      
+      <div className="border rounded-md p-8 bg-white print:border-none">
+        <div className="flex flex-col gap-8">
+          {/* Header */}
+          <div className="flex justify-between items-start">
+            <div>
+              <h1 className="text-2xl font-bold">{cotizacion.empresaEmisor.nombre}</h1>
+              <p className="text-gray-600">NIT: {cotizacion.empresaEmisor.nit}</p>
+              <p className="text-gray-600">{cotizacion.empresaEmisor.direccion}</p>
+              <p className="text-gray-600">Teléfono: {cotizacion.empresaEmisor.telefono}</p>
             </div>
-            <div className="text-center md:text-right mt-4 md:mt-0">
-              <h2 className="text-lg sm:text-xl font-semibold">COTIZACIÓN</h2>
-              <p className="font-bold">#{numero}</p>
-              <p>Fecha: {format(fechaEmision, 'dd/MM/yyyy', { locale: es })}</p>
-              <p>Vence: {format(fechaVencimiento, 'dd/MM/yyyy', { locale: es })}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Información de empresa y cliente */}
-        <div className="p-4 sm:p-6 grid grid-cols-1 md:grid-cols-2 gap-6 bg-white">
-          <div>
-            <h3 className="font-semibold text-lg mb-2">Empresa Emisora</h3>
-            <div className="space-y-1">
-              <p>{empresaEmisor.nombre}</p>
-              <p>NIT: {empresaEmisor.nit}</p>
-              <p>Teléfono: {empresaEmisor.telefono}</p>
-              <p>Dirección: {empresaEmisor.direccion}</p>
+            <div className="text-right">
+              <h2 className="text-xl font-semibold text-primary">COTIZACIÓN</h2>
+              <p className="text-gray-600">No. {cotizacion.numero}</p>
+              <p className="text-gray-600">Fecha: {formatDate(cotizacion.fechaEmision)}</p>
+              <p className="text-gray-600">Válida hasta: {formatDate(cotizacion.fechaVencimiento)}</p>
             </div>
           </div>
-          <div>
+          
+          {/* Cliente */}
+          <div className="border-t pt-4">
             <h3 className="font-semibold text-lg mb-2">Cliente</h3>
-            <div className="space-y-1">
-              <p>{cliente.nombre}</p>
-              <p>NIT: {cliente.nit}</p>
-              <p>Contacto: {cliente.contacto}</p>
-              <p>Teléfono: {cliente.telefono}</p>
-              <p>Dirección: {cliente.direccion}</p>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+              <div>
+                <p className="font-medium">Nombre:</p>
+                <p>{cotizacion.cliente.nombre}</p>
+              </div>
+              <div>
+                <p className="font-medium">NIT:</p>
+                <p>{cotizacion.cliente.nit}</p>
+              </div>
+              <div>
+                <p className="font-medium">Dirección:</p>
+                <p>{cotizacion.cliente.direccion}</p>
+              </div>
+              <div>
+                <p className="font-medium">Teléfono:</p>
+                <p>{cotizacion.cliente.telefono}</p>
+              </div>
+              <div>
+                <p className="font-medium">Contacto:</p>
+                <p>{cotizacion.cliente.contacto}</p>
+              </div>
             </div>
           </div>
-        </div>
-
-        {/* Tabla de productos */}
-        <div className="p-4 sm:p-6 bg-white border-t">
-          <h3 className="font-semibold text-lg mb-4">Detalles de la Cotización</h3>
-          <div className="overflow-x-auto">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Descripción</TableHead>
-                  <TableHead className="text-right">Cant.</TableHead>
-                  <TableHead className="text-right">Precio Unit.</TableHead>
-                  <TableHead className="text-right">IVA</TableHead>
-                  <TableHead className="text-right">Total</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {productos.map((producto) => (
-                  <TableRow key={producto.id}>
-                    <TableCell className="font-medium">{producto.descripcion}</TableCell>
-                    <TableCell className="text-right">{producto.cantidad}</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(producto.precioUnitario)}
-                    </TableCell>
-                    <TableCell className="text-right">{producto.iva}%</TableCell>
-                    <TableCell className="text-right">
-                      {formatCurrency(producto.total)}
-                    </TableCell>
-                  </TableRow>
+          
+          {/* Productos */}
+          <div className="border-t pt-4">
+            <h3 className="font-semibold text-lg mb-2">Productos y Servicios</h3>
+            <table className="min-w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-2 font-semibold">Descripción</th>
+                  <th className="text-center py-2 font-semibold">Cantidad</th>
+                  <th className="text-right py-2 font-semibold">Precio Unit.</th>
+                  <th className="text-right py-2 font-semibold">IVA</th>
+                  <th className="text-right py-2 font-semibold">Total</th>
+                </tr>
+              </thead>
+              <tbody>
+                {cotizacion.productos.map((producto, idx) => (
+                  <tr key={idx} className="border-b">
+                    <td className="py-2">{producto.descripcion}</td>
+                    <td className="py-2 text-center">{producto.cantidad}</td>
+                    <td className="py-2 text-right">{formatCurrency(producto.precioUnitario)}</td>
+                    <td className="py-2 text-right">{producto.iva}%</td>
+                    <td className="py-2 text-right">{formatCurrency(producto.total)}</td>
+                  </tr>
                 ))}
-              </TableBody>
-            </Table>
+              </tbody>
+              <tfoot>
+                <tr>
+                  <td colSpan={3}></td>
+                  <td className="py-2 text-right font-medium">Subtotal:</td>
+                  <td className="py-2 text-right">{formatCurrency(cotizacion.subtotal)}</td>
+                </tr>
+                <tr>
+                  <td colSpan={3}></td>
+                  <td className="py-2 text-right font-medium">IVA:</td>
+                  <td className="py-2 text-right">{formatCurrency(cotizacion.totalIva)}</td>
+                </tr>
+                <tr className="font-bold text-lg">
+                  <td colSpan={3}></td>
+                  <td className="py-2 text-right">Total:</td>
+                  <td className="py-2 text-right">{formatCurrency(cotizacion.total)}</td>
+                </tr>
+              </tfoot>
+            </table>
           </div>
-
-          {/* Totales */}
-          <div className="mt-6 flex justify-end">
-            <div className="w-full sm:w-64 space-y-2">
-              <div className="flex justify-between">
-                <span className="font-medium">Subtotal:</span>
-                <span>{formatCurrency(subtotal)}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="font-medium">IVA:</span>
-                <span>{formatCurrency(totalIva)}</span>
-              </div>
-              <div className="flex justify-between text-lg font-bold">
-                <span>Total:</span>
-                <span>{formatCurrency(total)}</span>
-              </div>
-            </div>
+          
+          {/* Terms & Notes */}
+          <div className="border-t pt-4">
+            <h3 className="font-semibold text-lg mb-2">Términos y Condiciones</h3>
+            <p className="text-sm text-gray-600">
+              1. Esta cotización es válida por 30 días a partir de la fecha de emisión.<br />
+              2. Los precios pueden estar sujetos a cambios sin previo aviso.<br />
+              3. Los tiempos de entrega son estimados y pueden variar.<br />
+              4. Los precios incluyen IVA según corresponda.
+            </p>
           </div>
-        </div>
-
-        {/* Notas y Firma */}
-        <div className="p-4 sm:p-6 bg-gray-50 border-t">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Condiciones</h3>
-              <ul className="list-disc pl-5 space-y-1 text-sm">
-                <li>Cotización válida por 30 días a partir de la fecha de emisión.</li>
-                <li>Precios sujetos a cambio sin previo aviso.</li>
-                <li>Forma de pago: A convenir.</li>
-                <li>Tiempo de entrega: A convenir.</li>
-              </ul>
-            </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-2">Firma</h3>
-              <div className="mt-4 print:mt-10 border-t pt-2" ref={signatureRef}>
-                <div className="space-y-2 mb-4 print:hidden">
-                  <Label htmlFor="firmaNombre">Nombre del Firmante</Label>
-                  <Input
-                    id="firmaNombre"
-                    value={empresaEmisor.firmaNombre || ''}
-                    onChange={handleFirmaNombreChange}
-                    placeholder="Nombre y cargo"
-                  />
-                </div>
-                
-                <p className="text-center print:mt-16">
-                  {empresaEmisor.firmaNombre || 'Firma Autorizada'}
-                </p>
-                <p className="text-center text-sm text-gray-500">
-                  {empresaEmisor.nombre}
-                </p>
-              </div>
+          
+          {/* Firma */}
+          <div className="border-t pt-4 mt-auto">
+            <div className="flex flex-col items-center mt-8">
+              <div className="border-t border-gray-400 w-48 mb-1 pt-2"></div>
+              <p className="font-medium">{cotizacion.empresaEmisor.nombre}</p>
             </div>
           </div>
         </div>
       </div>
-
-      <div className="print:hidden">
-        <h3 className="font-semibold text-lg mb-2">Acciones</h3>
-        <p className="text-gray-500 mb-4">
-          Puede guardar esta cotización, enviarla por email o imprimirla directamente.
-        </p>
-        <p className="text-sm text-gray-500">
-          Nota: Los botones para estas acciones están disponibles en la parte inferior del wizard.
-        </p>
+      
+      <div className="flex justify-between pt-4 border-t">
+        <Button onClick={handleBack} variant="outline" type="button">
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Volver
+        </Button>
+        
+        <div className="space-x-2">
+          <Button onClick={handleSave} type="button" disabled={isSaving || hasErrors} className="bg-primary text-primary-foreground">
+            {isSaving ? (
+              <>
+                <span className="animate-spin mr-2">◌</span>
+                Guardando...
+              </>
+            ) : (
+              <>
+                <Save className="h-4 w-4 mr-2" />
+                Guardar Cotización
+              </>
+            )}
+          </Button>
+        </div>
       </div>
     </div>
   );

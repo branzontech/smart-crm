@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { NuevoArticuloForm, Articulo } from "./NuevoArticuloForm";
@@ -27,15 +28,15 @@ export function ArticulosSection({
     proveedor_id: string;
     nombreProveedor: string;
     descripcion: string;
-    cantidad: number;
-    valor_unitario: number;
+    cantidad: number | null;
+    valor_unitario: number | null;
     tasa_iva: number;
   }>({
     proveedor_id: "",
     nombreProveedor: "",
     descripcion: "",
-    cantidad: 1,
-    valor_unitario: 0,
+    cantidad: null,
+    valor_unitario: null,
     tasa_iva: 0,
   });
 
@@ -53,6 +54,16 @@ export function ArticulosSection({
   const agregarArticulo = () => {
     if (!nuevoArticulo.proveedor_id || !nuevoArticulo.descripcion) {
       toast.error("El proveedor y la descripción son requeridos");
+      return;
+    }
+    
+    if (nuevoArticulo.cantidad === null) {
+      toast.error("La cantidad es requerida");
+      return;
+    }
+    
+    if (nuevoArticulo.valor_unitario === null) {
+      toast.error("El valor unitario es requerido");
       return;
     }
     
@@ -78,8 +89,8 @@ export function ArticulosSection({
       proveedor_id: "",
       nombreProveedor: "",
       descripcion: "",
-      cantidad: 1,
-      valor_unitario: 0,
+      cantidad: null,
+      valor_unitario: null,
       tasa_iva: 0,
     });
     

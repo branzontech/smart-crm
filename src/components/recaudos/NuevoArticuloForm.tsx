@@ -26,8 +26,8 @@ interface NuevoArticuloFormProps {
     proveedor_id: string;
     nombreProveedor: string;
     descripcion: string;
-    cantidad: number;
-    valor_unitario: number;
+    cantidad: number | null;
+    valor_unitario: number | null;
     tasa_iva: number;
   };
   setNuevoArticulo: (articulo: any) => void;
@@ -87,8 +87,8 @@ export function NuevoArticuloForm({
             type="number" 
             min="1" 
             placeholder="Cantidad"
-            value={nuevoArticulo.cantidad === 1 && !proveedorQuery ? "" : nuevoArticulo.cantidad} 
-            onChange={(e) => setNuevoArticulo({...nuevoArticulo, cantidad: parseInt(e.target.value) || 1})}
+            value={nuevoArticulo.cantidad === null ? "" : nuevoArticulo.cantidad} 
+            onChange={(e) => setNuevoArticulo({...nuevoArticulo, cantidad: e.target.value ? parseInt(e.target.value) : null})}
           />
         </div>
         <div>
@@ -98,8 +98,8 @@ export function NuevoArticuloForm({
             type="number" 
             min="0" 
             placeholder="Valor unitario"
-            value={nuevoArticulo.valor_unitario === 0 && !proveedorQuery ? "" : nuevoArticulo.valor_unitario} 
-            onChange={(e) => setNuevoArticulo({...nuevoArticulo, valor_unitario: parseFloat(e.target.value) || 0})}
+            value={nuevoArticulo.valor_unitario === null ? "" : nuevoArticulo.valor_unitario} 
+            onChange={(e) => setNuevoArticulo({...nuevoArticulo, valor_unitario: e.target.value ? parseFloat(e.target.value) : null})}
           />
         </div>
         <div className="flex items-start md:items-center gap-2 pt-7">

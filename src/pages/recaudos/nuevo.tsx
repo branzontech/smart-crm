@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -156,26 +155,65 @@ const NuevoRecaudo = () => {
   }, []);
 
   useEffect(() => {
-    if (clienteQuery) {
-      const filtered = clientes.filter(cliente => 
-        cliente.nombre.toLowerCase().includes(clienteQuery.toLowerCase())
-      );
-      setClientesFiltrados(filtered);
-    } else {
-      setClientesFiltrados([]);
-    }
-  }, [clienteQuery, clientes]);
+    const fetchClientes = async () => {
+      if (clienteQuery && clienteQuery.length >= 2) {
+        try {
+          const { data, error } = await supabase
+            .from('clientes')
+            .select('id, nombre, apellidos, empresa, tipo_persona')
+            .or(`nombre.ilike.%${clienteQuery}%,apellidos.ilike.%${clienteQuery}%,empresa.ilike.%${clienteQuery}%`)
+            .limit(10);
+
+          if (error) throw error;
+          
+          if (data) {
+            const formattedClientes = data.map(cliente => ({
+              id: cliente.id,
+              nombre: cliente.tipo_persona === 'juridica' 
+                ? cliente.empresa 
+                : `${cliente.nombre} ${cliente.apellidos || ''}`
+            }));
+            
+            setClientesFiltrados(formattedClientes);
+          }
+        } catch (error) {
+          console.error("Error searching clientes:", error);
+          toast.error("Error al buscar clientes");
+        }
+      } else {
+        setClientesFiltrados([]);
+      }
+    };
+
+    fetchClientes();
+  }, [clienteQuery]);
 
   useEffect(() => {
-    if (proveedorQuery) {
-      const filtered = proveedores.filter(proveedor => 
-        proveedor.nombre.toLowerCase().includes(proveedorQuery.toLowerCase())
-      );
-      setProveedoresFiltrados(filtered);
-    } else {
-      setProveedoresFiltrados([]);
-    }
-  }, [proveedorQuery, proveedores]);
+    const fetchProveedores = async () => {
+      if (proveedorQuery && proveedorQuery.length >= 2) {
+        try {
+          const { data, error } = await supabase
+            .from('proveedores')
+            .select('id, nombre')
+            .ilike('nombre', `%${proveedorQuery}%`)
+            .limit(10);
+
+          if (error) throw error;
+          
+          if (data) {
+            setProveedoresFiltrados(data);
+          }
+        } catch (error) {
+          console.error("Error searching proveedores:", error);
+          toast.error("Error al buscar proveedores");
+        }
+      } else {
+        setProveedoresFiltrados([]);
+      }
+    };
+
+    fetchProveedores();
+  }, [proveedorQuery]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -326,10 +364,20 @@ const NuevoRecaudo = () => {
         valor_iva: articulo.valor_iva
       }));
       
-      // Create recaudo
+      // Create recaudo with all required fields
       const { data: recaudoId, error } = await createRecaudo({
-        ...data,
-        articulos: articulosForDb
+        cliente_id: data.cliente_id,
+        monto: data.monto,
+        subtotal: data.subtotal,
+        iva: data.iva,
+        total: data.total,
+        metodo_pago: data.metodo_pago,
+        fecha_pago: data.fecha_pago,
+        fecha_vencimiento: data.fecha_vencimiento,
+        estado: data.estado,
+        notas: data.notas || "",
+        articulos: articulosForDb,
+        archivos: data.archivos
       });
       
       if (error) throw error;

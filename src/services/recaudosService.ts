@@ -33,7 +33,7 @@ export interface RecaudoForm {
   fecha_pago: string;
   fecha_vencimiento: string;
   estado: string;
-  notas?: string;
+  notas: string;
   articulos: ArticuloRecaudo[];
   archivos?: File[];
 }

@@ -24,15 +24,8 @@ const PaisesPage = () => {
 
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
-      // Remove descripcion field if it exists in the data
-      // Ensure we're not passing an empty string for código which could cause UUID conversion issues
-      const { descripcion, ...paisData } = data as any;
-      const cleanData = {
-        ...paisData,
-        codigo: paisData.codigo || null // Ensure código is null if empty
-      };
-      
-      await createPais(cleanData);
+      // We no longer need to remove descripcion as it's now part of our model
+      await createPais(data);
       handleRefresh(); // Refresh the data after adding
       toast.success("País creado exitosamente");
       return Promise.resolve();
@@ -47,15 +40,7 @@ const PaisesPage = () => {
     data: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      // Remove descripcion field if it exists in the data
-      // Ensure we're not passing an empty string for código which could cause UUID conversion issues
-      const { descripcion, ...paisData } = data as any;
-      const cleanData = {
-        ...paisData,
-        codigo: paisData.codigo || null // Ensure código is null if empty
-      };
-      
-      await updatePais(id, cleanData);
+      await updatePais(id, data);
       handleRefresh(); // Refresh the data after updating
       toast.success("País actualizado exitosamente");
       return Promise.resolve();
@@ -88,7 +73,7 @@ const PaisesPage = () => {
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           tipo="pais"
-          includeCodigo={true}
+          includeCodigo={false} // Set this to false as we don't want to show the auto-incremental code in the form
         />
       </div>
     </Layout>

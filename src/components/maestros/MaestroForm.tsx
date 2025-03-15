@@ -15,7 +15,7 @@ interface MaestroFormProps {
     id?: string;
     nombre?: string;
     descripcion?: string;
-    codigo?: string;
+    codigo?: number;
   };
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
@@ -33,7 +33,7 @@ const formSchema = (includeCodigo: boolean) => {
   if (includeCodigo) {
     return z.object({
       ...baseSchema,
-      codigo: z.string().optional(),
+      codigo: z.number().optional().or(z.string().transform(val => val === "" ? undefined : parseInt(val, 10))),
     });
   }
 

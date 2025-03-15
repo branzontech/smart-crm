@@ -67,22 +67,25 @@ export type Database = {
       }
       paises: {
         Row: {
-          codigo: string | null
+          codigo: number | null
           created_at: string
+          descripcion: string | null
           id: string
           nombre: string
           updated_at: string
         }
         Insert: {
-          codigo?: string | null
+          codigo?: number | null
           created_at?: string
+          descripcion?: string | null
           id?: string
           nombre: string
           updated_at?: string
         }
         Update: {
-          codigo?: string | null
+          codigo?: number | null
           created_at?: string
+          descripcion?: string | null
           id?: string
           nombre?: string
           updated_at?: string

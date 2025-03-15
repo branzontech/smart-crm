@@ -30,7 +30,7 @@ export function EmpresaBreadcrumbs({ nombreEmpresa }: EmpresaBreadcrumbsProps) {
   };
 
   return (
-    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between mb-6">
+    <div className="flex flex-col md:flex-row items-start md:items-center gap-4 justify-between mb-6 mt-4">
       <Button
         variant="ghost"
         onClick={handleBack}

@@ -71,7 +71,7 @@ export default function EditarEmpresa() {
         <Navbar />
         <div className="main-container">
           <Header />
-          <main className="content-container overflow-y-auto">
+          <main className="content-container overflow-y-auto pt-header">
             <div className="flex justify-center items-center h-full">
               <Loader2 className="h-8 w-8 animate-spin text-teal" />
               <span className="ml-2">Cargando datos de la empresa...</span>
@@ -88,7 +88,7 @@ export default function EditarEmpresa() {
         <Navbar />
         <div className="main-container">
           <Header />
-          <main className="content-container overflow-y-auto">
+          <main className="content-container overflow-y-auto pt-header">
             <div className="flex justify-center items-center h-full">
               <div className="text-center">
                 <h2 className="text-2xl font-bold text-gray-800 mb-4">Empresa no encontrada</h2>
@@ -124,7 +124,7 @@ export default function EditarEmpresa() {
       <Navbar />
       <div className="main-container">
         <Header />
-        <main className="content-container overflow-y-auto">
+        <main className="content-container overflow-y-auto pt-header">
           <div className="max-w-content">
             <EmpresaBreadcrumbs nombreEmpresa={empresa.nombre} />
             

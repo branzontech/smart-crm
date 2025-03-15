@@ -1,15 +1,8 @@
 
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
-import { Loader2, Plus } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -49,10 +42,10 @@ type ClienteSimpleForm = z.infer<typeof clienteSimpleSchema>;
 
 interface EmbeddedClienteFormProps {
   onClienteCreated?: (cliente: { id: number; nombre: string }) => void;
+  onCancel?: () => void;
 }
 
-export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormProps) {
-  const [open, setOpen] = useState(false);
+export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClienteFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [paises, setPaises] = useState<Pais[]>([]);
@@ -73,35 +66,33 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
     },
   });
 
-  // Cargar datos maestros al abrir el formulario
+  // Cargar datos maestros al montar el componente
   useEffect(() => {
-    if (open) {
-      const loadMaestros = async () => {
-        setIsLoadingMaestros(true);
-        try {
-          const [sectoresData, paisesData, empresasData] = await Promise.all([
-            fetchSectores(),
-            fetchPaises(),
-            fetchEmpresas(),
-          ]);
-          
-          setSectores(sectoresData);
-          setPaises(paisesData);
-          setEmpresas(empresasData);
-        } catch (error) {
-          console.error("Error al cargar datos maestros:", error);
-          toast.error("Error al cargar datos de referencia");
-        } finally {
-          setIsLoadingMaestros(false);
-        }
-      };
+    const loadMaestros = async () => {
+      setIsLoadingMaestros(true);
+      try {
+        const [sectoresData, paisesData, empresasData] = await Promise.all([
+          fetchSectores(),
+          fetchPaises(),
+          fetchEmpresas(),
+        ]);
+        
+        setSectores(sectoresData);
+        setPaises(paisesData);
+        setEmpresas(empresasData);
+      } catch (error) {
+        console.error("Error al cargar datos maestros:", error);
+        toast.error("Error al cargar datos de referencia");
+      } finally {
+        setIsLoadingMaestros(false);
+      }
+    };
 
-      loadMaestros();
-    }
-  }, [open]);
+    loadMaestros();
+  }, []);
 
   const goToFullClientForm = () => {
-    setOpen(false);
+    if (onCancel) onCancel();
     navigate("/clientes/nuevo");
   };
 
@@ -140,7 +131,6 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
       }
       
       toast.success("Cliente creado exitosamente");
-      setOpen(false);
       form.reset();
     } catch (error: any) {
       toast.error("Error al crear el cliente: " + error.message);
@@ -150,217 +140,199 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
-        <Button
-          type="button"
-          variant="outline"
-          className="text-teal hover:bg-[#FEF7CD] hover:text-teal"
-        >
-          <Plus className="h-4 w-4 mr-2" />
-          Nuevo Cliente
-        </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Crear Nuevo Cliente</DialogTitle>
-        </DialogHeader>
-        {isLoadingMaestros ? (
-          <div className="flex justify-center items-center py-4">
-            <Loader2 className="h-6 w-6 animate-spin text-primary" />
-            <span className="ml-2">Cargando datos...</span>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-              <div className="grid gap-4">
-                <FormField
-                  control={form.control}
-                  name="nombre"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Nombre *</FormLabel>
+    <>
+      {isLoadingMaestros ? (
+        <div className="flex justify-center items-center py-4">
+          <Loader2 className="h-6 w-6 animate-spin text-primary" />
+          <span className="ml-2">Cargando datos...</span>
+        </div>
+      ) : (
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+            <div className="grid gap-4">
+              <FormField
+                control={form.control}
+                name="nombre"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Nombre *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Nombre del cliente"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="documento"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Documento *</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Número de documento"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="empresa"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Empresa</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
                       <FormControl>
-                        <Input
-                          placeholder="Nombre del cliente"
-                          {...field}
-                        />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona una empresa" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="documento"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Documento *</FormLabel>
+                      <SelectContent>
+                        {empresas.map((empresa) => (
+                          <SelectItem key={empresa.id} value={empresa.id}>
+                            {empresa.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="sector"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Sector *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <Input
-                          placeholder="Número de documento"
-                          {...field}
-                        />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un sector" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="empresa"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Empresa</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        value={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona una empresa" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {empresas.map((empresa) => (
-                            <SelectItem key={empresa.id} value={empresa.id}>
-                              {empresa.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="sector"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Sector *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un sector" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {sectores.map((sector) => (
-                            <SelectItem key={sector.id} value={sector.id}>
-                              {sector.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="pais"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>País *</FormLabel>
-                      <Select
-                        onValueChange={field.onChange}
-                        defaultValue={field.value}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Selecciona un país" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {paises.map((pais) => (
-                            <SelectItem key={pais.id} value={pais.id}>
-                              {pais.nombre}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="email"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Email</FormLabel>
+                      <SelectContent>
+                        {sectores.map((sector) => (
+                          <SelectItem key={sector.id} value={sector.id}>
+                            {sector.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="pais"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>País *</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      defaultValue={field.value}
+                    >
                       <FormControl>
-                        <Input
-                          type="email"
-                          placeholder="correo@ejemplo.com"
-                          {...field}
-                        />
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un país" />
+                        </SelectTrigger>
                       </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                
-                <FormField
-                  control={form.control}
-                  name="telefono"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Teléfono</FormLabel>
-                      <FormControl>
-                        <Input
-                          placeholder="Número de teléfono"
-                          {...field}
-                        />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-              <div className="flex flex-col space-y-2">
-                <Button
-                  type="button"
-                  variant="link"
-                  className="text-teal hover:text-sage"
-                  onClick={goToFullClientForm}
-                >
-                  Ir al formulario completo
-                </Button>
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => {
-                    setOpen(false);
-                    form.reset();
-                  }}
-                >
-                  Cancelar
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal"
-                  disabled={isLoading}
-                >
-                  {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                  Guardar Cliente
-                </Button>
-              </div>
-            </form>
-          </Form>
-        )}
-      </DialogContent>
-    </Dialog>
+                      <SelectContent>
+                        {paises.map((pais) => (
+                          <SelectItem key={pais.id} value={pais.id}>
+                            {pais.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Email</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="email"
+                        placeholder="correo@ejemplo.com"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="telefono"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Teléfono</FormLabel>
+                    <FormControl>
+                      <Input
+                        placeholder="Número de teléfono"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+            <div className="flex flex-col space-y-2">
+              <Button
+                type="button"
+                variant="link"
+                className="text-teal hover:text-sage"
+                onClick={goToFullClientForm}
+              >
+                Ir al formulario completo
+              </Button>
+            </div>
+            <div className="flex justify-end space-x-2">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={onCancel}
+              >
+                Cancelar
+              </Button>
+              <Button
+                type="submit"
+                className="bg-[#FEF7CD] hover:bg-[#FEF7CD]/80 text-teal"
+                disabled={isLoading}
+              >
+                {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Guardar Cliente
+              </Button>
+            </div>
+          </form>
+        </Form>
+      )}
+    </>
   );
 }

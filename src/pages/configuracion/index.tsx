@@ -1,21 +1,48 @@
+
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { Settings, Save, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
-import { Switch } from "@/components/ui/switch";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
 import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
+import { CompanyConfigForm } from "@/components/configuracion/CompanyConfigForm";
+import { CompanyConfig, fetchCompanyConfig, saveCompanyConfig } from "@/services/configService";
 
 const ConfiguracionIndex = () => {
   const { currentTheme } = useTheme();
+  const [companyConfig, setCompanyConfig] = useState<CompanyConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   
-  const handleSave = () => {
-    toast.success("Configuración guardada correctamente");
+  useEffect(() => {
+    const loadConfig = async () => {
+      setIsLoading(true);
+      try {
+        const config = await fetchCompanyConfig();
+        setCompanyConfig(config);
+      } catch (error) {
+        console.error("Error loading company config:", error);
+        toast.error("Error al cargar la configuración de la empresa");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadConfig();
+  }, []);
+  
+  const handleSaveConfig = async (data: CompanyConfig) => {
+    try {
+      const savedConfig = await saveCompanyConfig(data);
+      if (savedConfig) {
+        setCompanyConfig(savedConfig);
+      }
+    } catch (error) {
+      console.error("Error saving company config:", error);
+      toast.error("Error al guardar la configuración de la empresa");
+    }
   };
 
   return (
@@ -43,40 +70,13 @@ const ConfiguracionIndex = () => {
                 <Card>
                   <CardHeader>
                     <CardTitle>Configuración General</CardTitle>
-                    <CardDescription>Configura los ajustes básicos de tu CRM</CardDescription>
+                    <CardDescription>Configura los datos principales de tu empresa</CardDescription>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="nombreEmpresa">Nombre de la Empresa</Label>
-                      <Input id="nombreEmpresa" placeholder="Tu Empresa S.A." />
-                    </div>
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email de Contacto</Label>
-                      <Input id="email" type="email" placeholder="contacto@tuempresa.com" />
-                    </div>
-                  </CardContent>
-                </Card>
-
-                <Card>
-                  <CardHeader>
-                    <CardTitle>Notificaciones</CardTitle>
-                    <CardDescription>Gestiona cómo quieres recibir notificaciones</CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label>Notificaciones por Email</Label>
-                        <p className="text-sm text-muted-foreground">Recibe actualizaciones importantes por email</p>
-                      </div>
-                      <Switch />
-                    </div>
-                    <div className="flex items-center justify-between">
-                      <div className="space-y-0.5">
-                        <Label>Notificaciones del Sistema</Label>
-                        <p className="text-sm text-muted-foreground">Recibe notificaciones en el sistema</p>
-                      </div>
-                      <Switch />
-                    </div>
+                  <CardContent>
+                    <CompanyConfigForm 
+                      initialData={companyConfig}
+                      onSubmit={handleSaveConfig}
+                    />
                   </CardContent>
                 </Card>
               </TabsContent>
@@ -94,13 +94,6 @@ const ConfiguracionIndex = () => {
                   </CardContent>
                 </Card>
               </TabsContent>
-
-              <div className="flex justify-end">
-                <Button onClick={handleSave}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Guardar Cambios
-                </Button>
-              </div>
             </Tabs>
           </div>
         </main>

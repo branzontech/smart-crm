@@ -244,6 +244,45 @@ export type Database = {
           },
         ]
       }
+      config_empresas: {
+        Row: {
+          contacto_principal: string
+          created_at: string
+          direccion: string
+          id: string
+          logo_path: string | null
+          nit: string
+          razon_social: string
+          telefono: string
+          telefono_secundario: string | null
+          updated_at: string
+        }
+        Insert: {
+          contacto_principal: string
+          created_at?: string
+          direccion: string
+          id?: string
+          logo_path?: string | null
+          nit: string
+          razon_social: string
+          telefono: string
+          telefono_secundario?: string | null
+          updated_at?: string
+        }
+        Update: {
+          contacto_principal?: string
+          created_at?: string
+          direccion?: string
+          id?: string
+          logo_path?: string | null
+          nit?: string
+          razon_social?: string
+          telefono?: string
+          telefono_secundario?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       empresas: {
         Row: {
           ciudad: string

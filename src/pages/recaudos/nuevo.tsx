@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Coins, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Save, Coins } from "lucide-react";
 import { 
   Select, 
   SelectContent, 
@@ -24,97 +24,26 @@ import {
   FormMessage 
 } from "@/components/ui/form";
 import { useForm } from "react-hook-form";
-import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import { Label } from "@/components/ui/label";
-import { CreateClienteDialog } from "@/components/CreateClienteDialog";
-import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
-import { FileUpload } from "@/components/FileUpload";
+import { FormLabel as Label } from "@/components/ui/form";
 import { getClientes } from "@/services/clientesService";
-import { getNextRecaudoNumber, createRecaudo, ArticuloRecaudo } from "@/services/recaudos";
+import { getNextRecaudoNumber, createRecaudo } from "@/services/recaudos";
 import { supabase } from "@/integrations/supabase/client";
-
-const articuloSchema = z.object({
-  id: z.string().optional(),
-  proveedor_id: z.string().min(1, { message: "El proveedor es requerido" }),
-  nombreProveedor: z.string().optional(),
-  descripcion: z.string().min(1, { message: "La descripción es requerida" }),
-  cantidad: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
-  valor_unitario: z.number().min(0, { message: "El valor unitario debe ser mayor o igual a 0" }),
-  valor_total: z.number().min(0, { message: "El valor total debe ser mayor o igual a 0" }),
-  tasa_iva: z.number().min(0, { message: "La tasa de IVA debe ser mayor o igual a 0" }),
-  valor_iva: z.number().min(0, { message: "El valor del IVA debe ser mayor o igual a 0" }),
-});
-
-const formSchema = z.object({
-  cliente_id: z.string().min(1, { message: "Seleccione un cliente" }),
-  clienteNombre: z.string().optional(),
-  monto: z.string().min(1, { message: "Ingrese el monto" }),
-  subtotal: z.number().min(0, { message: "El subtotal debe ser mayor o igual a 0" }),
-  iva: z.number().min(0, { message: "El IVA debe ser mayor o igual a 0" }),
-  total: z.number().min(0, { message: "El total debe ser mayor o igual a 0" }),
-  metodo_pago: z.string().min(1, { message: "Seleccione un método de pago" }),
-  fecha_pago: z.string().min(1, { message: "Seleccione una fecha de pago" }),
-  fecha_vencimiento: z.string().min(1, { message: "Seleccione una fecha de vencimiento" }),
-  estado: z.string().min(1, { message: "Seleccione un estado" }),
-  notas: z.string().optional(),
-  archivos: z.array(z.instanceof(File)).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-type Articulo = z.infer<typeof articuloSchema>;
+import { ClienteSearchField } from "@/components/recaudos/ClienteSearchField";
+import { ArticulosSection } from "@/components/recaudos/ArticulosSection";
+import { formSchema, FormValues, metodosPago, estados } from "@/components/recaudos/recaudoFormSchema";
+import { Articulo } from "@/components/recaudos/NuevoArticuloForm";
 
 const NuevoRecaudo = () => {
   const navigate = useNavigate();
   const [nextRecaudoNumber, setNextRecaudoNumber] = useState("");
   const [articulos, setArticulos] = useState<Articulo[]>([]);
   const [clienteQuery, setClienteQuery] = useState("");
-  const [proveedorQuery, setProveedorQuery] = useState("");
-  const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
-  const [proveedoresFiltrados, setProveedoresFiltrados] = useState<any[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [nuevoArticulo, setNuevoArticulo] = useState<{
-    proveedor_id: string;
-    nombreProveedor: string;
-    descripcion: string;
-    cantidad: number;
-    valor_unitario: number;
-    tasa_iva: number;
-  }>({
-    proveedor_id: "",
-    nombreProveedor: "",
-    descripcion: "",
-    cantidad: 1,
-    valor_unitario: 0,
-    tasa_iva: 0.19,
-  });
   const [archivos, setArchivos] = useState<File[]>([]);
   const [clientes, setClientes] = useState<any[]>([]);
   const [proveedores, setProveedores] = useState<any[]>([]);
-
-  const metodosPago = [
-    { id: "transferencia", nombre: "Transferencia Bancaria" },
-    { id: "efectivo", nombre: "Efectivo" },
-    { id: "cheque", nombre: "Cheque" },
-    { id: "tarjeta", nombre: "Tarjeta de Crédito/Débito" },
-    { id: "app", nombre: "Aplicación de Pago" },
-  ];
-
-  const estados = [
-    { id: "pendiente", nombre: "Pendiente" },
-    { id: "enproceso", nombre: "En Proceso" },
-    { id: "pagado", nombre: "Pagado" },
-    { id: "vencido", nombre: "Vencido" },
-  ];
-
-  const tasasIVA = [
-    { valor: 0, etiqueta: "0%" },
-    { valor: 0.05, etiqueta: "5%" },
-    { valor: 0.16, etiqueta: "16%" },
-    { valor: 0.19, etiqueta: "19%" },
-  ];
 
   useEffect(() => {
     const loadInitialData = async () => {
@@ -155,67 +84,6 @@ const NuevoRecaudo = () => {
     loadInitialData();
   }, []);
 
-  useEffect(() => {
-    const fetchClientes = async () => {
-      if (clienteQuery && clienteQuery.length >= 2) {
-        try {
-          const { data, error } = await supabase
-            .from('clientes')
-            .select('id, nombre, apellidos, empresa, tipo_persona')
-            .or(`nombre.ilike.%${clienteQuery}%,apellidos.ilike.%${clienteQuery}%,empresa.ilike.%${clienteQuery}%`)
-            .limit(10);
-
-          if (error) throw error;
-          
-          if (data) {
-            const formattedClientes = data.map(cliente => ({
-              id: cliente.id,
-              nombre: cliente.tipo_persona === 'juridica' 
-                ? cliente.empresa 
-                : `${cliente.nombre} ${cliente.apellidos || ''}`
-            }));
-            
-            setClientesFiltrados(formattedClientes);
-          }
-        } catch (error) {
-          console.error("Error searching clientes:", error);
-          toast.error("Error al buscar clientes");
-        }
-      } else {
-        setClientesFiltrados([]);
-      }
-    };
-
-    fetchClientes();
-  }, [clienteQuery]);
-
-  useEffect(() => {
-    const fetchProveedores = async () => {
-      if (proveedorQuery && proveedorQuery.length >= 2) {
-        try {
-          const { data, error } = await supabase
-            .from('proveedores')
-            .select('id, nombre')
-            .ilike('nombre', `%${proveedorQuery}%`)
-            .limit(10);
-
-          if (error) throw error;
-          
-          if (data) {
-            setProveedoresFiltrados(data);
-          }
-        } catch (error) {
-          console.error("Error searching proveedores:", error);
-          toast.error("Error al buscar proveedores");
-        }
-      } else {
-        setProveedoresFiltrados([]);
-      }
-    };
-
-    fetchProveedores();
-  }, [proveedorQuery]);
-
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -234,110 +102,10 @@ const NuevoRecaudo = () => {
     },
   });
 
-  const calcularTotales = () => {
-    const subtotal = articulos.reduce((sum, item) => sum + (item.valor_total || 0), 0);
-    const iva = articulos.reduce((sum, item) => sum + (item.valor_iva || 0), 0);
-    const total = subtotal + iva;
-    
-    form.setValue('subtotal', subtotal);
-    form.setValue('iva', iva);
-    form.setValue('total', total);
-    form.setValue('monto', total.toString());
-  };
-
-  const agregarArticulo = () => {
-    if (!nuevoArticulo.proveedor_id || !nuevoArticulo.descripcion) {
-      toast.error("El proveedor y la descripción son requeridos");
-      return;
-    }
-    
-    const valorTotal = nuevoArticulo.cantidad * nuevoArticulo.valor_unitario;
-    const valorIva = valorTotal * nuevoArticulo.tasa_iva;
-    
-    const articulo: Articulo = {
-      id: `art-${Date.now()}`,
-      proveedor_id: nuevoArticulo.proveedor_id,
-      nombreProveedor: nuevoArticulo.nombreProveedor,
-      descripcion: nuevoArticulo.descripcion,
-      cantidad: nuevoArticulo.cantidad,
-      valor_unitario: nuevoArticulo.valor_unitario,
-      valor_total: valorTotal,
-      tasa_iva: nuevoArticulo.tasa_iva,
-      valor_iva: valorIva,
-    };
-    
-    const nuevosArticulos = [...articulos, articulo];
-    setArticulos(nuevosArticulos);
-    
-    setNuevoArticulo({
-      proveedor_id: "",
-      nombreProveedor: "",
-      descripcion: "",
-      cantidad: 1,
-      valor_unitario: 0,
-      tasa_iva: 0.19,
-    });
-    
-    setProveedorQuery("");
-    setProveedoresFiltrados([]);
-    
-    setTimeout(() => calcularTotales(), 0);
-  };
-
-  const eliminarArticulo = (id: string) => {
-    const nuevosArticulos = articulos.filter(articulo => articulo.id !== id);
-    setArticulos(nuevosArticulos);
-    setTimeout(() => calcularTotales(), 0);
-  };
-
   const seleccionarCliente = (cliente: any) => {
     form.setValue('cliente_id', cliente.id);
     form.setValue('clienteNombre', cliente.nombre);
     setClienteQuery(cliente.nombre);
-    setClientesFiltrados([]);
-  };
-
-  const seleccionarProveedor = (proveedor: any) => {
-    setNuevoArticulo({
-      ...nuevoArticulo,
-      proveedor_id: proveedor.id,
-      nombreProveedor: proveedor.nombre,
-    });
-    setProveedorQuery(proveedor.nombre);
-    setProveedoresFiltrados([]);
-  };
-
-  const handleClienteCreated = (cliente: { id: number | string; nombre: string }) => {
-    // Add to the local list
-    const newCliente = {
-      id: cliente.id.toString(),
-      nombre: cliente.nombre
-    };
-    
-    setClientes([newCliente, ...clientes]);
-    
-    // Select the created cliente
-    form.setValue('cliente_id', newCliente.id);
-    form.setValue('clienteNombre', newCliente.nombre);
-    setClienteQuery(newCliente.nombre);
-  };
-
-  const handleProveedorCreated = (proveedor: { id: number | string; nombre: string }) => {
-    // Add to the local list
-    const newProveedor = {
-      id: proveedor.id.toString(),
-      nombre: proveedor.nombre
-    };
-    
-    setProveedores([newProveedor, ...proveedores]);
-    
-    // Select the created proveedor
-    setNuevoArticulo({
-      ...nuevoArticulo,
-      proveedor_id: newProveedor.id,
-      nombreProveedor: newProveedor.nombre,
-    });
-    setProveedorQuery(newProveedor.nombre);
   };
 
   const handleFilesChange = (files: File[]) => {
@@ -355,7 +123,7 @@ const NuevoRecaudo = () => {
     
     try {
       // Prepare articulos for database
-      const articulosForDb: ArticuloRecaudo[] = articulos.map(articulo => ({
+      const articulosForDb = articulos.map(articulo => ({
         proveedor_id: articulo.proveedor_id,
         descripcion: articulo.descripcion,
         cantidad: articulo.cantidad,
@@ -429,38 +197,13 @@ const NuevoRecaudo = () => {
                   <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                       <div>
-                        <FormLabel>Cliente</FormLabel>
-                        <div className="relative">
-                          <div className="flex space-x-2 mb-2">
-                            <div className="relative flex-grow">
-                              <Input
-                                placeholder="Buscar cliente..."
-                                value={clienteQuery}
-                                onChange={(e) => setClienteQuery(e.target.value)}
-                                className="pr-10"
-                              />
-                              <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-                            </div>
-                            <CreateClienteDialog onClienteCreated={handleClienteCreated} />
-                          </div>
-                          
-                          {clientesFiltrados.length > 0 && (
-                            <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
-                              {clientesFiltrados.map(cliente => (
-                                <div
-                                  key={cliente.id}
-                                  className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                  onClick={() => seleccionarCliente(cliente)}
-                                >
-                                  {cliente.nombre}
-                                </div>
-                              ))}
-                            </div>
-                          )}
-                          <FormMessage>
-                            {form.formState.errors.cliente_id?.message}
-                          </FormMessage>
-                        </div>
+                        <Label>Cliente</Label>
+                        <ClienteSearchField 
+                          clienteQuery={clienteQuery}
+                          setClienteQuery={setClienteQuery}
+                          onSelectCliente={seleccionarCliente}
+                          error={form.formState.errors.cliente_id?.message}
+                        />
                       </div>
                       
                       <FormField
@@ -560,183 +303,13 @@ const NuevoRecaudo = () => {
                       />
                     </div>
                     
-                    <Card className="border border-gray-200">
-                      <CardHeader className="pb-2">
-                        <CardTitle className="text-lg">Artículos o Servicios por Proveedor</CardTitle>
-                      </CardHeader>
-                      <CardContent>
-                        <div className="mb-4 grid grid-cols-1 gap-4">
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div>
-                              <Label htmlFor="proveedor">Proveedor</Label>
-                              <div className="relative">
-                                <div className="flex space-x-2">
-                                  <div className="relative flex-grow">
-                                    <Input
-                                      id="proveedor"
-                                      placeholder="Buscar proveedor..."
-                                      value={proveedorQuery}
-                                      onChange={(e) => setProveedorQuery(e.target.value)}
-                                      className="pr-10"
-                                    />
-                                    <Search className="absolute right-3 top-3 h-4 w-4 text-gray-400" />
-                                  </div>
-                                  <CreateProveedorDialog onProveedorCreated={handleProveedorCreated} />
-                                </div>
-                                
-                                {proveedoresFiltrados.length > 0 && (
-                                  <div className="absolute z-10 mt-1 w-full bg-white shadow-lg rounded-md border border-gray-200 max-h-60 overflow-auto">
-                                    {proveedoresFiltrados.map(proveedor => (
-                                      <div
-                                        key={proveedor.id}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                        onClick={() => seleccionarProveedor(proveedor)}
-                                      >
-                                        {proveedor.nombre}
-                                      </div>
-                                    ))}
-                                  </div>
-                                )}
-                              </div>
-                            </div>
-                            <div>
-                              <Label htmlFor="descripcion">Descripción</Label>
-                              <Input 
-                                id="descripcion"
-                                placeholder="Descripción del artículo o servicio" 
-                                value={nuevoArticulo.descripcion} 
-                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, descripcion: e.target.value})}
-                              />
-                            </div>
-                          </div>
-                          
-                          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                            <div>
-                              <Label htmlFor="cantidad">Cantidad</Label>
-                              <Input 
-                                id="cantidad"
-                                type="number" 
-                                min="1" 
-                                value={nuevoArticulo.cantidad} 
-                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, cantidad: parseInt(e.target.value) || 1})}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="valorUnitario">Valor Unitario</Label>
-                              <Input 
-                                id="valorUnitario"
-                                type="number" 
-                                min="0" 
-                                value={nuevoArticulo.valor_unitario} 
-                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, valor_unitario: parseFloat(e.target.value) || 0})}
-                              />
-                            </div>
-                            <div>
-                              <Label htmlFor="tasaIva">IVA</Label>
-                              <Select 
-                                value={nuevoArticulo.tasa_iva.toString()}
-                                onValueChange={(value) => setNuevoArticulo({
-                                  ...nuevoArticulo, 
-                                  tasa_iva: parseFloat(value)
-                                })}
-                              >
-                                <SelectTrigger id="tasaIva">
-                                  <SelectValue placeholder="Seleccionar IVA" />
-                                </SelectTrigger>
-                                <SelectContent>
-                                  {tasasIVA.map((tasa) => (
-                                    <SelectItem key={tasa.valor} value={tasa.valor.toString()}>
-                                      {tasa.etiqueta}
-                                    </SelectItem>
-                                  ))}
-                                </SelectContent>
-                              </Select>
-                            </div>
-                          </div>
-                          
-                          <div className="flex justify-end mt-2">
-                            <Button 
-                              type="button" 
-                              className="bg-teal hover:bg-sage text-white"
-                              onClick={agregarArticulo}
-                              disabled={!nuevoArticulo.proveedor_id || !nuevoArticulo.descripcion}
-                            >
-                              <Plus className="h-4 w-4 mr-2" />
-                              Agregar Artículo
-                            </Button>
-                          </div>
-                        </div>
-                        
-                        {articulos.length > 0 ? (
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead>Proveedor</TableHead>
-                                <TableHead>Descripción</TableHead>
-                                <TableHead className="text-right">Cantidad</TableHead>
-                                <TableHead className="text-right">Valor Unitario</TableHead>
-                                <TableHead className="text-right">IVA (%)</TableHead>
-                                <TableHead className="text-right">Valor IVA</TableHead>
-                                <TableHead className="text-right">Valor Total</TableHead>
-                                <TableHead className="text-center">Acciones</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {articulos.map((articulo) => (
-                                <TableRow key={articulo.id}>
-                                  <TableCell>{articulo.nombreProveedor}</TableCell>
-                                  <TableCell>{articulo.descripcion}</TableCell>
-                                  <TableCell className="text-right">{articulo.cantidad}</TableCell>
-                                  <TableCell className="text-right">
-                                    ${articulo.valor_unitario.toLocaleString()}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    {(articulo.tasa_iva * 100).toFixed(0)}%
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    ${articulo.valor_iva.toLocaleString()}
-                                  </TableCell>
-                                  <TableCell className="text-right">
-                                    ${articulo.valor_total.toLocaleString()}
-                                  </TableCell>
-                                  <TableCell className="text-center">
-                                    <Button 
-                                      type="button" 
-                                      variant="ghost" 
-                                      className="h-8 w-8 p-0 text-red-500 hover:text-red-700 hover:bg-red-50"
-                                      onClick={() => eliminarArticulo(articulo.id!)}
-                                    >
-                                      <Trash2 className="h-4 w-4" />
-                                    </Button>
-                                  </TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        ) : (
-                          <div className="text-center py-4 text-gray-500">
-                            No hay artículos agregados
-                          </div>
-                        )}
-                        
-                        <FileUpload onFilesChange={handleFilesChange} />
-                        
-                        <div className="mt-4 space-y-2 border-t pt-4">
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">Subtotal:</span>
-                            <span>${form.watch('subtotal').toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-center">
-                            <span className="font-medium">Total IVA:</span>
-                            <span>${form.watch('iva').toLocaleString()}</span>
-                          </div>
-                          <div className="flex justify-between items-center font-bold text-lg">
-                            <span>Total:</span>
-                            <span>${form.watch('total').toLocaleString()}</span>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
+                    <ArticulosSection 
+                      articulos={articulos}
+                      setArticulos={setArticulos}
+                      watch={form.watch}
+                      setValue={form.setValue}
+                      onFilesChange={handleFilesChange}
+                    />
                     
                     <FormField
                       control={form.control}

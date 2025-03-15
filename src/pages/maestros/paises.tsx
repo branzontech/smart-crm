@@ -24,12 +24,17 @@ const PaisesPage = () => {
 
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
-      // We no longer need to remove descripcion as it's now part of our model
-      await createPais(data);
-      handleRefresh(); // Refresh the data after adding
+      // Explicitly omit the codigo field as it should be auto-incremented by the database
+      const { codigo, ...paisData } = data as any;
+      
+      console.log("Saving país with data:", paisData); // For debugging
+      
+      await createPais(paisData);
+      handleRefresh();
       toast.success("País creado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
+      console.error("Error creating país:", error);
       toast.error(`Error al crear país: ${error.message}`);
       return Promise.reject(error);
     }
@@ -40,11 +45,17 @@ const PaisesPage = () => {
     data: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      await updatePais(id, data);
-      handleRefresh(); // Refresh the data after updating
+      // Explicitly omit the codigo field as it should not be updated
+      const { codigo, ...paisData } = data as any;
+      
+      console.log("Updating país with data:", paisData); // For debugging
+      
+      await updatePais(id, paisData);
+      handleRefresh();
       toast.success("País actualizado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
+      console.error("Error updating país:", error);
       toast.error(`Error al actualizar país: ${error.message}`);
       return Promise.reject(error);
     }
@@ -53,7 +64,7 @@ const PaisesPage = () => {
   const handleDelete = async (id: string) => {
     try {
       await deletePais(id);
-      handleRefresh(); // Refresh the data after deleting
+      handleRefresh();
       toast.success("País eliminado exitosamente");
       return Promise.resolve();
     } catch (error: any) {
@@ -73,7 +84,7 @@ const PaisesPage = () => {
           onUpdate={handleUpdate}
           onDelete={handleDelete}
           tipo="pais"
-          includeCodigo={false} // Set this to false as we don't want to show the auto-incremental code in the form
+          includeCodigo={false} // Keep this false so the code field isn't shown in the form
         />
       </div>
     </Layout>

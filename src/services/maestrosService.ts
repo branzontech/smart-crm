@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 import { Sector, TipoServicio, Pais, Ciudad, OrigenCliente } from "@/types/maestros";
 
@@ -99,18 +98,25 @@ export const fetchPaises = async (): Promise<Pais[]> => {
   return data || [];
 };
 
-export const createPais = async (pais: Omit<Pais, "id" | "created_at" | "updated_at">): Promise<Pais> => {
+export const createPais = async (pais: Omit<Pais, "id" | "created_at" | "updated_at" | "codigo">): Promise<Pais> => {
+  console.log("Creating país with data:", pais); // For debugging
+  
   const { data, error } = await supabase
     .from("paises")
     .insert(pais)
     .select()
     .single();
   
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error creating país:", error);
+    throw error;
+  }
   return data;
 };
 
-export const updatePais = async (id: string, pais: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>): Promise<Pais> => {
+export const updatePais = async (id: string, pais: Partial<Omit<Pais, "id" | "created_at" | "updated_at" | "codigo">>): Promise<Pais> => {
+  console.log("Updating país with ID:", id, "and data:", pais); // For debugging
+  
   const { data, error } = await supabase
     .from("paises")
     .update(pais)
@@ -118,7 +124,10 @@ export const updatePais = async (id: string, pais: Partial<Omit<Pais, "id" | "cr
     .select()
     .single();
   
-  if (error) throw error;
+  if (error) {
+    console.error("Supabase error updating país:", error);
+    throw error;
+  }
   return data;
 };
 

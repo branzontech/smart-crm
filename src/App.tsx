@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -166,7 +165,7 @@ export default function App() {
               </ProtectedRoute>
             } />
             {/* Redirigir cualquier otra ruta de recaudos a la página principal de recaudos */}
-            <Route path="/recaudos/*" element={<Navigate to="/recaudos/seguimiento" replace />} />
+            <Route path="/recaudos/*" element={<Navigate to="/recaudos" replace />} />
             
             {/* Rutas de Ventas - Protegidas */}
             <Route path="/ventas" element={

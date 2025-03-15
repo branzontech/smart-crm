@@ -1,4 +1,3 @@
-
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
@@ -14,6 +13,11 @@ import { es } from "date-fns/locale";
 import { RecaudoFilterBar } from "@/components/recaudos/RecaudoFilterBar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { RecaudoDetailDialog } from "@/components/recaudos/RecaudoDetailDialog";
+import { RecaudoStatusDialog } from "@/components/recaudos/RecaudoStatusDialog";
+import { RecaudoPaymentDialog } from "@/components/recaudos/RecaudoPaymentDialog";
+import { Recaudo } from "./seguimiento";
+import { updateRecaudoStatus, updateRecaudoNotes } from "@/services/recaudos/detailsService";
 
 const RecaudosIndex = () => {
   const navigate = useNavigate();
@@ -23,6 +27,12 @@ const RecaudosIndex = () => {
   const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards');
   const itemsPerPage = 5;
   const isMobile = useIsMobile();
+  
+  const [selectedRecaudo, setSelectedRecaudo] = useState<Recaudo | null>(null);
+  const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showStatusDialog, setShowStatusDialog] = useState(false);
+  const [showPaymentDialog, setShowPaymentDialog] = useState(false);
+  const [newStatus, setNewStatus] = useState("");
 
   useEffect(() => {
     const fetchRecaudos = async () => {
@@ -72,7 +82,81 @@ const RecaudosIndex = () => {
     }
   };
 
-  // Pagination logic
+  const handleViewRecaudo = (recaudo: any) => {
+    const convertedRecaudo: Recaudo = {
+      id: recaudo.id,
+      cliente: recaudo.cliente?.nombre + ' ' + (recaudo.cliente?.apellidos || ''),
+      factura: recaudo.numero,
+      monto: recaudo.monto,
+      fechaVencimiento: recaudo.fecha_vencimiento,
+      estado: recaudo.estado,
+      diasVencido: recaudo.fecha_vencimiento ? 
+        Math.max(0, Math.floor((new Date().getTime() - new Date(recaudo.fecha_vencimiento).getTime()) / (1000 * 3600 * 24))) : 0
+    };
+    
+    setSelectedRecaudo(convertedRecaudo);
+    setShowDetailDialog(true);
+  };
+
+  const handleChangeStatus = (recaudo: any) => {
+    const convertedRecaudo: Recaudo = {
+      id: recaudo.id,
+      cliente: recaudo.cliente?.nombre + ' ' + (recaudo.cliente?.apellidos || ''),
+      factura: recaudo.numero,
+      monto: recaudo.monto,
+      fechaVencimiento: recaudo.fecha_vencimiento,
+      estado: recaudo.estado,
+      diasVencido: recaudo.fecha_vencimiento ? 
+        Math.max(0, Math.floor((new Date().getTime() - new Date(recaudo.fecha_vencimiento).getTime()) / (1000 * 3600 * 24))) : 0
+    };
+    
+    setSelectedRecaudo(convertedRecaudo);
+    setNewStatus(recaudo.estado);
+    setShowStatusDialog(true);
+  };
+
+  const handlePayment = (recaudo: any) => {
+    const convertedRecaudo: Recaudo = {
+      id: recaudo.id,
+      cliente: recaudo.cliente?.nombre + ' ' + (recaudo.cliente?.apellidos || ''),
+      factura: recaudo.numero,
+      monto: recaudo.monto,
+      fechaVencimiento: recaudo.fecha_vencimiento,
+      estado: recaudo.estado,
+      diasVencido: recaudo.fecha_vencimiento ? 
+        Math.max(0, Math.floor((new Date().getTime() - new Date(recaudo.fecha_vencimiento).getTime()) / (1000 * 3600 * 24))) : 0
+    };
+    
+    setSelectedRecaudo(convertedRecaudo);
+    setShowPaymentDialog(true);
+  };
+
+  const updateStatus = async (id: string, status: string) => {
+    const result = await updateRecaudoStatus(id, status);
+    
+    if (result.success) {
+      setRecaudos(recaudos.map(recaudo => 
+        recaudo.id === id ? { ...recaudo, estado: status } : recaudo
+      ));
+      setShowStatusDialog(false);
+    }
+  };
+
+  const markAsPaid = async (id: string) => {
+    const result = await updateRecaudoStatus(id, "Pagado");
+    
+    if (result.success) {
+      setRecaudos(recaudos.map(recaudo => 
+        recaudo.id === id ? { ...recaudo, estado: "Pagado" } : recaudo
+      ));
+      setShowPaymentDialog(false);
+    }
+  };
+
+  const updateNotes = async (id: string, notes: string) => {
+    await updateRecaudoNotes(id, notes);
+  };
+
   const totalPages = Math.ceil(recaudos.length / itemsPerPage);
   const paginatedRecaudos = recaudos.slice(
     (currentPage - 1) * itemsPerPage,
@@ -138,7 +222,11 @@ const RecaudosIndex = () => {
               {viewMode === 'cards' ? (
                 <div className="grid gap-4">
                   {paginatedRecaudos.map((recaudo) => (
-                    <Card key={recaudo.id} className="p-4 hover:shadow-md transition-shadow cursor-pointer" onClick={() => navigate(`/recaudos/${recaudo.id}`)}>
+                    <Card 
+                      key={recaudo.id} 
+                      className="p-4 hover:shadow-md transition-shadow cursor-pointer" 
+                      onClick={() => handleViewRecaudo(recaudo)}
+                    >
                       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
                         <div>
                           <div className="flex flex-wrap items-center gap-2">
@@ -181,6 +269,7 @@ const RecaudosIndex = () => {
                         <TableHead>Método</TableHead>
                         <TableHead>Monto</TableHead>
                         <TableHead>Estado</TableHead>
+                        <TableHead className="text-center">Acciones</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -188,18 +277,53 @@ const RecaudosIndex = () => {
                         <TableRow 
                           key={recaudo.id} 
                           className="cursor-pointer hover:bg-gray-50"
-                          onClick={() => navigate(`/recaudos/${recaudo.id}`)}
                         >
-                          <TableCell className="font-medium">{recaudo.numero}</TableCell>
-                          <TableCell>{recaudo.cliente?.nombre} {recaudo.cliente?.apellidos}</TableCell>
-                          <TableCell>{format(new Date(recaudo.fecha_vencimiento), 'dd MMM yyyy', { locale: es })}</TableCell>
-                          <TableCell>{recaudo.metodo_pago}</TableCell>
-                          <TableCell>${Number(recaudo.monto).toLocaleString()}</TableCell>
-                          <TableCell>
+                          <TableCell className="font-medium" onClick={() => handleViewRecaudo(recaudo)}>
+                            {recaudo.numero}
+                          </TableCell>
+                          <TableCell onClick={() => handleViewRecaudo(recaudo)}>
+                            {recaudo.cliente?.nombre} {recaudo.cliente?.apellidos}
+                          </TableCell>
+                          <TableCell onClick={() => handleViewRecaudo(recaudo)}>
+                            {format(new Date(recaudo.fecha_vencimiento), 'dd MMM yyyy', { locale: es })}
+                          </TableCell>
+                          <TableCell onClick={() => handleViewRecaudo(recaudo)}>
+                            {recaudo.metodo_pago}
+                          </TableCell>
+                          <TableCell onClick={() => handleViewRecaudo(recaudo)}>
+                            ${Number(recaudo.monto).toLocaleString()}
+                          </TableCell>
+                          <TableCell onClick={() => handleViewRecaudo(recaudo)}>
                             <Badge className={`flex items-center w-fit ${getStatusClass(recaudo.estado)}`}>
                               {getStatusIcon(recaudo.estado)}
                               {recaudo.estado}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <div className="flex justify-center space-x-1">
+                              <Button 
+                                variant="ghost" 
+                                size="icon" 
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleChangeStatus(recaudo);
+                                }}
+                              >
+                                <AlertCircle className="h-4 w-4" />
+                              </Button>
+                              {recaudo.estado !== "Pagado" && (
+                                <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePayment(recaudo);
+                                  }}
+                                >
+                                  <Check className="h-4 w-4" />
+                                </Button>
+                              )}
+                            </div>
                           </TableCell>
                         </TableRow>
                       ))}
@@ -239,6 +363,30 @@ const RecaudosIndex = () => {
             </>
           )}
         </div>
+
+        <RecaudoDetailDialog 
+          open={showDetailDialog} 
+          onOpenChange={setShowDetailDialog} 
+          recaudo={selectedRecaudo}
+          onEditStatus={handleChangeStatus}
+          onUpdateNotes={updateNotes}
+        />
+
+        <RecaudoStatusDialog 
+          open={showStatusDialog} 
+          onOpenChange={setShowStatusDialog} 
+          recaudo={selectedRecaudo} 
+          nuevoEstado={newStatus}
+          onEstadoChange={setNewStatus}
+          onConfirm={() => selectedRecaudo && updateStatus(selectedRecaudo.id, newStatus)}
+        />
+
+        <RecaudoPaymentDialog 
+          open={showPaymentDialog} 
+          onOpenChange={setShowPaymentDialog} 
+          recaudo={selectedRecaudo} 
+          onConfirm={(id) => markAsPaid(id)}
+        />
       </main>
     </div>
   );

@@ -19,7 +19,6 @@ import {
   Edit,
   CreditCard
 } from "lucide-react";
-import { useNavigate } from "react-router-dom";
 
 interface RecaudoTableProps {
   onViewDetail: (recaudo: Recaudo) => void;
@@ -33,9 +32,6 @@ export const RecaudoTable = ({
   onPayment 
 }: RecaudoTableProps) => {
   // Use hook to access recaudos data
-  const navigate = useNavigate();
-  
-  // Importing data from parent component via props
   const { recaudos } = useRecaudosContext();
   
   // Format currency

@@ -1,7 +1,7 @@
 
 import { Layout } from "@/components/layout/Layout";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/components/ui/card";
-import { Building2, FileText, Globe, MapPin, UserPlus } from "lucide-react";
+import { Building2, FileText, Globe, MapPin, UserPlus, Package } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
 interface MaestroCardProps {
@@ -63,6 +63,12 @@ const MaestrosIndexPage = () => {
       description: "Administrar orígenes de captación de clientes",
       icon: <UserPlus className="h-5 w-5" />,
       path: "/maestros/origenes-cliente",
+    },
+    {
+      title: "Tipos de Productos",
+      description: "Administrar catálogo de tipos de productos",
+      icon: <Package className="h-5 w-5" />,
+      path: "/maestros/tipos-productos",
     },
   ];
 

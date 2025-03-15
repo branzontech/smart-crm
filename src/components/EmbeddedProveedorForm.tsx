@@ -10,7 +10,7 @@ import {
   SelectTrigger, 
   SelectValue 
 } from "@/components/ui/select";
-import { getSectores } from "@/services/maestros/sectorService";
+import { fetchSectores } from "@/services/maestros/sectorService";
 import { useEffect } from "react";
 
 interface EmbeddedProveedorFormProps {
@@ -32,9 +32,9 @@ export function EmbeddedProveedorForm({ onProveedorCreated, onCancel }: Embedded
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
-    const fetchSectores = async () => {
+    const fetchSectoresData = async () => {
       try {
-        const { data } = await getSectores();
+        const data = await fetchSectores();
         if (data) {
           setSectores(data);
         }
@@ -43,7 +43,7 @@ export function EmbeddedProveedorForm({ onProveedorCreated, onCancel }: Embedded
       }
     };
 
-    fetchSectores();
+    fetchSectoresData();
   }, []);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {

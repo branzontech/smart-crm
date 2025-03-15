@@ -3,6 +3,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { Cotizacion } from "@/types/cotizacion";
 import { handleSupabaseError } from "@/utils/supabaseHelpers";
 import { toast } from "sonner";
+import { Json } from "@/integrations/supabase/types";
 
 // Generate a quotation number
 export const generateCotizacionNumber = (): string => {
@@ -16,22 +17,25 @@ export const generateCotizacionNumber = (): string => {
 // Save quotation to database
 export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | null> => {
   try {
+    // Convert our application types to database types
+    const cotizacionDB = {
+      numero: cotizacion.numero,
+      fecha_emision: cotizacion.fechaEmision.toISOString(),
+      fecha_vencimiento: cotizacion.fechaVencimiento.toISOString(),
+      empresa_emisor: cotizacion.empresaEmisor as unknown as Json,
+      cliente: cotizacion.cliente as unknown as Json,
+      subtotal: cotizacion.subtotal,
+      total_iva: cotizacion.totalIva,
+      total: cotizacion.total,
+      firma_nombre: cotizacion.firmaNombre,
+      firma_url: cotizacion.firmaUrl,
+      estado: cotizacion.estado
+    };
+
     // First, insert the main quotation record
     const { data: cotizacionData, error: cotizacionError } = await supabase
       .from("cotizaciones")
-      .insert({
-        numero: cotizacion.numero,
-        fecha_emision: cotizacion.fechaEmision.toISOString(),
-        fecha_vencimiento: cotizacion.fechaVencimiento.toISOString(),
-        empresa_emisor: cotizacion.empresaEmisor,
-        cliente: cotizacion.cliente,
-        subtotal: cotizacion.subtotal,
-        total_iva: cotizacion.totalIva,
-        total: cotizacion.total,
-        firma_nombre: cotizacion.firmaNombre,
-        firma_url: cotizacion.firmaUrl,
-        estado: cotizacion.estado
-      })
+      .insert(cotizacionDB)
       .select("id")
       .single();
 
@@ -104,9 +108,9 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
       numero: cotizacionData.numero,
       fechaEmision: new Date(cotizacionData.fecha_emision),
       fechaVencimiento: new Date(cotizacionData.fecha_vencimiento),
-      empresaEmisor: cotizacionData.empresa_emisor,
-      cliente: cotizacionData.cliente,
-      productos: productos.map((p: any) => ({
+      empresaEmisor: cotizacionData.empresa_emisor as any,
+      cliente: cotizacionData.cliente as any,
+      productos: productos.map((p) => ({
         id: p.id,
         descripcion: p.descripcion,
         cantidad: p.cantidad,
@@ -119,7 +123,7 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
       total: cotizacionData.total,
       firmaNombre: cotizacionData.firma_nombre,
       firmaUrl: cotizacionData.firma_url,
-      estado: cotizacionData.estado
+      estado: cotizacionData.estado as "borrador" | "enviada" | "aprobada" | "rechazada" | "vencida"
     };
 
     return cotizacion;
@@ -142,20 +146,21 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
     // Ensure data is an array
     const cotizaciones = Array.isArray(data) ? data : [];
 
+    // Map the database results to our application type
     return cotizaciones.map((item) => ({
       id: item.id,
       numero: item.numero,
       fechaEmision: new Date(item.fecha_emision),
       fechaVencimiento: new Date(item.fecha_vencimiento),
-      empresaEmisor: item.empresa_emisor,
-      cliente: item.cliente,
+      empresaEmisor: item.empresa_emisor as any,
+      cliente: item.cliente as any,
       productos: [],
       subtotal: item.subtotal,
       totalIva: item.total_iva,
       total: item.total,
       firmaNombre: item.firma_nombre,
       firmaUrl: item.firma_url,
-      estado: item.estado
+      estado: item.estado as "borrador" | "enviada" | "aprobada" | "rechazada" | "vencida"
     }));
   } catch (error) {
     handleSupabaseError(error, "Error al obtener las cotizaciones");
@@ -166,6 +171,12 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
 // Update quotation status
 export const updateCotizacionStatus = async (id: string, estado: string): Promise<boolean> => {
   try {
+    // Validate the estado value matches one of the allowed values
+    const validEstados = ["borrador", "enviada", "aprobada", "rechazada", "vencida"];
+    if (!validEstados.includes(estado)) {
+      throw new Error(`Estado inválido: ${estado}. Debe ser uno de: ${validEstados.join(", ")}`);
+    }
+    
     const { error } = await supabase
       .from("cotizaciones")
       .update({ estado })

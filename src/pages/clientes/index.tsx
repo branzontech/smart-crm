@@ -35,7 +35,8 @@ import {
   DialogClose,
   DialogFooter,
 } from "@/components/ui/dialog";
-import { getClientes, deleteCliente, Cliente } from "@/services/clientesService";
+import { getClientes, deleteCliente } from "@/services/clientesService";
+import { Cliente } from "@/types/maestros";
 import { CreateClienteDialog } from "@/components/CreateClienteDialog";
 
 export default function ClientesPage() {

@@ -35,7 +35,7 @@ export const createEmpresa = async (empresa: Omit<Empresa, "id" | "created_at" |
       throw error;
     }
     
-    return data;
+    return data as Empresa;
   } catch (error: any) {
     toast.error(`Error al crear empresa: ${error.message}`);
     throw error;
@@ -49,5 +49,5 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
     .order("nombre");
   
   if (error) throw error;
-  return data || [];
+  return data as Empresa[] || [];
 };

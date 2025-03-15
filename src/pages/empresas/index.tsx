@@ -1,20 +1,35 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { Building2, Plus } from "lucide-react";
+import { Building2, Loader2, Plus } from "lucide-react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
+import { fetchEmpresas, Empresa } from "@/services/empresaService";
+import { toast } from "sonner";
 
 const EmpresasIndex = () => {
   const navigate = useNavigate();
+  const [empresas, setEmpresas] = useState<Empresa[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const empresas = [
-    { id: 1, nombre: "Tech Solutions SA", industria: "Tecnología", empleados: 150, ciudad: "Buenos Aires" },
-    { id: 2, nombre: "Green Energy Corp", industria: "Energía", empleados: 75, ciudad: "Córdoba" },
-    { id: 3, nombre: "Global Logistics", industria: "Logística", empleados: 200, ciudad: "Rosario" },
-  ];
+  useEffect(() => {
+    const loadEmpresas = async () => {
+      try {
+        setIsLoading(true);
+        const data = await fetchEmpresas();
+        setEmpresas(data);
+      } catch (error: any) {
+        toast.error(`Error al cargar empresas: ${error.message}`);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadEmpresas();
+  }, []);
 
   return (
     <div className="min-h-screen flex bg-gray-50">
@@ -38,41 +53,56 @@ const EmpresasIndex = () => {
             </div>
 
             <Card>
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader className="bg-mint/20">
-                    <TableRow>
-                      <TableHead className="text-teal">Nombre</TableHead>
-                      <TableHead className="text-teal">Industria</TableHead>
-                      <TableHead className="text-teal">Empleados</TableHead>
-                      <TableHead className="text-teal">Ciudad</TableHead>
-                      <TableHead className="text-teal">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {empresas.map((empresa) => (
-                      <TableRow
-                        key={empresa.id}
-                        className="hover:bg-gray-50 transition-colors duration-150"
-                      >
-                        <TableCell className="font-medium">{empresa.nombre}</TableCell>
-                        <TableCell>{empresa.industria}</TableCell>
-                        <TableCell>{empresa.empleados}</TableCell>
-                        <TableCell>{empresa.ciudad}</TableCell>
-                        <TableCell>
-                          <Button
-                            variant="ghost"
-                            className="text-teal hover:text-sage hover:bg-mint/20"
-                            onClick={() => navigate(`/empresas/${empresa.id}`)}
-                          >
-                            Ver detalles
-                          </Button>
-                        </TableCell>
+              {isLoading ? (
+                <div className="flex justify-center items-center p-8">
+                  <Loader2 className="h-8 w-8 animate-spin text-teal" />
+                  <span className="ml-2">Cargando empresas...</span>
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader className="bg-mint/20">
+                      <TableRow>
+                        <TableHead className="text-teal">Nombre</TableHead>
+                        <TableHead className="text-teal">Industria</TableHead>
+                        <TableHead className="text-teal">Empleados</TableHead>
+                        <TableHead className="text-teal">Ciudad</TableHead>
+                        <TableHead className="text-teal">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {empresas.length === 0 ? (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8">
+                            No hay empresas registradas. Crea una nueva empresa para comenzar.
+                          </TableCell>
+                        </TableRow>
+                      ) : (
+                        empresas.map((empresa) => (
+                          <TableRow
+                            key={empresa.id}
+                            className="hover:bg-gray-50 transition-colors duration-150"
+                          >
+                            <TableCell className="font-medium">{empresa.nombre}</TableCell>
+                            <TableCell>{empresa.industria}</TableCell>
+                            <TableCell>{empresa.empleados}</TableCell>
+                            <TableCell>{empresa.ciudad}</TableCell>
+                            <TableCell>
+                              <Button
+                                variant="ghost"
+                                className="text-teal hover:text-sage hover:bg-mint/20"
+                                onClick={() => navigate(`/empresas/${empresa.id}`)}
+                              >
+                                Ver detalles
+                              </Button>
+                            </TableCell>
+                          </TableRow>
+                        ))
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </Card>
           </div>
         </main>

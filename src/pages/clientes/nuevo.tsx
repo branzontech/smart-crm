@@ -31,6 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchSectores, fetchTiposServicios, fetchPaises, fetchCiudades, fetchOrigenesCliente } from "@/services/maestrosService";
 import { Sector, TipoServicio, Pais, Ciudad, OrigenCliente } from "@/types/maestros";
+import { createCliente } from "@/services/clientesService";
 
 const clienteSchema = z.object({
   tipoPersona: z.enum(["natural", "juridica"]),
@@ -138,12 +139,16 @@ export default function NuevoCliente() {
   const onSubmit = async (data: ClienteForm) => {
     setIsLoading(true);
     try {
-      // Aquí iría la lógica para guardar en la base de datos
-      console.log(data);
+      const result = await createCliente(data);
+      
+      if (result.error) {
+        throw result.error;
+      }
+      
       toast.success("Cliente guardado exitosamente");
       navigate("/clientes");
-    } catch (error) {
-      toast.error("Error al guardar el cliente");
+    } catch (error: any) {
+      toast.error("Error al guardar el cliente: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -156,7 +161,7 @@ export default function NuevoCliente() {
         <Header />
         <main className="content-container pt-[var(--header-height)] overflow-y-auto">
           <div className="max-w-content">
-            <div className="mb-6">
+            <div className="mb-6 mt-4">
               <Button
                 variant="ghost"
                 className="text-teal hover:text-sage hover:bg-mint/20 mb-4"

@@ -35,6 +35,55 @@ export interface Ciudad {
   updated_at: string;
 }
 
+// Define Cliente interface
+export interface Cliente {
+  id: string;
+  tipo_persona: "natural" | "juridica";
+  tipo_documento: string;
+  documento: string;
+  nombre: string;
+  apellidos?: string;
+  empresa?: string;
+  cargo?: string;
+  email: string;
+  telefono: string;
+  tipo: "potencial" | "activo" | "inactivo" | "recurrente" | "referido" | "suspendido" | "corporativo";
+  tipo_servicio_id: string;
+  tipo_servicio?: {
+    id: string;
+    nombre: string;
+  };
+  sector_id: string;
+  sector?: {
+    id: string;
+    nombre: string;
+  };
+  direccion: string;
+  ciudad_id: string;
+  ciudad?: {
+    id: string;
+    nombre: string;
+    pais?: {
+      id: string;
+      nombre: string;
+    };
+  };
+  pais_id: string;
+  pais?: {
+    id: string;
+    nombre: string;
+  };
+  notas?: string;
+  origen_id: string;
+  origen?: {
+    id: string;
+    nombre: string;
+  };
+  presupuesto_estimado?: number;
+  created_at: string;
+  updated_at: string;
+}
+
 // Utility interface for handling Supabase joins
 export interface RelationshipResponse<T> {
   data: T | null;

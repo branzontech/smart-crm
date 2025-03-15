@@ -41,6 +41,114 @@ export type Database = {
           },
         ]
       }
+      clientes: {
+        Row: {
+          apellidos: string | null
+          cargo: string | null
+          ciudad_id: string | null
+          created_at: string
+          direccion: string
+          documento: string
+          email: string
+          empresa: string | null
+          id: string
+          nombre: string
+          notas: string | null
+          origen_id: string | null
+          pais_id: string | null
+          presupuesto_estimado: number | null
+          sector_id: string | null
+          telefono: string
+          tipo: string
+          tipo_documento: string
+          tipo_persona: string
+          tipo_servicio_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          apellidos?: string | null
+          cargo?: string | null
+          ciudad_id?: string | null
+          created_at?: string
+          direccion: string
+          documento: string
+          email: string
+          empresa?: string | null
+          id?: string
+          nombre: string
+          notas?: string | null
+          origen_id?: string | null
+          pais_id?: string | null
+          presupuesto_estimado?: number | null
+          sector_id?: string | null
+          telefono: string
+          tipo: string
+          tipo_documento: string
+          tipo_persona: string
+          tipo_servicio_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          apellidos?: string | null
+          cargo?: string | null
+          ciudad_id?: string | null
+          created_at?: string
+          direccion?: string
+          documento?: string
+          email?: string
+          empresa?: string | null
+          id?: string
+          nombre?: string
+          notas?: string | null
+          origen_id?: string | null
+          pais_id?: string | null
+          presupuesto_estimado?: number | null
+          sector_id?: string | null
+          telefono?: string
+          tipo?: string
+          tipo_documento?: string
+          tipo_persona?: string
+          tipo_servicio_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clientes_ciudad_id_fkey"
+            columns: ["ciudad_id"]
+            isOneToOne: false
+            referencedRelation: "ciudades"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_origen_id_fkey"
+            columns: ["origen_id"]
+            isOneToOne: false
+            referencedRelation: "origenes_cliente"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_pais_id_fkey"
+            columns: ["pais_id"]
+            isOneToOne: false
+            referencedRelation: "paises"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_sector_id_fkey"
+            columns: ["sector_id"]
+            isOneToOne: false
+            referencedRelation: "sectores"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "clientes_tipo_servicio_id_fkey"
+            columns: ["tipo_servicio_id"]
+            isOneToOne: false
+            referencedRelation: "tipos_servicios"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       empresas: {
         Row: {
           ciudad: string

@@ -32,6 +32,7 @@ import {
 } from "@/components/ui/select";
 import { fetchSectores, fetchPaises } from "@/services/maestrosService";
 import { Sector, Pais } from "@/types/maestros";
+import { createCliente } from "@/services/clientesService";
 
 const clienteSimpleSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
@@ -101,22 +102,41 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
   const handleSubmit = async (data: ClienteSimpleForm) => {
     setIsLoading(true);
     try {
-      // Simular la creación de un cliente
-      // En un caso real, esto sería una llamada a la API
-      const nuevoCliente = {
-        id: Math.floor(Math.random() * 1000), // Simulado
+      // Convertir a formato completo para la API
+      const clienteCompleto = {
+        tipoPersona: "natural",
+        tipoDocumento: "CC",
+        documento: data.documento,
         nombre: data.nombre.trim(),
+        email: data.email || "",
+        telefono: data.telefono || "",
+        tipo: "potencial",
+        sector: data.sector,
+        pais: data.pais,
+        tipoServicio: "", // Estos campos son requeridos por el esquema
+        direccion: "Por definir", // Valores por defecto
+        ciudad: data.pais, // Usamos el mismo país como ciudad temporalmente
+        origen: data.sector, // Usamos el sector como origen temporalmente
       };
 
-      if (onClienteCreated) {
-        onClienteCreated(nuevoCliente);
+      const result = await createCliente(clienteCompleto);
+      
+      if (result.error) {
+        throw result.error;
+      }
+
+      if (result.data && onClienteCreated) {
+        onClienteCreated({
+          id: Number(result.data.id),
+          nombre: result.data.nombre,
+        });
       }
       
       toast.success("Cliente creado exitosamente");
       setOpen(false);
       form.reset();
-    } catch (error) {
-      toast.error("Error al crear el cliente");
+    } catch (error: any) {
+      toast.error("Error al crear el cliente: " + error.message);
     } finally {
       setIsLoading(false);
     }

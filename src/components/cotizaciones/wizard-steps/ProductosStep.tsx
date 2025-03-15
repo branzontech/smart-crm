@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -19,6 +20,7 @@ export const ProductosStep: React.FC = () => {
   const [precioUnitario, setPrecioUnitario] = useState<number | null>(null);
   const [aplicarIva, setAplicarIva] = useState(true);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     if (productos.length > 0) {
@@ -42,6 +44,8 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const ivaRate = aplicarIva ? 19 : 0;
     
     const productSubtotal = cantidad * precioUnitario;
@@ -63,7 +67,16 @@ export const ProductosStep: React.FC = () => {
     setCantidad(null);
     setPrecioUnitario(null);
 
-    toast.success('Producto agregado correctamente');
+    // Show toast notification with a shorter duration
+    toast.success('Producto agregado correctamente', {
+      duration: 2000,
+      position: 'top-right',
+    });
+    
+    // Reset the isSubmitting state after a short delay
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 500);
   };
 
   const startEditingProduct = (productId: string) => {
@@ -102,6 +115,8 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const ivaRate = aplicarIva ? 19 : 0;
     
     const productSubtotal = cantidad * precioUnitario;
@@ -127,7 +142,16 @@ export const ProductosStep: React.FC = () => {
     setPrecioUnitario(null);
     setEditingProductId(null);
 
-    toast.success('Producto actualizado correctamente');
+    // Show toast notification with a shorter duration
+    toast.success('Producto actualizado correctamente', {
+      duration: 2000,
+      position: 'top-right',
+    });
+    
+    // Reset the isSubmitting state after a short delay
+    setTimeout(() => {
+      setIsSubmitting(false);
+    }, 500);
   };
 
   const handleRemoveProducto = (id: string) => {
@@ -135,7 +159,12 @@ export const ProductosStep: React.FC = () => {
     if (index === -1) return;
     
     removeProducto(index);
-    toast.success('Producto eliminado correctamente');
+    
+    // Show toast notification with a shorter duration
+    toast.success('Producto eliminado correctamente', {
+      duration: 2000,
+      position: 'top-right',
+    });
   };
 
   const formatCurrency = (value: number) => {
@@ -215,12 +244,14 @@ export const ProductosStep: React.FC = () => {
                 <Button
                   onClick={saveEditingProduct}
                   className="bg-green-600 hover:bg-green-700 text-white"
+                  disabled={isSubmitting}
                 >
                   <Save className="h-4 w-4 mr-2" /> Guardar
                 </Button>
                 <Button
                   variant="outline"
                   onClick={cancelEditing}
+                  disabled={isSubmitting}
                 >
                   <X className="h-4 w-4 mr-2" /> Cancelar
                 </Button>
@@ -229,6 +260,7 @@ export const ProductosStep: React.FC = () => {
               <Button
                 onClick={handleAddProducto}
                 className="bg-primary text-primary-foreground"
+                disabled={isSubmitting}
               >
                 <Plus className="h-4 w-4 mr-2" /> Agregar Producto
               </Button>
@@ -269,7 +301,7 @@ export const ProductosStep: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => startEditingProduct(producto.id)}
-                          disabled={!!editingProductId}
+                          disabled={!!editingProductId || isSubmitting}
                         >
                           <Edit className="h-4 w-4" />
                         </Button>
@@ -277,7 +309,7 @@ export const ProductosStep: React.FC = () => {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveProducto(producto.id)}
-                          disabled={!!editingProductId}
+                          disabled={!!editingProductId || isSubmitting}
                           className="text-red-500 hover:text-red-700"
                         >
                           <Trash className="h-4 w-4" />

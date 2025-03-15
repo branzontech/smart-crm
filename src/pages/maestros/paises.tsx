@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MaestroTable } from "@/components/maestros/MaestroTable";
 import { Layout } from "@/components/layout/Layout";
-import { fetchPaises, createPais, updatePais, deletePais } from "@/services/maestrosService";
+import { fetchPaises, createPais, updatePais, deletePais } from "@/services/maestros";
 import { Pais } from "@/types/maestros";
 import { toast } from "sonner";
 

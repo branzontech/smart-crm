@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CiudadTable } from "@/components/maestros/CiudadTable";
 import { Layout } from "@/components/layout/Layout";
-import { fetchCiudades, createCiudad, updateCiudad, deleteCiudad } from "@/services/maestrosService";
+import { fetchCiudades, createCiudad, updateCiudad, deleteCiudad } from "@/services/maestros";
 import { Ciudad } from "@/types/maestros";
 import { toast } from "sonner";
 

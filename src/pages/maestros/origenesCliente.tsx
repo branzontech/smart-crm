@@ -3,7 +3,7 @@ import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { MaestroTable } from "@/components/maestros/MaestroTable";
 import { Layout } from "@/components/layout/Layout";
-import { fetchOrigenesCliente, createOrigenCliente, updateOrigenCliente, deleteOrigenCliente } from "@/services/maestrosService";
+import { fetchOrigenesCliente, createOrigenCliente, updateOrigenCliente, deleteOrigenCliente } from "@/services/maestros";
 import { OrigenCliente } from "@/types/maestros";
 import { toast } from "sonner";
 

@@ -25,11 +25,14 @@ import { Calendar } from "@/components/ui/calendar";
 import { 
   Search, 
   Calendar as CalendarIcon, 
-  DollarSign 
+  DollarSign,
+  Filter,
+  X
 } from "lucide-react";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
 import { useRecaudos } from "@/hooks/useRecaudos";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export const RecaudoFilterBar = () => {
   const { 
@@ -51,13 +54,44 @@ export const RecaudoFilterBar = () => {
     handleLimpiarFiltros 
   } = useRecaudos();
 
+  const isMobile = useIsMobile();
+  const [isCollapsed, setIsCollapsed] = useState(false);
+
+  if (isMobile && isCollapsed) {
+    return (
+      <div className="flex justify-between items-center mb-4">
+        <Button 
+          variant="outline" 
+          onClick={() => setIsCollapsed(false)}
+          className="w-full flex items-center justify-center gap-2"
+          size="sm"
+        >
+          <Filter className="h-4 w-4" />
+          Mostrar filtros
+        </Button>
+      </div>
+    );
+  }
+
   return (
     <Card className="mb-6">
-      <CardHeader className="pb-3">
-        <CardTitle>Filtrar Recaudos</CardTitle>
-        <CardDescription>
-          Utilice los filtros para encontrar recaudos específicos
-        </CardDescription>
+      <CardHeader className="pb-3 flex flex-row justify-between items-start">
+        <div>
+          <CardTitle>Filtrar Recaudos</CardTitle>
+          <CardDescription>
+            Utilice los filtros para encontrar recaudos específicos
+          </CardDescription>
+        </div>
+        {isMobile && (
+          <Button 
+            variant="ghost" 
+            onClick={() => setIsCollapsed(true)}
+            size="icon"
+            className="mt-[-0.5rem]"
+          >
+            <X className="h-4 w-4" />
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <div className="flex flex-col space-y-4">
@@ -84,6 +118,7 @@ export const RecaudoFilterBar = () => {
                   <SelectItem value="pendiente">Pendiente</SelectItem>
                   <SelectItem value="en proceso">En proceso</SelectItem>
                   <SelectItem value="vencido">Vencido</SelectItem>
+                  <SelectItem value="pagado">Pagado</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -94,6 +129,7 @@ export const RecaudoFilterBar = () => {
               variant="outline" 
               onClick={() => setMostrarFiltrosAvanzados(!mostrarFiltrosAvanzados)}
               className="text-teal"
+              size={isMobile ? "sm" : "default"}
             >
               {mostrarFiltrosAvanzados ? "Ocultar filtros avanzados" : "Mostrar filtros avanzados"}
             </Button>
@@ -102,6 +138,7 @@ export const RecaudoFilterBar = () => {
               variant="ghost" 
               onClick={handleLimpiarFiltros}
               className="text-gray-500"
+              size={isMobile ? "sm" : "default"}
             >
               Limpiar filtros
             </Button>
@@ -122,6 +159,7 @@ export const RecaudoFilterBar = () => {
                           <Button
                             variant="outline"
                             className="w-full justify-start text-left font-normal"
+                            size={isMobile ? "sm" : "default"}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {fechaDesde ? format(fechaDesde, 'PP', { locale: es }) : "Fecha desde"}
@@ -143,6 +181,7 @@ export const RecaudoFilterBar = () => {
                           <Button
                             variant="outline"
                             className="w-full justify-start text-left font-normal"
+                            size={isMobile ? "sm" : "default"}
                           >
                             <CalendarIcon className="mr-2 h-4 w-4" />
                             {fechaHasta ? format(fechaHasta, 'PP', { locale: es }) : "Fecha hasta"}
@@ -191,6 +230,7 @@ export const RecaudoFilterBar = () => {
                 <Button 
                   className="bg-teal hover:bg-teal/90"
                   onClick={aplicarFiltros}
+                  size={isMobile ? "sm" : "default"}
                 >
                   Aplicar filtros
                 </Button>

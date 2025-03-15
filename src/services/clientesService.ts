@@ -1,6 +1,7 @@
 
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { Cliente as ClienteType } from "@/types/maestros";
 
 export interface ClienteForm {
   tipoPersona: "natural" | "juridica";
@@ -23,18 +24,7 @@ export interface ClienteForm {
   presupuestoEstimado?: string;
 }
 
-export interface Cliente extends Omit<ClienteForm, 'tipoServicio' | 'sector' | 'ciudad' | 'pais' | 'origen'> {
-  id: string;
-  tipo_servicio_id: string;
-  sector_id: string;
-  ciudad_id: string;
-  pais_id: string;
-  origen_id: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export const createCliente = async (clienteData: ClienteForm): Promise<{ data: Cliente | null; error: Error | null }> => {
+export const createCliente = async (clienteData: ClienteForm): Promise<{ data: ClienteType | null; error: Error | null }> => {
   try {
     // Transform form data to match database structure
     const cliente = {
@@ -65,7 +55,7 @@ export const createCliente = async (clienteData: ClienteForm): Promise<{ data: C
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as ClienteType, error: null };
   } catch (error: any) {
     console.error("Error creando cliente:", error);
     toast.error(`Error al crear cliente: ${error.message}`);
@@ -73,7 +63,7 @@ export const createCliente = async (clienteData: ClienteForm): Promise<{ data: C
   }
 };
 
-export const getClientes = async (): Promise<{ data: Cliente[] | null; error: Error | null }> => {
+export const getClientes = async (): Promise<{ data: ClienteType[] | null; error: Error | null }> => {
   try {
     const { data, error } = await supabase
       .from("clientes")
@@ -88,7 +78,7 @@ export const getClientes = async (): Promise<{ data: Cliente[] | null; error: Er
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as ClienteType[], error: null };
   } catch (error: any) {
     console.error("Error obteniendo clientes:", error);
     toast.error(`Error al cargar clientes: ${error.message}`);
@@ -96,7 +86,7 @@ export const getClientes = async (): Promise<{ data: Cliente[] | null; error: Er
   }
 };
 
-export const getClienteById = async (id: string): Promise<{ data: Cliente | null; error: Error | null }> => {
+export const getClienteById = async (id: string): Promise<{ data: ClienteType | null; error: Error | null }> => {
   try {
     const { data, error } = await supabase
       .from("clientes")
@@ -112,14 +102,14 @@ export const getClienteById = async (id: string): Promise<{ data: Cliente | null
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as ClienteType, error: null };
   } catch (error: any) {
     console.error(`Error obteniendo cliente ${id}:`, error);
     return { data: null, error };
   }
 };
 
-export const updateCliente = async (id: string, clienteData: Partial<ClienteForm>): Promise<{ data: Cliente | null; error: Error | null }> => {
+export const updateCliente = async (id: string, clienteData: Partial<ClienteForm>): Promise<{ data: ClienteType | null; error: Error | null }> => {
   try {
     // Transform form data to match database structure
     const updateData: Record<string, any> = {};
@@ -155,7 +145,7 @@ export const updateCliente = async (id: string, clienteData: Partial<ClienteForm
       .single();
 
     if (error) throw error;
-    return { data, error: null };
+    return { data: data as ClienteType, error: null };
   } catch (error: any) {
     console.error(`Error actualizando cliente ${id}:`, error);
     toast.error(`Error al actualizar cliente: ${error.message}`);

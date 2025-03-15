@@ -31,7 +31,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { fetchSectores, fetchTiposServicios, fetchPaises, fetchCiudades, fetchOrigenesCliente } from "@/services/maestrosService";
 import { Sector, TipoServicio, Pais, Ciudad, OrigenCliente } from "@/types/maestros";
-import { createCliente } from "@/services/clientesService";
+import { createCliente, ClienteForm } from "@/services/clientesService";
 
 const clienteSchema = z.object({
   tipoPersona: z.enum(["natural", "juridica"]),
@@ -57,7 +57,7 @@ const clienteSchema = z.object({
   presupuestoEstimado: z.string().optional(),
 });
 
-type ClienteForm = z.infer<typeof clienteSchema>;
+type ClienteFormValues = z.infer<typeof clienteSchema>;
 
 export default function NuevoCliente() {
   const navigate = useNavigate();
@@ -72,7 +72,7 @@ export default function NuevoCliente() {
   const [ciudadesFiltradas, setCiudadesFiltradas] = useState<Ciudad[]>([]);
   const [isLoadingMaestros, setIsLoadingMaestros] = useState(true);
 
-  const form = useForm<ClienteForm>({
+  const form = useForm<ClienteFormValues>({
     resolver: zodResolver(clienteSchema),
     defaultValues: {
       tipoPersona: "natural",
@@ -136,10 +136,32 @@ export default function NuevoCliente() {
   // Observar el tipo de persona para condicionar la UI
   const tipoPersona = form.watch("tipoPersona");
 
-  const onSubmit = async (data: ClienteForm) => {
+  const onSubmit = async (data: ClienteFormValues) => {
     setIsLoading(true);
     try {
-      const result = await createCliente(data);
+      // Asegurar que data tiene todos los campos requeridos por ClienteForm
+      const clienteData: ClienteForm = {
+        tipoPersona: data.tipoPersona,
+        tipoDocumento: data.tipoDocumento,
+        documento: data.documento,
+        nombre: data.nombre,
+        apellidos: data.apellidos,
+        empresa: data.empresa,
+        cargo: data.cargo,
+        email: data.email,
+        telefono: data.telefono,
+        tipo: data.tipo,
+        tipoServicio: data.tipoServicio,
+        sector: data.sector,
+        direccion: data.direccion,
+        ciudad: data.ciudad,
+        pais: data.pais,
+        notas: data.notas,
+        origen: data.origen,
+        presupuestoEstimado: data.presupuestoEstimado,
+      };
+      
+      const result = await createCliente(clienteData);
       
       if (result.error) {
         throw result.error;

@@ -32,7 +32,7 @@ import {
 } from "@/components/ui/select";
 import { fetchSectores, fetchPaises } from "@/services/maestrosService";
 import { Sector, Pais } from "@/types/maestros";
-import { createCliente } from "@/services/clientesService";
+import { createCliente, ClienteForm } from "@/services/clientesService";
 
 const clienteSimpleSchema = z.object({
   nombre: z.string().min(2, "El nombre es requerido"),
@@ -103,8 +103,8 @@ export function EmbeddedClienteForm({ onClienteCreated }: EmbeddedClienteFormPro
     setIsLoading(true);
     try {
       // Convertir a formato completo para la API
-      const clienteCompleto = {
-        tipoPersona: "natural",
+      const clienteCompleto: ClienteForm = {
+        tipoPersona: "natural" as const,
         tipoDocumento: "CC",
         documento: data.documento,
         nombre: data.nombre.trim(),

@@ -1,9 +1,10 @@
-import { useState, useMemo } from "react";
+
+import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, Check, MoreHorizontal } from "lucide-react";
+import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, Check, MoreHorizontal, Loader2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import {
   Table,
@@ -30,19 +31,24 @@ import {
 } from "@/components/ui/select";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { getAllCotizaciones } from "@/services/cotizacionService";
+import { Cotizacion } from "@/types/cotizacion";
+import { toast } from "sonner";
 
 const CotizacionesIndex = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [filtroEstado, setFiltroEstado] = useState<string | null>(null);
-  const [selectedCotizaciones, setSelectedCotizaciones] = useState<number[]>([]);
+  const [selectedCotizaciones, setSelectedCotizaciones] = useState<string[]>([]);
   const [sortConfig, setSortConfig] = useState<{
-    key: keyof typeof cotizaciones[0] | null;
+    key: keyof Cotizacion | null;
     direction: 'asc' | 'desc';
   }>({
     key: null,
     direction: 'asc'
   });
+  const [cotizaciones, setCotizaciones] = useState<Cotizacion[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [visibleColumns, setVisibleColumns] = useState<{
     cliente: boolean;
     numero: boolean;
@@ -59,35 +65,23 @@ const CotizacionesIndex = () => {
     validezHasta: true,
   });
 
-  const cotizaciones = [
-    {
-      id: 1,
-      cliente: "Tech Solutions SA",
-      numero: "COT-2024-001",
-      monto: 25000,
-      estado: "Enviada",
-      fechaEmision: "2024-03-15",
-      validezHasta: "2024-04-15",
-    },
-    {
-      id: 2,
-      cliente: "Green Energy Corp",
-      numero: "COT-2024-002",
-      monto: 45000,
-      estado: "Aprobada",
-      fechaEmision: "2024-03-10",
-      validezHasta: "2024-04-10",
-    },
-    {
-      id: 3,
-      cliente: "Global Logistics",
-      numero: "COT-2024-003",
-      monto: 15000,
-      estado: "En revisión",
-      fechaEmision: "2024-03-12",
-      validezHasta: "2024-04-12",
-    },
-  ];
+  // Fetch cotizaciones from database
+  useEffect(() => {
+    const fetchCotizaciones = async () => {
+      try {
+        setIsLoading(true);
+        const data = await getAllCotizaciones();
+        setCotizaciones(data);
+      } catch (error) {
+        console.error("Error fetching cotizaciones:", error);
+        toast.error("Error al cargar las cotizaciones");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCotizaciones();
+  }, []);
 
   const sortedCotizaciones = useMemo(() => {
     if (!sortConfig.key) return cotizaciones;
@@ -105,8 +99,10 @@ const CotizacionesIndex = () => {
 
   const filteredCotizaciones = useMemo(() => {
     return sortedCotizaciones.filter(cotizacion => {
+      const clienteNombre = cotizacion.cliente?.nombre || '';
+      
       const matchesSearch = searchTerm === "" || 
-        cotizacion.cliente.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        clienteNombre.toLowerCase().includes(searchTerm.toLowerCase()) ||
         cotizacion.numero.toLowerCase().includes(searchTerm.toLowerCase());
       
       const matchesEstado = filtroEstado === null || 
@@ -116,7 +112,7 @@ const CotizacionesIndex = () => {
     });
   }, [sortedCotizaciones, searchTerm, filtroEstado]);
 
-  const requestSort = (key: keyof typeof cotizaciones[0]) => {
+  const requestSort = (key: keyof Cotizacion) => {
     let direction: 'asc' | 'desc' = 'asc';
     if (sortConfig.key === key && sortConfig.direction === 'asc') {
       direction = 'desc';
@@ -124,7 +120,7 @@ const CotizacionesIndex = () => {
     setSortConfig({ key, direction });
   };
 
-  const toggleSelection = (id: number) => {
+  const toggleSelection = (id: string) => {
     setSelectedCotizaciones(prev => 
       prev.includes(id) 
         ? prev.filter(itemId => itemId !== id)
@@ -133,10 +129,10 @@ const CotizacionesIndex = () => {
   };
 
   const toggleAllSelection = () => {
-    if (selectedCotizaciones.length === filteredCotizaciones.length) {
+    if (selectedCotizaciones.length === filteredCotizaciones.length && filteredCotizaciones.length > 0) {
       setSelectedCotizaciones([]);
     } else {
-      setSelectedCotizaciones(filteredCotizaciones.map(c => c.id));
+      setSelectedCotizaciones(filteredCotizaciones.map(c => c.id || '').filter(id => id !== ''));
     }
   };
 
@@ -145,6 +141,40 @@ const CotizacionesIndex = () => {
       ...prev,
       [column]: !prev[column]
     }));
+  };
+
+  const formatDate = (date: Date) => {
+    return new Date(date).toLocaleDateString();
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0
+    }).format(value);
+  };
+
+  const getEstadoClass = (estado: string) => {
+    switch (estado) {
+      case 'aprobada':
+        return "bg-green-100 text-green-800";
+      case 'enviada':
+        return "bg-blue-100 text-blue-800";
+      case 'borrador':
+        return "bg-gray-100 text-gray-800";
+      case 'rechazada':
+        return "bg-red-100 text-red-800";
+      case 'vencida':
+        return "bg-yellow-100 text-yellow-800";
+      default:
+        return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getEstadoDisplayName = (estado: string) => {
+    // Capitalize first letter
+    return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
   const hasSelection = selectedCotizaciones.length > 0;
@@ -201,10 +231,12 @@ const CotizacionesIndex = () => {
                       <SelectValue placeholder="Todos los estados" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="todos">Todos los estados</SelectItem>
-                      <SelectItem value="Enviada">Enviada</SelectItem>
-                      <SelectItem value="Aprobada">Aprobada</SelectItem>
-                      <SelectItem value="En revisión">En revisión</SelectItem>
+                      <SelectItem value="">Todos los estados</SelectItem>
+                      <SelectItem value="borrador">Borrador</SelectItem>
+                      <SelectItem value="enviada">Enviada</SelectItem>
+                      <SelectItem value="aprobada">Aprobada</SelectItem>
+                      <SelectItem value="rechazada">Rechazada</SelectItem>
+                      <SelectItem value="vencida">Vencida</SelectItem>
                     </SelectContent>
                   </Select>
                 </div>
@@ -260,192 +292,192 @@ const CotizacionesIndex = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-in fade-in-50 duration-500">
-              <div className="overflow-x-auto">
-                <Table>
-                  <TableHeader>
-                    <TableRow>
-                      <TableHead className="w-[50px]">
-                        <div className="flex items-center justify-center">
-                          <input
-                            type="checkbox"
-                            checked={selectedCotizaciones.length === filteredCotizaciones.length && filteredCotizaciones.length > 0}
-                            onChange={toggleAllSelection}
-                            className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                          />
-                        </div>
-                      </TableHead>
-                      
-                      {visibleColumns.cliente && (
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('cliente')}>
-                          <div className="flex items-center">
-                            Cliente
-                            {sortConfig.key === 'cliente' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      {visibleColumns.numero && (
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('numero')}>
-                          <div className="flex items-center">
-                            Número
-                            {sortConfig.key === 'numero' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      {visibleColumns.monto && (
-                        <TableHead className="cursor-pointer text-right" onClick={() => requestSort('monto')}>
-                          <div className="flex items-center justify-end">
-                            Monto
-                            {sortConfig.key === 'monto' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      {visibleColumns.estado && (
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('estado')}>
-                          <div className="flex items-center">
-                            Estado
-                            {sortConfig.key === 'estado' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      {visibleColumns.fechaEmision && (
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('fechaEmision')}>
-                          <div className="flex items-center">
-                            Emisión
-                            {sortConfig.key === 'fechaEmision' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      {visibleColumns.validezHasta && (
-                        <TableHead className="cursor-pointer" onClick={() => requestSort('validezHasta')}>
-                          <div className="flex items-center">
-                            Válido hasta
-                            {sortConfig.key === 'validezHasta' && (
-                              sortConfig.direction === 'asc' 
-                                ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                : <SortDesc className="ml-1 h-4 w-4" />
-                            )}
-                          </div>
-                        </TableHead>
-                      )}
-                      
-                      <TableHead className="w-[80px]">Acciones</TableHead>
-                    </TableRow>
-                  </TableHeader>
-                  <TableBody>
-                    {filteredCotizaciones.map((cotizacion) => (
-                      <TableRow 
-                        key={cotizacion.id} 
-                        className={selectedCotizaciones.includes(cotizacion.id) ? "bg-mint/10" : ""}
-                      >
-                        <TableCell>
+              {isLoading ? (
+                <div className="flex justify-center items-center h-64">
+                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[50px]">
                           <div className="flex items-center justify-center">
                             <input
                               type="checkbox"
-                              checked={selectedCotizaciones.includes(cotizacion.id)}
-                              onChange={() => toggleSelection(cotizacion.id)}
+                              checked={selectedCotizaciones.length === filteredCotizaciones.length && filteredCotizaciones.length > 0}
+                              onChange={toggleAllSelection}
                               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                             />
                           </div>
-                        </TableCell>
+                        </TableHead>
                         
                         {visibleColumns.cliente && (
-                          <TableCell className="font-medium">{cotizacion.cliente}</TableCell>
+                          <TableHead className="cursor-pointer" onClick={() => requestSort('cliente')}>
+                            <div className="flex items-center">
+                              Cliente
+                              {sortConfig.key === 'cliente' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
                         {visibleColumns.numero && (
-                          <TableCell>{cotizacion.numero}</TableCell>
+                          <TableHead className="cursor-pointer" onClick={() => requestSort('numero')}>
+                            <div className="flex items-center">
+                              Número
+                              {sortConfig.key === 'numero' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
                         {visibleColumns.monto && (
-                          <TableCell className="text-right">${cotizacion.monto.toLocaleString()}</TableCell>
+                          <TableHead className="cursor-pointer text-right" onClick={() => requestSort('total')}>
+                            <div className="flex items-center justify-end">
+                              Monto
+                              {sortConfig.key === 'total' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
                         {visibleColumns.estado && (
-                          <TableCell>
-                            <span className={`px-2 py-1 rounded-full text-xs ${
-                              cotizacion.estado === "Aprobada"
-                                ? "bg-green-100 text-green-800"
-                                : cotizacion.estado === "Enviada"
-                                ? "bg-blue-100 text-blue-800"
-                                : "bg-yellow-100 text-yellow-800"
-                            }`}>
-                              {cotizacion.estado}
-                            </span>
-                          </TableCell>
+                          <TableHead className="cursor-pointer" onClick={() => requestSort('estado')}>
+                            <div className="flex items-center">
+                              Estado
+                              {sortConfig.key === 'estado' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
                         {visibleColumns.fechaEmision && (
-                          <TableCell>{new Date(cotizacion.fechaEmision).toLocaleDateString()}</TableCell>
+                          <TableHead className="cursor-pointer" onClick={() => requestSort('fechaEmision')}>
+                            <div className="flex items-center">
+                              Emisión
+                              {sortConfig.key === 'fechaEmision' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
                         {visibleColumns.validezHasta && (
-                          <TableCell>{new Date(cotizacion.validezHasta).toLocaleDateString()}</TableCell>
+                          <TableHead className="cursor-pointer" onClick={() => requestSort('fechaVencimiento')}>
+                            <div className="flex items-center">
+                              Válido hasta
+                              {sortConfig.key === 'fechaVencimiento' && (
+                                sortConfig.direction === 'asc' 
+                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
+                                  : <SortDesc className="ml-1 h-4 w-4" />
+                              )}
+                            </div>
+                          </TableHead>
                         )}
                         
-                        <TableCell>
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" className="h-8 w-8 p-0">
-                                <span className="sr-only">Abrir menú</span>
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              <DropdownMenuItem onClick={() => navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
-                                Ver detalles
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
-                                Editar
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-red-600">
-                                Eliminar
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
-                        </TableCell>
+                        <TableHead className="w-[80px]">Acciones</TableHead>
                       </TableRow>
-                    ))}
-                    
-                    {filteredCotizaciones.length === 0 && (
-                      <TableRow>
-                        <TableCell colSpan={
-                          1 + // Checkbox column
-                          Object.values(visibleColumns).filter(Boolean).length + // Visible data columns
-                          1 // Action column
-                        } className="h-24 text-center">
-                          No se encontraron cotizaciones con los filtros seleccionados
-                        </TableCell>
-                      </TableRow>
-                    )}
-                  </TableBody>
-                </Table>
-              </div>
+                    </TableHeader>
+                    <TableBody>
+                      {filteredCotizaciones.map((cotizacion) => (
+                        <TableRow 
+                          key={cotizacion.id} 
+                          className={selectedCotizaciones.includes(cotizacion.id || '') ? "bg-mint/10" : ""}
+                        >
+                          <TableCell>
+                            <div className="flex items-center justify-center">
+                              <input
+                                type="checkbox"
+                                checked={selectedCotizaciones.includes(cotizacion.id || '')}
+                                onChange={() => cotizacion.id && toggleSelection(cotizacion.id)}
+                                className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                              />
+                            </div>
+                          </TableCell>
+                          
+                          {visibleColumns.cliente && (
+                            <TableCell className="font-medium">{cotizacion.cliente.nombre}</TableCell>
+                          )}
+                          
+                          {visibleColumns.numero && (
+                            <TableCell>{cotizacion.numero}</TableCell>
+                          )}
+                          
+                          {visibleColumns.monto && (
+                            <TableCell className="text-right">{formatCurrency(cotizacion.total)}</TableCell>
+                          )}
+                          
+                          {visibleColumns.estado && (
+                            <TableCell>
+                              <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
+                                {getEstadoDisplayName(cotizacion.estado)}
+                              </span>
+                            </TableCell>
+                          )}
+                          
+                          {visibleColumns.fechaEmision && (
+                            <TableCell>{formatDate(cotizacion.fechaEmision)}</TableCell>
+                          )}
+                          
+                          {visibleColumns.validezHasta && (
+                            <TableCell>{formatDate(cotizacion.fechaVencimiento)}</TableCell>
+                          )}
+                          
+                          <TableCell>
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button variant="ghost" className="h-8 w-8 p-0">
+                                  <span className="sr-only">Abrir menú</span>
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent align="end">
+                                <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
+                                  Ver detalles
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
+                                  Editar
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem className="text-red-600">
+                                  Eliminar
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      
+                      {filteredCotizaciones.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={
+                            1 + // Checkbox column
+                            Object.values(visibleColumns).filter(Boolean).length + // Visible data columns
+                            1 // Action column
+                          } className="h-24 text-center">
+                            No se encontraron cotizaciones con los filtros seleccionados
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                </div>
+              )}
             </div>
 
             {hasSelection && (

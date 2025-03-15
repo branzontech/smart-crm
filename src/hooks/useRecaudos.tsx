@@ -336,6 +336,8 @@ export const useRecaudos = () => {
     marcarComoPagado,
     cambiarEstado,
     actualizarNotas,
-    cargarRecaudos
+    cargarRecaudos,
+    obtenerDetalleRecaudo,
+    filtrarRecaudos
   };
 };

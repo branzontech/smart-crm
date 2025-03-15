@@ -23,11 +23,19 @@ import { useRecaudos } from "@/hooks/useRecaudos";
 export interface Recaudo {
   id: string;
   cliente: string;
+  cliente_id?: string;
   factura: string;
+  numero?: string;
   monto: number;
   fechaVencimiento: string;
   estado: string;
   diasVencido: number;
+  subtotal?: number;
+  iva?: number;
+  total?: number;
+  fecha_pago?: string;
+  metodo_pago?: string;
+  notas?: string;
   detalles?: {
     direccion: string;
     telefono: string;

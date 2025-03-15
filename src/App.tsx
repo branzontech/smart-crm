@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -19,6 +18,8 @@ import NuevoCliente from "./pages/clientes/nuevo";
 
 // Empresas
 import Empresas from "./pages/empresas";
+import DetalleEmpresa from "./pages/empresas/[id]";
+import EditarEmpresa from "./pages/empresas/[id]/editar";
 import NuevaEmpresa from "./pages/empresas/nuevo";
 
 // Proveedores
@@ -109,6 +110,16 @@ export default function App() {
             <Route path="/empresas/nuevo" element={
               <ProtectedRoute>
                 <NuevaEmpresa />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresas/:id" element={
+              <ProtectedRoute>
+                <DetalleEmpresa />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresas/:id/editar" element={
+              <ProtectedRoute>
+                <EditarEmpresa />
               </ProtectedRoute>
             } />
             

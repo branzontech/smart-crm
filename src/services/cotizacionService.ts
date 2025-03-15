@@ -18,7 +18,7 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
   try {
     // First, insert the main quotation record
     const { data: cotizacionData, error: cotizacionError } = await supabase
-      .from("cotizaciones" as any)
+      .from("cotizaciones")
       .insert({
         numero: cotizacion.numero,
         fecha_emision: cotizacion.fechaEmision.toISOString(),
@@ -31,11 +31,16 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
         firma_nombre: cotizacion.firmaNombre,
         firma_url: cotizacion.firmaUrl,
         estado: cotizacion.estado
-      } as any)
+      })
       .select("id")
       .single();
 
     if (cotizacionError) throw cotizacionError;
+    
+    // Explicitly check if cotizacionData is null or doesn't have an id
+    if (!cotizacionData || !('id' in cotizacionData)) {
+      throw new Error("Failed to retrieve ID after insertion");
+    }
 
     const cotizacionId = cotizacionData.id;
 
@@ -51,8 +56,8 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
       }));
 
       const { error: productosError } = await supabase
-        .from("productos_cotizacion" as any)
-        .insert(productosMapped as any);
+        .from("productos_cotizacion")
+        .insert(productosMapped);
 
       if (productosError) throw productosError;
     }
@@ -70,20 +75,28 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
   try {
     // Get main quotation data
     const { data: cotizacionData, error: cotizacionError } = await supabase
-      .from("cotizaciones" as any)
+      .from("cotizaciones")
       .select("*")
       .eq("id", id)
       .single();
 
     if (cotizacionError) throw cotizacionError;
+    
+    // Explicit type check for cotizacionData
+    if (!cotizacionData) {
+      throw new Error("Cotización no encontrada");
+    }
 
     // Get products for this quotation
     const { data: productosData, error: productosError } = await supabase
-      .from("productos_cotizacion" as any)
+      .from("productos_cotizacion")
       .select("*")
       .eq("cotizacion_id", id);
 
     if (productosError) throw productosError;
+    
+    // Ensure productosData is an array
+    const productos = Array.isArray(productosData) ? productosData : [];
 
     // Map database structure to our Cotizacion type
     const cotizacion: Cotizacion = {
@@ -93,7 +106,7 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
       fechaVencimiento: new Date(cotizacionData.fecha_vencimiento),
       empresaEmisor: cotizacionData.empresa_emisor,
       cliente: cotizacionData.cliente,
-      productos: productosData.map((p: any) => ({
+      productos: productos.map((p: any) => ({
         id: p.id,
         descripcion: p.descripcion,
         cantidad: p.cantidad,
@@ -120,13 +133,16 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
 export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
   try {
     const { data, error } = await supabase
-      .from("cotizaciones" as any)
+      .from("cotizaciones")
       .select("*")
       .order("fecha_emision", { ascending: false });
 
     if (error) throw error;
+    
+    // Ensure data is an array
+    const cotizaciones = Array.isArray(data) ? data : [];
 
-    return data.map((item: any) => ({
+    return cotizaciones.map((item) => ({
       id: item.id,
       numero: item.numero,
       fechaEmision: new Date(item.fecha_emision),
@@ -151,7 +167,7 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
 export const updateCotizacionStatus = async (id: string, estado: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from("cotizaciones" as any)
+      .from("cotizaciones")
       .update({ estado })
       .eq("id", id);
 

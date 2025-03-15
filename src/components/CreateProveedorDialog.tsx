@@ -1,12 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { createProveedor } from "@/services/proveedoresService";
@@ -39,8 +39,8 @@ export function CreateProveedorDialog({ onProveedorCreated }: CreateProveedorDia
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           type="button"
           variant="outline"
@@ -49,13 +49,18 @@ export function CreateProveedorDialog({ onProveedorCreated }: CreateProveedorDia
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Proveedor
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Crear Nuevo Proveedor</DialogTitle>
-        </DialogHeader>
-        <EmbeddedProveedorForm onProveedorCreated={handleProveedorCreated} onCancel={() => setOpen(false)} />
-      </DialogContent>
-    </Dialog>
+      </DrawerTrigger>
+      <DrawerContent className="h-[90vh] pt-6">
+        <DrawerHeader className="max-w-4xl mx-auto w-full">
+          <DrawerTitle className="text-xl">Crear Nuevo Proveedor</DrawerTitle>
+        </DrawerHeader>
+        <div className="max-w-4xl mx-auto w-full px-6 pb-6 overflow-y-auto">
+          <EmbeddedProveedorForm 
+            onProveedorCreated={handleProveedorCreated} 
+            onCancel={() => setOpen(false)} 
+          />
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

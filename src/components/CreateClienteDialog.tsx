@@ -1,12 +1,12 @@
 
 import { Button } from "@/components/ui/button";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
 import { Plus } from "lucide-react";
 import { useState } from "react";
 import { EmbeddedClienteForm } from "./EmbeddedClienteForm";
@@ -24,8 +24,8 @@ export function CreateClienteDialog({ onClienteCreated }: CreateClienteDialogPro
   };
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogTrigger asChild>
+    <Drawer open={open} onOpenChange={setOpen}>
+      <DrawerTrigger asChild>
         <Button
           type="button"
           variant="outline"
@@ -34,13 +34,15 @@ export function CreateClienteDialog({ onClienteCreated }: CreateClienteDialogPro
           <Plus className="h-4 w-4 mr-2" />
           Nuevo Cliente
         </Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
-          <DialogTitle>Crear Nuevo Cliente</DialogTitle>
-        </DialogHeader>
-        <EmbeddedClienteForm onClienteCreated={handleClienteCreated} />
-      </DialogContent>
-    </Dialog>
+      </DrawerTrigger>
+      <DrawerContent className="h-[90vh] pt-6">
+        <DrawerHeader className="max-w-4xl mx-auto w-full">
+          <DrawerTitle className="text-xl">Crear Nuevo Cliente</DrawerTitle>
+        </DrawerHeader>
+        <div className="max-w-4xl mx-auto w-full px-6 pb-6 overflow-y-auto">
+          <EmbeddedClienteForm onClienteCreated={handleClienteCreated} />
+        </div>
+      </DrawerContent>
+    </Drawer>
   );
 }

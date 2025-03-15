@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -30,7 +29,8 @@ export const EmpresaStep: React.FC = () => {
               nit: config.nit,
               telefono: config.telefono,
               direccion: config.direccion,
-              logo: config.logo_path
+              logo: config.logo_path,
+              email: ''  // Added missing email field
             });
           }
         } catch (error) {

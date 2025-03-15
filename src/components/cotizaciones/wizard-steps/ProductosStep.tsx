@@ -8,6 +8,7 @@ import { Plus, Trash, Edit, Save, X, BadgePercent } from 'lucide-react';
 import { toast } from 'sonner';
 import { v4 as uuidv4 } from 'uuid';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Producto } from '@/types/cotizacion';
 
 export const ProductosStep: React.FC = () => {
   const { cotizacion, addProducto, updateProducto, removeProducto } = useCotizacion();
@@ -36,12 +37,16 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
+    // Calculate total
+    const total = cantidad * precioUnitario * (1 + (aplicarIva ? iva : 0) / 100);
+
     addProducto({
       id: uuidv4(),
       descripcion,
       cantidad,
       precioUnitario,
-      iva: aplicarIva ? iva : 0
+      iva: aplicarIva ? iva : 0,
+      total
     });
 
     // Reset form
@@ -61,6 +66,7 @@ export const ProductosStep: React.FC = () => {
       setCantidad(product.cantidad);
       setPrecioUnitario(product.precioUnitario);
       setIva(product.iva);
+      setAplicarIva(product.iva > 0);
       setEditingProductId(productId);
     }
   };
@@ -91,11 +97,20 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
-    updateProducto(editingProductId, {
+    // Calculate total
+    const total = cantidad * precioUnitario * (1 + (aplicarIva ? iva : 0) / 100);
+
+    // Find the index of the product we're editing
+    const index = productos.findIndex(p => p.id === editingProductId);
+    if (index === -1) return;
+
+    updateProducto(index, {
+      id: editingProductId,
       descripcion,
       cantidad,
       precioUnitario,
-      iva: aplicarIva ? iva : 0
+      iva: aplicarIva ? iva : 0,
+      total
     });
 
     // Reset form
@@ -109,7 +124,11 @@ export const ProductosStep: React.FC = () => {
   };
 
   const handleRemoveProducto = (id: string) => {
-    removeProducto(id);
+    // Find the index of the product we're removing
+    const index = productos.findIndex(p => p.id === id);
+    if (index === -1) return;
+    
+    removeProducto(index);
     toast.success('Producto eliminado correctamente');
   };
 

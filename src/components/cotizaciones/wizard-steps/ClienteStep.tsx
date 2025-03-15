@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -66,12 +65,13 @@ export const ClienteStep: React.FC = () => {
       
       // Si ya hay una ciudad seleccionada y no está en el país actual, limpiar el campo
       if (cliente.ciudad_id && !filtradas.some(c => c.id === cliente.ciudad_id)) {
+        // Fixed: Using a partial update
         updateCliente({ ciudad_id: '' });
       }
     } else {
       setCiudadesFiltradas([]);
     }
-  }, [cliente.pais_id, ciudades, updateCliente]);
+  }, [cliente.pais_id, ciudades, updateCliente, cliente.ciudad_id]);
 
   const handleSearch = async () => {
     if (!searchTerm) {
@@ -116,6 +116,7 @@ export const ClienteStep: React.FC = () => {
       telefono: selectedCliente.telefono,
       contacto: selectedCliente.tipo_persona === 'juridica' ? selectedCliente.cargo || '' : `${selectedCliente.nombre} ${selectedCliente.apellidos || ''}`,
       direccion: selectedCliente.direccion,
+      email: selectedCliente.email,
       pais_id: selectedCliente.pais_id,
       ciudad_id: selectedCliente.ciudad_id,
       sector_id: selectedCliente.sector_id
@@ -128,11 +129,26 @@ export const ClienteStep: React.FC = () => {
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-    updateCliente({ [name]: value });
+    // Fixed: Using a partial update via a properly typed object
+    const update = { [name]: value } as Partial<{
+      nombre: string;
+      nit: string;
+      telefono: string;
+      contacto: string;
+      direccion: string;
+      email: string;
+    }>;
+    updateCliente(update);
   };
 
   const handleSelectChange = (name: string, value: string) => {
-    updateCliente({ [name]: value });
+    // Fixed: Using a partial update via a properly typed object
+    const update = { [name]: value } as Partial<{
+      pais_id: string;
+      ciudad_id: string;
+      sector_id: string;
+    }>;
+    updateCliente(update);
   };
 
   if (isLoadingMaestros) {

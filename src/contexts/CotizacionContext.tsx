@@ -1,6 +1,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { Cotizacion, Producto, Cliente, EmpresaEmisor } from '@/types/cotizacion';
+import { Cotizacion, Cliente, EmpresaEmisor, Producto } from '@/types/cotizacion';
 import { generateCotizacionNumber } from '@/services/cotizacionService';
 
 // Define the shape of our context
@@ -9,8 +9,9 @@ type CotizacionContextType = {
   setCotizacion: React.Dispatch<React.SetStateAction<Cotizacion>>;
   currentStep: 'empresa' | 'cliente' | 'productos' | 'preview';
   setCurrentStep: React.Dispatch<React.SetStateAction<'empresa' | 'cliente' | 'productos' | 'preview'>>;
-  updateEmpresaEmisor: (empresaEmisor: EmpresaEmisor) => void;
-  updateCliente: (cliente: Cliente) => void;
+  updateEmpresaEmisor: (empresaEmisor: Partial<EmpresaEmisor>) => void;
+  updateCliente: (cliente: Partial<Cliente>) => void;
+  updateFechaVencimiento: (date: Date) => void; // Added missing method
   addProducto: (producto: Producto) => void;
   updateProducto: (index: number, producto: Producto) => void;
   removeProducto: (index: number) => void;
@@ -49,7 +50,7 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       direccion: '',
       telefono: '',
       contacto: '',
-      email: ''
+      email: '',
     },
     productos: [],
     subtotal: 0,
@@ -75,13 +76,27 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   }, []);
 
   // Update empresa emisor data
-  const updateEmpresaEmisor = (empresaEmisor: EmpresaEmisor) => {
-    setCotizacion(prev => ({ ...prev, empresaEmisor }));
+  const updateEmpresaEmisor = (empresaEmisorData: Partial<EmpresaEmisor>) => {
+    setCotizacion(prev => ({ 
+      ...prev, 
+      empresaEmisor: { ...prev.empresaEmisor, ...empresaEmisorData } 
+    }));
   };
 
   // Update cliente data
-  const updateCliente = (cliente: Cliente) => {
-    setCotizacion(prev => ({ ...prev, cliente }));
+  const updateCliente = (clienteData: Partial<Cliente>) => {
+    setCotizacion(prev => ({ 
+      ...prev, 
+      cliente: { ...prev.cliente, ...clienteData } 
+    }));
+  };
+
+  // Update fecha vencimiento
+  const updateFechaVencimiento = (date: Date) => {
+    setCotizacion(prev => ({
+      ...prev,
+      fechaVencimiento: date
+    }));
   };
 
   // Add a new producto
@@ -141,6 +156,7 @@ export const CotizacionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         setCurrentStep,
         updateEmpresaEmisor,
         updateCliente,
+        updateFechaVencimiento,
         addProducto,
         updateProducto,
         removeProducto,

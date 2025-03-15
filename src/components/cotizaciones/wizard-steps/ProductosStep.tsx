@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -11,15 +11,20 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Producto } from '@/types/cotizacion';
 
 export const ProductosStep: React.FC = () => {
-  const { cotizacion, addProducto, updateProducto, removeProducto } = useCotizacion();
+  const { cotizacion, addProducto, updateProducto, removeProducto, calcularTotales } = useCotizacion();
   const { productos, subtotal, totalIva, total } = cotizacion;
 
   const [descripcion, setDescripcion] = useState('');
-  const [cantidad, setCantidad] = useState(1);
-  const [precioUnitario, setPrecioUnitario] = useState(0);
-  const [iva, setIva] = useState(19); // Default IVA rate in Colombia
-  const [aplicarIva, setAplicarIva] = useState(true); // State for the checkbox
+  const [cantidad, setCantidad] = useState<number | null>(null);
+  const [precioUnitario, setPrecioUnitario] = useState<number | null>(null);
+  const [aplicarIva, setAplicarIva] = useState(true);
   const [editingProductId, setEditingProductId] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (productos.length > 0) {
+      calcularTotales();
+    }
+  }, [productos, calcularTotales]);
 
   const handleAddProducto = () => {
     if (!descripcion) {
@@ -27,34 +32,36 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
-    if (cantidad <= 0) {
+    if (!cantidad || cantidad <= 0) {
       toast.error('La cantidad debe ser mayor a cero');
       return;
     }
 
-    if (precioUnitario <= 0) {
+    if (!precioUnitario || precioUnitario <= 0) {
       toast.error('El precio unitario debe ser mayor a cero');
       return;
     }
 
-    // Calculate total
-    const total = cantidad * precioUnitario * (1 + (aplicarIva ? iva : 0) / 100);
+    const ivaRate = aplicarIva ? 19 : 0;
+    
+    const productSubtotal = cantidad * precioUnitario;
+    
+    const ivaAmount = (productSubtotal * ivaRate) / 100;
+    
+    const productTotal = productSubtotal + ivaAmount;
 
     addProducto({
       id: uuidv4(),
       descripcion,
       cantidad,
       precioUnitario,
-      iva: aplicarIva ? iva : 0,
-      total
+      iva: ivaRate,
+      total: productTotal
     });
 
-    // Reset form
     setDescripcion('');
-    setCantidad(1);
-    setPrecioUnitario(0);
-    setIva(19);
-    // Keep aplicarIva checkbox as is for user convenience
+    setCantidad(null);
+    setPrecioUnitario(null);
 
     toast.success('Producto agregado correctamente');
   };
@@ -65,7 +72,6 @@ export const ProductosStep: React.FC = () => {
       setDescripcion(product.descripcion);
       setCantidad(product.cantidad);
       setPrecioUnitario(product.precioUnitario);
-      setIva(product.iva);
       setAplicarIva(product.iva > 0);
       setEditingProductId(productId);
     }
@@ -73,9 +79,8 @@ export const ProductosStep: React.FC = () => {
 
   const cancelEditing = () => {
     setDescripcion('');
-    setCantidad(1);
-    setPrecioUnitario(0);
-    setIva(19);
+    setCantidad(null);
+    setPrecioUnitario(null);
     setEditingProductId(null);
   };
 
@@ -87,20 +92,24 @@ export const ProductosStep: React.FC = () => {
       return;
     }
 
-    if (cantidad <= 0) {
+    if (!cantidad || cantidad <= 0) {
       toast.error('La cantidad debe ser mayor a cero');
       return;
     }
 
-    if (precioUnitario <= 0) {
+    if (!precioUnitario || precioUnitario <= 0) {
       toast.error('El precio unitario debe ser mayor a cero');
       return;
     }
 
-    // Calculate total
-    const total = cantidad * precioUnitario * (1 + (aplicarIva ? iva : 0) / 100);
+    const ivaRate = aplicarIva ? 19 : 0;
+    
+    const productSubtotal = cantidad * precioUnitario;
+    
+    const ivaAmount = (productSubtotal * ivaRate) / 100;
+    
+    const productTotal = productSubtotal + ivaAmount;
 
-    // Find the index of the product we're editing
     const index = productos.findIndex(p => p.id === editingProductId);
     if (index === -1) return;
 
@@ -109,22 +118,19 @@ export const ProductosStep: React.FC = () => {
       descripcion,
       cantidad,
       precioUnitario,
-      iva: aplicarIva ? iva : 0,
-      total
+      iva: ivaRate,
+      total: productTotal
     });
 
-    // Reset form
     setDescripcion('');
-    setCantidad(1);
-    setPrecioUnitario(0);
-    setIva(19);
+    setCantidad(null);
+    setPrecioUnitario(null);
     setEditingProductId(null);
 
     toast.success('Producto actualizado correctamente');
   };
 
   const handleRemoveProducto = (id: string) => {
-    // Find the index of the product we're removing
     const index = productos.findIndex(p => p.id === id);
     if (index === -1) return;
     
@@ -168,8 +174,9 @@ export const ProductosStep: React.FC = () => {
               id="cantidad"
               type="number"
               min="1"
-              value={cantidad}
-              onChange={(e) => setCantidad(Number(e.target.value))}
+              value={cantidad === null ? '' : cantidad}
+              onChange={(e) => setCantidad(e.target.value ? Number(e.target.value) : null)}
+              placeholder="Ingrese la cantidad"
             />
           </div>
 
@@ -179,43 +186,26 @@ export const ProductosStep: React.FC = () => {
               id="precioUnitario"
               type="number"
               min="0"
-              value={precioUnitario}
-              onChange={(e) => setPrecioUnitario(Number(e.target.value))}
+              value={precioUnitario === null ? '' : precioUnitario}
+              onChange={(e) => setPrecioUnitario(e.target.value ? Number(e.target.value) : null)}
+              placeholder="Ingrese el precio unitario"
             />
           </div>
 
-          <div className="flex gap-4">
-            <div className="space-y-2 flex-1">
-              <Label htmlFor="iva" className={!aplicarIva ? "text-gray-400" : ""}>IVA (%)</Label>
-              <Input
-                id="iva"
-                type="number"
-                min="0"
-                max="100"
-                value={iva}
-                onChange={(e) => setIva(Number(e.target.value))}
-                disabled={!aplicarIva}
-                className={!aplicarIva ? "bg-gray-100 text-gray-400" : ""}
-              />
-            </div>
-          </div>
-
-          <div className="flex items-start md:items-center gap-2">
-            <div className="flex items-center space-x-2 mt-2">
-              <Checkbox 
-                id="aplicarIva" 
-                checked={aplicarIva} 
-                onCheckedChange={(checked) => setAplicarIva(checked === true)}
-              />
-              <div className="flex items-center space-x-1.5">
-                <Label 
-                  htmlFor="aplicarIva" 
-                  className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
-                >
-                  Aplicar IVA (19%)
-                </Label>
-                <BadgePercent className="h-4 w-4 text-primary" />
-              </div>
+          <div className="flex items-center space-x-2">
+            <Checkbox 
+              id="aplicarIva" 
+              checked={aplicarIva} 
+              onCheckedChange={(checked) => setAplicarIva(checked === true)}
+            />
+            <div className="flex items-center space-x-1.5">
+              <Label 
+                htmlFor="aplicarIva" 
+                className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer"
+              >
+                Aplicar IVA (19%)
+              </Label>
+              <BadgePercent className="h-4 w-4 text-primary" />
             </div>
           </div>
 

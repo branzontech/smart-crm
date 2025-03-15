@@ -41,6 +41,51 @@ export type Database = {
           },
         ]
       }
+      empresas: {
+        Row: {
+          ciudad: string
+          created_at: string
+          descripcion: string | null
+          direccion: string
+          empleados: number
+          id: string
+          industria: string
+          nombre: string
+          periodo_vencimiento_facturas: string
+          sitio_web: string | null
+          telefono: string
+          updated_at: string
+        }
+        Insert: {
+          ciudad: string
+          created_at?: string
+          descripcion?: string | null
+          direccion: string
+          empleados: number
+          id?: string
+          industria: string
+          nombre: string
+          periodo_vencimiento_facturas: string
+          sitio_web?: string | null
+          telefono: string
+          updated_at?: string
+        }
+        Update: {
+          ciudad?: string
+          created_at?: string
+          descripcion?: string | null
+          direccion?: string
+          empleados?: number
+          id?: string
+          industria?: string
+          nombre?: string
+          periodo_vencimiento_facturas?: string
+          sitio_web?: string | null
+          telefono?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       origenes_cliente: {
         Row: {
           created_at: string

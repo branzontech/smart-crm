@@ -24,8 +24,9 @@ export const createEmpresa = async (empresa: Omit<Empresa, "id" | "created_at" |
       throw new Error("El nombre de la empresa es requerido");
     }
 
+    // Use type assertion to work around type limitations
     const { data, error } = await supabase
-      .from("empresas")
+      .from("empresas" as any)
       .insert(empresa)
       .select()
       .single();
@@ -43,8 +44,9 @@ export const createEmpresa = async (empresa: Omit<Empresa, "id" | "created_at" |
 };
 
 export const fetchEmpresas = async (): Promise<Empresa[]> => {
+  // Use type assertion to work around type limitations
   const { data, error } = await supabase
-    .from("empresas")
+    .from("empresas" as any)
     .select("*")
     .order("nombre");
   

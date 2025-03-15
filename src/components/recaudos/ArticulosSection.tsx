@@ -41,9 +41,13 @@ export function ArticulosSection({
   });
 
   const calcularTotales = () => {
+    console.log("Calculando totales con", articulos.length, "artículos");
+    
     const subtotal = articulos.reduce((sum, item) => sum + (item.valor_total || 0), 0);
     const iva = articulos.reduce((sum, item) => sum + (item.valor_iva || 0), 0);
     const total = subtotal + iva;
+    
+    console.log("Nuevos valores calculados:", { subtotal, iva, total });
     
     setValue('subtotal', subtotal);
     setValue('iva', iva);
@@ -82,9 +86,13 @@ export function ArticulosSection({
       valor_iva: valorIva,
     };
     
+    console.log("Agregando artículo:", articulo);
+    
+    // Primero actualizamos el array de artículos
     const nuevosArticulos = [...articulos, articulo];
     setArticulos(nuevosArticulos);
     
+    // Luego reseteamos el formulario de nuevo artículo
     setNuevoArticulo({
       proveedor_id: "",
       nombreProveedor: "",
@@ -96,14 +104,14 @@ export function ArticulosSection({
     
     setProveedorQuery("");
     
-    // Cálculo inmediato de totales sin setTimeout
+    // Cálculo inmediato de totales usando el nuevo array
     calcularTotales();
   };
 
   const eliminarArticulo = (id: string) => {
     const nuevosArticulos = articulos.filter(articulo => articulo.id !== id);
     setArticulos(nuevosArticulos);
-    // Cálculo inmediato de totales sin setTimeout
+    // Cálculo inmediato de totales usando el nuevo array
     calcularTotales();
   };
 

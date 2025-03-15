@@ -96,13 +96,15 @@ export function ArticulosSection({
     
     setProveedorQuery("");
     
-    setTimeout(() => calcularTotales(), 0);
+    // Cálculo inmediato de totales sin setTimeout
+    calcularTotales();
   };
 
   const eliminarArticulo = (id: string) => {
     const nuevosArticulos = articulos.filter(articulo => articulo.id !== id);
     setArticulos(nuevosArticulos);
-    setTimeout(() => calcularTotales(), 0);
+    // Cálculo inmediato de totales sin setTimeout
+    calcularTotales();
   };
 
   return (

@@ -52,19 +52,36 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
     const { data, error } = await supabase
       .from("empresas" as any)
       .select(`
-        *,
-        industria_nombre:sectores(nombre),
-        ciudad_nombre:ciudades(nombre)
+        *
       `)
       .order("nombre");
     
     if (error) throw error;
     
-    // Formatear los datos para que se muestren correctamente
-    const empresasFormateadas = (data as unknown as any[]).map(empresa => ({
-      ...empresa,
-      industria_nombre: empresa.industria_nombre?.nombre || 'No disponible',
-      ciudad_nombre: empresa.ciudad_nombre?.nombre || 'No disponible'
+    // Get the raw data first, then we'll fetch related data separately
+    const empresas = data as any[];
+    
+    // Process each empresa to fetch related data
+    const empresasFormateadas = await Promise.all(empresas.map(async (empresa) => {
+      // Fetch industria name
+      const { data: industriaData } = await supabase
+        .from("sectores" as any)
+        .select("nombre")
+        .eq("id", empresa.industria)
+        .single();
+      
+      // Fetch ciudad name
+      const { data: ciudadData } = await supabase
+        .from("ciudades" as any)
+        .select("nombre")
+        .eq("id", empresa.ciudad)
+        .single();
+      
+      return {
+        ...empresa,
+        industria_nombre: industriaData?.nombre || 'No disponible',
+        ciudad_nombre: ciudadData?.nombre || 'No disponible'
+      };
     }));
     
     // Ensure proper type conversion
@@ -77,14 +94,10 @@ export const fetchEmpresas = async (): Promise<Empresa[]> => {
 
 export const fetchEmpresaById = async (id: string): Promise<Empresa | null> => {
   try {
-    // Use type assertion to work around type limitations
+    // Get the empresa data first
     const { data, error } = await supabase
       .from("empresas" as any)
-      .select(`
-        *,
-        industria_nombre:sectores(nombre),
-        ciudad_nombre:ciudades(nombre)
-      `)
+      .select("*")
       .eq("id", id)
       .single();
     
@@ -96,11 +109,27 @@ export const fetchEmpresaById = async (id: string): Promise<Empresa | null> => {
       throw error;
     }
     
-    // Formatear los datos
+    // Basic empresa data from the first query
+    const empresaData = data as any;
+    
+    // Now fetch related data
+    const { data: industriaData } = await supabase
+      .from("sectores" as any)
+      .select("nombre")
+      .eq("id", empresaData.industria)
+      .single();
+    
+    const { data: ciudadData } = await supabase
+      .from("ciudades" as any)
+      .select("nombre") 
+      .eq("id", empresaData.ciudad)
+      .single();
+    
+    // Merge all data
     const empresaFormateada = {
-      ...data,
-      industria_nombre: data.industria_nombre?.nombre || 'No disponible',
-      ciudad_nombre: data.ciudad_nombre?.nombre || 'No disponible'
+      ...empresaData,
+      industria_nombre: industriaData?.nombre || 'No disponible',
+      ciudad_nombre: ciudadData?.nombre || 'No disponible'
     };
     
     // Ensure proper type conversion

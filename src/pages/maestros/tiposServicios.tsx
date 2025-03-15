@@ -27,12 +27,14 @@ const TiposServiciosPage = () => {
       // Remove any id field if it exists (let Supabase generate it)
       const { id, ...tipoServicioData } = data as any;
       
-      // Filter out any empty string values that might be for UUID fields
-      const cleanedData = Object.fromEntries(
-        Object.entries(tipoServicioData).filter(([_, value]) => value !== "")
-      );
+      // Asegurar que el nombre siempre esté presente
+      const cleanedData: Omit<TipoServicio, "id" | "created_at" | "updated_at"> = {
+        nombre: tipoServicioData.nombre,
+        // Incluir descripción solo si tiene valor
+        ...(tipoServicioData.descripcion && tipoServicioData.descripcion !== "" ? { descripcion: tipoServicioData.descripcion } : {})
+      };
       
-      console.log("Saving tipo servicio with data:", cleanedData); // For debugging
+      console.log("Saving tipo servicio with data:", cleanedData);
       
       await createTipoServicio(cleanedData);
       handleRefresh();
@@ -50,12 +52,17 @@ const TiposServiciosPage = () => {
     data: Partial<Omit<TipoServicio, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      // Filter out any empty string values that might be for UUID fields
+      // Filtrar campos vacíos pero mantener campos válidos
       const cleanedData = Object.fromEntries(
         Object.entries(data as any).filter(([_, value]) => value !== "")
       );
       
-      console.log("Updating tipo servicio with ID:", id, "and data:", cleanedData); // For debugging
+      // Verificar que haya al menos un campo para actualizar
+      if (Object.keys(cleanedData).length === 0) {
+        throw new Error("Debe proporcionar al menos un campo para actualizar");
+      }
+      
+      console.log("Updating tipo servicio with ID:", id, "and data:", cleanedData);
       
       await updateTipoServicio(id, cleanedData);
       handleRefresh();

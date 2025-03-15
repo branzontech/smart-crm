@@ -24,12 +24,19 @@ const PaisesPage = () => {
 
   const handleAdd = async (data: Omit<Pais, "id" | "created_at" | "updated_at">) => {
     try {
-      // Explicitly omit the codigo field and any empty UUID fields
+      // Omitir campos id y código para crear un nuevo país
       const { codigo, id, ...paisData } = data as any;
       
-      console.log("Saving país with data:", paisData); // For debugging
+      // Asegurar que el nombre esté presente y crear un objeto limpio
+      const cleanedData: Omit<Pais, "id" | "created_at" | "updated_at"> = {
+        nombre: paisData.nombre,
+        // Incluir descripción solo si tiene valor
+        ...(paisData.descripcion && paisData.descripcion !== "" ? { descripcion: paisData.descripcion } : {})
+      };
       
-      await createPais(paisData);
+      console.log("Saving país with data:", cleanedData);
+      
+      await createPais(cleanedData);
       handleRefresh();
       toast.success("País creado exitosamente");
       return Promise.resolve();
@@ -45,15 +52,20 @@ const PaisesPage = () => {
     data: Partial<Omit<Pais, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      // Explicitly omit the codigo field and any empty UUID fields
+      // Omitir el código para la actualización
       const { codigo, ...paisData } = data as any;
       
-      // Filter out any empty string values that might be for UUID fields
+      // Filtrar campos vacíos, manteniendo campos válidos
       const cleanedData = Object.fromEntries(
         Object.entries(paisData).filter(([_, value]) => value !== "")
       );
       
-      console.log("Updating país with ID:", id, "and data:", cleanedData); // For debugging
+      // Verificar que haya al menos un campo para actualizar
+      if (Object.keys(cleanedData).length === 0) {
+        throw new Error("Debe proporcionar al menos un campo para actualizar");
+      }
+      
+      console.log("Updating país with ID:", id, "and data:", cleanedData);
       
       await updatePais(id, cleanedData);
       handleRefresh();

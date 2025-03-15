@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { CiudadTable } from "@/components/maestros/CiudadTable";
@@ -29,11 +30,18 @@ const CiudadesPage = () => {
         throw new Error("El país es requerido");
       }
       
-      const cleanedData = Object.fromEntries(
-        Object.entries(ciudadData).filter(([key, value]) => 
-          key === 'nombre' || (value !== "" && value !== undefined)
+      // Filtrar solo los campos opcionales vacíos, manteniendo los requeridos
+      const cleanedData: Omit<Ciudad, "id" | "created_at" | "updated_at" | "pais"> = {
+        nombre: ciudadData.nombre,
+        pais_id: ciudadData.pais_id,
+        // Agregar otros campos opcionales solo si tienen valor
+        ...Object.fromEntries(
+          Object.entries(ciudadData)
+            .filter(([key, value]) => 
+              !['nombre', 'pais_id'].includes(key) && value !== "" && value !== undefined
+            )
         )
-      );
+      };
       
       console.log("Saving ciudad with data:", cleanedData);
       
@@ -53,10 +61,15 @@ const CiudadesPage = () => {
     data: Partial<Omit<Ciudad, "id" | "created_at" | "updated_at" | "pais">>
   ) => {
     try {
+      // Para actualizaciones, necesitamos asegurarnos de que al menos un campo requerido esté presente
+      if (!data.nombre && !data.pais_id) {
+        throw new Error("Debe proporcionar al menos un campo para actualizar");
+      }
+      
+      // Filtrar solo los campos vacíos, manteniendo los requeridos y cualquier valor válido
       const cleanedData = Object.fromEntries(
-        Object.entries(data as any).filter(([key, value]) => 
-          key === 'nombre' || (value !== "" && value !== undefined)
-        )
+        Object.entries(data)
+          .filter(([_, value]) => value !== "")
       );
       
       console.log("Updating ciudad with ID:", id, "and data:", cleanedData);

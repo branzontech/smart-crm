@@ -27,12 +27,14 @@ const SectoresPage = () => {
       // Remove any id field if it exists (let Supabase generate it)
       const { id, ...sectorData } = data as any;
       
-      // Filter out any empty string values that might be for UUID fields
-      const cleanedData = Object.fromEntries(
-        Object.entries(sectorData).filter(([_, value]) => value !== "")
-      );
+      // Asegurar que el nombre siempre esté presente
+      const cleanedData: Omit<Sector, "id" | "created_at" | "updated_at"> = {
+        nombre: sectorData.nombre,
+        // Incluir descripción solo si tiene valor
+        ...(sectorData.descripcion && sectorData.descripcion !== "" ? { descripcion: sectorData.descripcion } : {})
+      };
       
-      console.log("Saving sector with data:", cleanedData); // For debugging
+      console.log("Saving sector with data:", cleanedData);
       
       await createSector(cleanedData);
       handleRefresh();
@@ -50,12 +52,17 @@ const SectoresPage = () => {
     data: Partial<Omit<Sector, "id" | "created_at" | "updated_at">>
   ) => {
     try {
-      // Filter out any empty string values that might be for UUID fields
+      // Filtrar campos vacíos pero mantener campos válidos
       const cleanedData = Object.fromEntries(
         Object.entries(data as any).filter(([_, value]) => value !== "")
       );
       
-      console.log("Updating sector with ID:", id, "and data:", cleanedData); // For debugging
+      // Verificar que haya al menos un campo para actualizar
+      if (Object.keys(cleanedData).length === 0) {
+        throw new Error("Debe proporcionar al menos un campo para actualizar");
+      }
+      
+      console.log("Updating sector with ID:", id, "and data:", cleanedData);
       
       await updateSector(id, cleanedData);
       handleRefresh();

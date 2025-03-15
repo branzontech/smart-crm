@@ -1,5 +1,5 @@
 
-import { useState } from "react";
+import { useContext } from "react";
 import { Recaudo } from "@/pages/recaudos/seguimiento";
 import {
   Table,
@@ -19,6 +19,7 @@ import {
   Edit,
   CreditCard
 } from "lucide-react";
+import { useRecaudos } from "@/hooks/useRecaudos";
 
 interface RecaudoTableProps {
   onViewDetail: (recaudo: Recaudo) => void;
@@ -32,7 +33,7 @@ export const RecaudoTable = ({
   onPayment 
 }: RecaudoTableProps) => {
   // Use hook to access recaudos data
-  const { recaudos } = useRecaudosContext();
+  const { recaudos } = useRecaudos();
   
   // Format currency
   const formatCurrency = (amount: number) => {
@@ -89,7 +90,7 @@ export const RecaudoTable = ({
                   className="hover:bg-gray-50 cursor-pointer"
                   onClick={(e) => handleViewDetails(recaudo, e)}
                 >
-                  <TableCell className="font-medium">{recaudo.factura}</TableCell>
+                  <TableCell className="font-medium">{recaudo.factura || recaudo.numero || "N/A"}</TableCell>
                   <TableCell>{recaudo.cliente}</TableCell>
                   <TableCell className="text-right">{formatCurrency(recaudo.monto)}</TableCell>
                   <TableCell className="text-center">
@@ -148,19 +149,4 @@ export const RecaudoTable = ({
       </div>
     </div>
   );
-};
-
-// Context hook to access recaudos data
-const useRecaudosContext = () => {
-  // This would normally come from a context, but for simplicity we're importing from a parent component
-  // This is mocked to prevent errors
-  const { recaudos } = useRecaudosFromProps();
-  return { recaudos };
-};
-
-// Mock hook to get recaudos data
-const useRecaudosFromProps = () => {
-  // This would be replaced with your actual hook or context
-  const [recaudos, setRecaudos] = useState<Recaudo[]>([]);
-  return { recaudos };
 };

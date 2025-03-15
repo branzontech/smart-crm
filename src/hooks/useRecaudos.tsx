@@ -3,125 +3,10 @@ import { useState, useEffect } from "react";
 import { Recaudo } from "@/pages/recaudos/seguimiento";
 import { toast } from "sonner";
 import { getRecaudoDetails, updateRecaudoStatus, updateRecaudoNotes } from "@/services/recaudos/detailsService";
-
-// Datos ficticios de recaudos pendientes o en proceso
-const recaudosPendientes: Recaudo[] = [
-  {
-    id: "REC-2023-001",
-    cliente: "Tech Solutions SA",
-    factura: "FAC-2023-045",
-    monto: 15000,
-    fechaVencimiento: "2023-11-15",
-    estado: "Pendiente",
-    diasVencido: 0,
-    detalles: {
-      direccion: "Calle Principal #123, Ciudad Empresa",
-      telefono: "+57 300 123 4567",
-      articulos: [
-        { nombre: "Servicio de Consultoría", cantidad: 1, precio: 15000 }
-      ],
-      metodoPago: "Transferencia",
-      notas: "Pago a 30 días"
-    }
-  },
-  {
-    id: "REC-2023-002",
-    cliente: "Green Energy Corp",
-    factura: "FAC-2023-032",
-    monto: 45000,
-    fechaVencimiento: "2023-10-25",
-    estado: "Vencido",
-    diasVencido: 21,
-    detalles: {
-      direccion: "Av. Sostenible #456, Ciudad Verde",
-      telefono: "+57 300 765 4321",
-      articulos: [
-        { nombre: "Paneles Solares", cantidad: 3, precio: 10000 },
-        { nombre: "Instalación", cantidad: 1, precio: 15000 }
-      ],
-      metodoPago: "Efectivo",
-      notas: "Cliente con historial de pagos tardíos"
-    }
-  },
-  {
-    id: "REC-2023-003",
-    cliente: "Global Logistics",
-    factura: "FAC-2023-018",
-    monto: 28500,
-    fechaVencimiento: "2023-11-05",
-    estado: "En proceso",
-    diasVencido: 0,
-    detalles: {
-      direccion: "Puerto Industrial #789, Ciudad Logística",
-      telefono: "+57 300 987 6543",
-      articulos: [
-        { nombre: "Servicio de Transporte", cantidad: 1, precio: 28500 }
-      ],
-      metodoPago: "Transferencia",
-      notas: "El cliente confirmó la transferencia, esperando verificación"
-    }
-  },
-  {
-    id: "REC-2023-004",
-    cliente: "Digital Systems Inc",
-    factura: "FAC-2023-067",
-    monto: 12800,
-    fechaVencimiento: "2023-11-30",
-    estado: "Pendiente",
-    diasVencido: 0,
-    detalles: {
-      direccion: "Calle Tecnológica #321, Ciudad Digital",
-      telefono: "+57 300 234 5678",
-      articulos: [
-        { nombre: "Hosting Anual", cantidad: 1, precio: 8800 },
-        { nombre: "Dominio Premium", cantidad: 1, precio: 4000 }
-      ],
-      metodoPago: "Tarjeta de Crédito",
-      notas: "Renovación automática anual"
-    }
-  },
-  {
-    id: "REC-2023-005",
-    cliente: "Smart Solutions",
-    factura: "FAC-2023-039",
-    monto: 35600,
-    fechaVencimiento: "2023-10-15",
-    estado: "Vencido",
-    diasVencido: 31,
-    detalles: {
-      direccion: "Av. Innovación #654, Ciudad Inteligente",
-      telefono: "+57 300 876 5432",
-      articulos: [
-        { nombre: "Software a medida", cantidad: 1, precio: 30000 },
-        { nombre: "Soporte técnico", cantidad: 1, precio: 5600 }
-      ],
-      metodoPago: "Cheque",
-      notas: "Contactar para gestionar el cobro"
-    }
-  },
-  {
-    id: "REC-2023-006",
-    cliente: "Innovación Digital",
-    factura: "FAC-2023-078",
-    monto: 22500,
-    fechaVencimiento: "2023-09-30",
-    estado: "Pagado",
-    diasVencido: 0,
-    detalles: {
-      direccion: "Av. Progreso #789, Ciudad Futuro",
-      telefono: "+57 300 111 2222",
-      articulos: [
-        { nombre: "Desarrollo web", cantidad: 1, precio: 18000 },
-        { nombre: "Diseño UX/UI", cantidad: 1, precio: 4500 }
-      ],
-      metodoPago: "Transferencia",
-      notas: "Pagado en su totalidad el 29/09/2023"
-    }
-  }
-];
+import { getRecaudos as fetchRecaudos } from "@/services/recaudos/recaudosService";
 
 export const useRecaudos = () => {
-  const [recaudos, setRecaudos] = useState<Recaudo[]>(recaudosPendientes);
+  const [recaudos, setRecaudos] = useState<Recaudo[]>([]);
   const [recaudoSeleccionado, setRecaudoSeleccionado] = useState<Recaudo | null>(null);
   const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [filtro, setFiltro] = useState("");
@@ -131,6 +16,57 @@ export const useRecaudos = () => {
   const [montoMinimo, setMontoMinimo] = useState("");
   const [montoMaximo, setMontoMaximo] = useState("");
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
+  const [cargandoRecaudos, setCargandoRecaudos] = useState(true);
+  
+  // Función para cargar los recaudos desde la base de datos
+  const cargarRecaudos = async () => {
+    setCargandoRecaudos(true);
+    try {
+      const { data, error } = await fetchRecaudos();
+      if (error) throw error;
+      
+      if (data) {
+        // Transformar los datos al formato que espera la aplicación
+        const recaudosFormateados = data.map(recaudo => {
+          // Calcular días vencido
+          const hoy = new Date();
+          const fechaVencimiento = new Date(recaudo.fecha_vencimiento);
+          const diasVencido = fechaVencimiento < hoy ? 
+            Math.floor((hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+          
+          // Formatear el nombre del cliente
+          const nombreCompleto = recaudo.cliente.tipo_persona === 'juridica' ? 
+            recaudo.cliente.empresa : 
+            `${recaudo.cliente.nombre} ${recaudo.cliente.apellidos || ''}`;
+          
+          return {
+            id: recaudo.id,
+            cliente: nombreCompleto,
+            cliente_id: recaudo.cliente_id,
+            factura: recaudo.factura,
+            numero: recaudo.numero,
+            monto: recaudo.monto,
+            fechaVencimiento: recaudo.fecha_vencimiento,
+            estado: recaudo.estado.charAt(0).toUpperCase() + recaudo.estado.slice(1), // Capitalizar el estado
+            diasVencido: diasVencido,
+            subtotal: recaudo.subtotal,
+            iva: recaudo.iva,
+            total: recaudo.total,
+            fecha_pago: recaudo.fecha_pago,
+            metodo_pago: recaudo.metodo_pago,
+            notas: recaudo.notas
+          };
+        });
+        
+        setRecaudos(recaudosFormateados);
+      }
+    } catch (error) {
+      console.error("Error al cargar recaudos:", error);
+      toast.error("Error al cargar los recaudos");
+    } finally {
+      setCargandoRecaudos(false);
+    }
+  };
   
   // Función para obtener los detalles completos de un recaudo
   const obtenerDetalleRecaudo = async (id: string) => {
@@ -140,11 +76,35 @@ export const useRecaudos = () => {
       if (error) throw error;
       
       if (data) {
+        // Calcular días vencido
+        const hoy = new Date();
+        const fechaVencimiento = new Date(data.fecha_vencimiento);
+        const diasVencido = fechaVencimiento < hoy ? 
+          Math.floor((hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0;
+        
+        // Formatear el nombre del cliente
+        const nombreCompleto = data.cliente.tipo_persona === 'juridica' ? 
+          data.cliente.empresa : 
+          `${data.cliente.nombre} ${data.cliente.apellidos || ''}`;
+        
         // Mapeamos los datos desde la API a nuestro formato de recaudo
-        const recaudoConDetalle = {
-          ...recaudoSeleccionado,
+        const recaudoConDetalle: Recaudo = {
+          id: data.id,
+          numero: data.numero,
+          cliente: nombreCompleto,
+          cliente_id: data.cliente_id,
+          factura: data.factura || data.numero,
+          monto: data.monto,
+          fechaVencimiento: data.fecha_vencimiento,
+          estado: data.estado.charAt(0).toUpperCase() + data.estado.slice(1), // Capitalizar el estado
+          diasVencido: diasVencido,
+          subtotal: data.subtotal,
+          iva: data.iva,
+          total: data.total,
+          fecha_pago: data.fecha_pago,
+          metodo_pago: data.metodo_pago,
+          notas: data.notas,
           detalles: {
-            ...(recaudoSeleccionado?.detalles || {}),
             direccion: data.cliente?.direccion || '',
             telefono: data.cliente?.telefono || '',
             fechaEmision: data.created_at,
@@ -153,21 +113,21 @@ export const useRecaudos = () => {
             notas: data.notas || '',
             subtotal: data.subtotal,
             totalIva: data.iva,
-            articulos: data.articulos.map((art: any) => ({
+            articulos: data.articulos?.map((art: any) => ({
               nombre: art.descripcion,
               cantidad: art.cantidad,
               precio: art.valor_unitario,
               iva: art.valor_iva,
               proveedor: art.proveedor?.nombre || 'No especificado'
-            })),
-            archivosAdjuntos: data.archivos.map((archivo: any) => ({
+            })) || [],
+            archivosAdjuntos: data.archivos?.map((archivo: any) => ({
               id: archivo.id,
               nombre: archivo.nombre,
               tipo: archivo.tipo,
               url: archivo.url,
               tamaño: archivo.tamano,
               fechaSubida: archivo.created_at
-            }))
+            })) || []
           }
         };
         
@@ -183,7 +143,7 @@ export const useRecaudos = () => {
 
   // Función para filtrar recaudos
   const filtrarRecaudos = () => {
-    let recaudosFiltrados = recaudosPendientes;
+    let recaudosFiltrados = [...recaudos];
     
     // Filtrar por texto (cliente, factura, id)
     if (filtro) {
@@ -191,7 +151,8 @@ export const useRecaudos = () => {
       recaudosFiltrados = recaudosFiltrados.filter(
         recaudo => 
           recaudo.cliente.toLowerCase().includes(lowercaseFiltro) ||
-          recaudo.factura.toLowerCase().includes(lowercaseFiltro) ||
+          (recaudo.factura && recaudo.factura.toLowerCase().includes(lowercaseFiltro)) ||
+          (recaudo.numero && recaudo.numero.toLowerCase().includes(lowercaseFiltro)) ||
           recaudo.id.toLowerCase().includes(lowercaseFiltro)
       );
     }
@@ -235,7 +196,7 @@ export const useRecaudos = () => {
       }
     }
     
-    setRecaudos(recaudosFiltrados);
+    return recaudosFiltrados;
   };
 
   // Función para marcar como pagado
@@ -253,19 +214,23 @@ export const useRecaudos = () => {
       if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
         setRecaudoSeleccionado({ ...recaudoSeleccionado, estado: "Pagado", diasVencido: 0 });
       }
+      
+      // Recargar los recaudos después de la actualización
+      cargarRecaudos();
     }
   };
 
   // Función para cambiar estado
   const cambiarEstado = async (id: string, nuevoEstado: string) => {
     if (nuevoEstado) {
-      const result = await updateRecaudoStatus(id, nuevoEstado);
+      const estadoFormateado = nuevoEstado.charAt(0).toUpperCase() + nuevoEstado.slice(1).toLowerCase();
+      const result = await updateRecaudoStatus(id, estadoFormateado);
       
       if (result.success) {
         // Actualizamos el estado local
         const recaudosActualizados = recaudos.map(recaudo => 
           recaudo.id === id 
-            ? { ...recaudo, estado: nuevoEstado, diasVencido: nuevoEstado === "Pagado" ? 0 : recaudo.diasVencido } 
+            ? { ...recaudo, estado: estadoFormateado, diasVencido: estadoFormateado === "Pagado" ? 0 : recaudo.diasVencido } 
             : recaudo
         );
         setRecaudos(recaudosActualizados);
@@ -274,10 +239,13 @@ export const useRecaudos = () => {
         if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
           setRecaudoSeleccionado({ 
             ...recaudoSeleccionado, 
-            estado: nuevoEstado, 
-            diasVencido: nuevoEstado === "Pagado" ? 0 : recaudoSeleccionado.diasVencido 
+            estado: estadoFormateado, 
+            diasVencido: estadoFormateado === "Pagado" ? 0 : recaudoSeleccionado.diasVencido 
           });
         }
+        
+        // Recargar los recaudos después de la actualización
+        cargarRecaudos();
       }
     }
   };
@@ -291,19 +259,28 @@ export const useRecaudos = () => {
       if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
         setRecaudoSeleccionado({
           ...recaudoSeleccionado,
+          notas: nuevasNotas,
           detalles: {
-            ...recaudoSeleccionado.detalles,
+            ...recaudoSeleccionado.detalles!,
             notas: nuevasNotas
           }
         });
       }
+      
+      // Actualizar el estado local de recaudos
+      const recaudosActualizados = recaudos.map(recaudo => 
+        recaudo.id === id ? { ...recaudo, notas: nuevasNotas } : recaudo
+      );
+      setRecaudos(recaudosActualizados);
     }
   };
 
   // Aplicar filtros cuando cambian
   const aplicarFiltros = () => {
-    filtrarRecaudos();
+    const recaudosFiltrados = filtrarRecaudos();
+    // No actualizamos el estado recaudos aquí para mantener los datos originales
     setMostrarFiltrosAvanzados(false);
+    return recaudosFiltrados;
   };
 
   const handleLimpiarFiltros = () => {
@@ -313,7 +290,7 @@ export const useRecaudos = () => {
     setFechaHasta(undefined);
     setMontoMinimo("");
     setMontoMaximo("");
-    setRecaudos(recaudosPendientes);
+    cargarRecaudos();
   };
 
   // Cargar detalles cuando se selecciona un recaudo
@@ -323,15 +300,23 @@ export const useRecaudos = () => {
     }
   }, [recaudoSeleccionado?.id]);
 
+  // Cargar recaudos al iniciar
   useEffect(() => {
-    filtrarRecaudos();
+    cargarRecaudos();
+  }, []);
+
+  // Filtrar recaudos cuando cambian los filtros básicos
+  useEffect(() => {
+    // No actualizamos setRecaudos para mantener los datos originales
   }, [filtro, estado]);
 
   return {
-    recaudos,
+    recaudos: filtrarRecaudos(), // Aplicamos filtros pero mantenemos los datos originales
+    recaudosOriginales: recaudos,
     recaudoSeleccionado,
     setRecaudoSeleccionado,
     cargandoDetalle,
+    cargandoRecaudos,
     filtro,
     setFiltro,
     estado,
@@ -350,6 +335,7 @@ export const useRecaudos = () => {
     handleLimpiarFiltros,
     marcarComoPagado,
     cambiarEstado,
-    actualizarNotas
+    actualizarNotas,
+    cargarRecaudos
   };
 };

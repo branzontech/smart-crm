@@ -61,31 +61,22 @@ export const RecaudoDetailDialog = ({
 
   // Inicializar notas cuando el recaudo cambia
   useEffect(() => {
-    if (recaudo && recaudo.detalles?.notas) {
-      setNewNotes(recaudo.detalles.notas);
+    if (recaudo) {
+      setNewNotes(recaudo.notas || (recaudo.detalles?.notas || ""));
     }
   }, [recaudo]);
 
   if (!recaudo) return null;
 
   // Función para formatear fecha
-  const formatDate = (dateString: string) => {
+  const formatDate = (dateString: string | undefined) => {
+    if (!dateString) return "No especificada";
+    
     return new Date(dateString).toLocaleDateString('es-ES', {
       year: 'numeric',
       month: 'long',
       day: 'numeric'
     });
-  };
-
-  // Función para obtener el nombre del estado
-  const getEstadoLabel = (estado: string) => {
-    const estados: Record<string, string> = {
-      'pendiente': 'Pendiente',
-      'enproceso': 'En proceso',
-      'pagado': 'Pagado',
-      'vencido': 'Vencido'
-    };
-    return estados[estado] || estado;
   };
 
   // Función para obtener el nombre del método de pago
@@ -97,7 +88,7 @@ export const RecaudoDetailDialog = ({
       'tarjeta': 'Tarjeta de Crédito/Débito',
       'app': 'Aplicación de Pago'
     };
-    return metodos[metodoPago] || metodoPago;
+    return metodos[metodoPago.toLowerCase()] || metodoPago;
   };
 
   // Función para obtener el icono del tipo de archivo
@@ -128,7 +119,7 @@ export const RecaudoDetailDialog = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">Detalle del Recaudo #{recaudo.id}</DialogTitle>
+          <DialogTitle className="text-xl">Detalle del Recaudo #{recaudo.numero || recaudo.id}</DialogTitle>
           <DialogDescription>
             Información completa del recaudo y sus artículos asociados
           </DialogDescription>
@@ -160,7 +151,7 @@ export const RecaudoDetailDialog = ({
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
                     <FileText className="h-5 w-5 text-teal-600" />
-                    Recaudo {recaudo.id}
+                    Recaudo {recaudo.numero || recaudo.id}
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
                     <Building className="h-4 w-4 text-gray-500" />
@@ -200,15 +191,15 @@ export const RecaudoDetailDialog = ({
                 <div className="space-y-2">
                   <div className="flex justify-between pb-2 border-b border-gray-100">
                     <span className="text-gray-600">Número de Factura:</span>
-                    <span className="font-medium">{recaudo.factura}</span>
+                    <span className="font-medium">{recaudo.factura || recaudo.numero || "No especificada"}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-100">
                     <span className="text-gray-600">Método de pago:</span>
-                    <span className="font-medium">{getMetodoPagoLabel(recaudo.detalles?.metodoPago || '')}</span>
+                    <span className="font-medium">{getMetodoPagoLabel(recaudo.metodo_pago || recaudo.detalles?.metodoPago || "No especificado")}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-100">
                     <span className="text-gray-600">Estado:</span>
-                    <span className="font-medium">{getEstadoLabel(recaudo.estado)}</span>
+                    <span className="font-medium">{recaudo.estado}</span>
                   </div>
                 </div>
               </div>
@@ -225,7 +216,7 @@ export const RecaudoDetailDialog = ({
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-100">
                     <span className="text-gray-600">Fecha de Pago:</span>
-                    <span className="font-medium">{recaudo.detalles?.fechaPago ? formatDate(recaudo.detalles.fechaPago) : 'No especificada'}</span>
+                    <span className="font-medium">{recaudo.fecha_pago ? formatDate(recaudo.fecha_pago) : (recaudo.detalles?.fechaPago ? formatDate(recaudo.detalles.fechaPago) : 'No especificada')}</span>
                   </div>
                   <div className="flex justify-between pb-2 border-b border-gray-100">
                     <span className="text-gray-600">Fecha de Vencimiento:</span>
@@ -256,23 +247,31 @@ export const RecaudoDetailDialog = ({
                     </tr>
                   </thead>
                   <tbody>
-                    {recaudo.detalles?.articulos.map((articulo, index) => (
-                      <tr key={index} className="border-b">
-                        <td className="border p-2">{articulo.proveedor || 'No especificado'}</td>
-                        <td className="border p-2">{articulo.nombre}</td>
-                        <td className="border p-2 text-right">{articulo.cantidad}</td>
-                        <td className="border p-2 text-right">${articulo.precio.toLocaleString()}</td>
-                        <td className="border p-2 text-right">${(articulo.iva || 0).toLocaleString()}</td>
-                        <td className="border p-2 text-right">${(articulo.cantidad * articulo.precio).toLocaleString()}</td>
+                    {recaudo.detalles?.articulos && recaudo.detalles.articulos.length > 0 ? (
+                      recaudo.detalles.articulos.map((articulo, index) => (
+                        <tr key={index} className="border-b">
+                          <td className="border p-2">{articulo.proveedor || 'No especificado'}</td>
+                          <td className="border p-2">{articulo.nombre}</td>
+                          <td className="border p-2 text-right">{articulo.cantidad}</td>
+                          <td className="border p-2 text-right">${articulo.precio.toLocaleString()}</td>
+                          <td className="border p-2 text-right">${(articulo.iva || 0).toLocaleString()}</td>
+                          <td className="border p-2 text-right">${(articulo.cantidad * articulo.precio).toLocaleString()}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <tr>
+                        <td colSpan={6} className="border p-4 text-center text-gray-500">
+                          No hay artículos disponibles
+                        </td>
                       </tr>
-                    ))}
+                    )}
                     <tr className="bg-gray-50">
                       <td colSpan={4} className="border p-2 text-right font-medium">Subtotal:</td>
-                      <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.subtotal?.toLocaleString() || recaudo.monto.toLocaleString()}</td>
+                      <td colSpan={2} className="border p-2 text-right">${recaudo.subtotal?.toLocaleString() || (recaudo.detalles?.subtotal?.toLocaleString() || recaudo.monto.toLocaleString())}</td>
                     </tr>
                     <tr className="bg-gray-50">
                       <td colSpan={4} className="border p-2 text-right font-medium">IVA Total:</td>
-                      <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.totalIva?.toLocaleString() || '0'}</td>
+                      <td colSpan={2} className="border p-2 text-right">${recaudo.iva?.toLocaleString() || (recaudo.detalles?.totalIva?.toLocaleString() || '0')}</td>
                     </tr>
                     <tr className="bg-gray-50 font-bold">
                       <td colSpan={4} className="border p-2 text-right">Total:</td>
@@ -355,7 +354,7 @@ export const RecaudoDetailDialog = ({
                 />
               ) : (
                 <div className="p-3 bg-gray-50 rounded-md">
-                  {recaudo.detalles?.notas || 'No hay notas adicionales.'}
+                  {recaudo.notas || recaudo.detalles?.notas || 'No hay notas adicionales.'}
                 </div>
               )}
             </div>
@@ -396,4 +395,3 @@ export const RecaudoDetailDialog = ({
     </Dialog>
   );
 };
-

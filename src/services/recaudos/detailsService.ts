@@ -10,7 +10,7 @@ export const getRecaudoDetails = async (id: string) => {
       .from('recaudos')
       .select(`
         *,
-        cliente:cliente_id(id, nombre, apellidos, empresa, telefono, direccion)
+        cliente:cliente_id(id, nombre, apellidos, empresa, telefono, direccion, tipo_persona)
       `)
       .eq('id', id)
       .single();
@@ -46,7 +46,8 @@ export const getRecaudoDetails = async (id: string) => {
         
         archivosWithUrls.push({
           ...archivo,
-          url: data.publicUrl
+          url: data.publicUrl,
+          tamano: archivo.tamano // Asegurarse de que se llame 'tamano' en lugar de 'tamaño'
         });
       }
     }
@@ -70,7 +71,7 @@ export const updateRecaudoStatus = async (id: string, newStatus: string) => {
   try {
     const { error } = await supabase
       .from('recaudos')
-      .update({ estado: newStatus })
+      .update({ estado: newStatus.toLowerCase() }) // Guardar en minúsculas en la BD
       .eq('id', id);
 
     if (error) throw error;

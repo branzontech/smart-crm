@@ -2,6 +2,7 @@
 import { useState, useEffect } from "react";
 import { Recaudo } from "@/pages/recaudos/seguimiento";
 import { toast } from "sonner";
+import { getRecaudoDetails, updateRecaudoStatus, updateRecaudoNotes } from "@/services/recaudos/detailsService";
 
 // Datos ficticios de recaudos pendientes o en proceso
 const recaudosPendientes: Recaudo[] = [
@@ -122,6 +123,7 @@ const recaudosPendientes: Recaudo[] = [
 export const useRecaudos = () => {
   const [recaudos, setRecaudos] = useState<Recaudo[]>(recaudosPendientes);
   const [recaudoSeleccionado, setRecaudoSeleccionado] = useState<Recaudo | null>(null);
+  const [cargandoDetalle, setCargandoDetalle] = useState(false);
   const [filtro, setFiltro] = useState("");
   const [estado, setEstado] = useState("todos");
   const [fechaDesde, setFechaDesde] = useState<Date | undefined>(undefined);
@@ -130,6 +132,55 @@ export const useRecaudos = () => {
   const [montoMaximo, setMontoMaximo] = useState("");
   const [mostrarFiltrosAvanzados, setMostrarFiltrosAvanzados] = useState(false);
   
+  // Función para obtener los detalles completos de un recaudo
+  const obtenerDetalleRecaudo = async (id: string) => {
+    setCargandoDetalle(true);
+    try {
+      const { data, error } = await getRecaudoDetails(id);
+      if (error) throw error;
+      
+      if (data) {
+        // Mapeamos los datos desde la API a nuestro formato de recaudo
+        const recaudoConDetalle = {
+          ...recaudoSeleccionado,
+          detalles: {
+            ...(recaudoSeleccionado?.detalles || {}),
+            direccion: data.cliente?.direccion || '',
+            telefono: data.cliente?.telefono || '',
+            fechaEmision: data.created_at,
+            fechaPago: data.fecha_pago,
+            metodoPago: data.metodo_pago,
+            notas: data.notas || '',
+            subtotal: data.subtotal,
+            totalIva: data.iva,
+            articulos: data.articulos.map((art: any) => ({
+              nombre: art.descripcion,
+              cantidad: art.cantidad,
+              precio: art.valor_unitario,
+              iva: art.valor_iva,
+              proveedor: art.proveedor?.nombre || 'No especificado'
+            })),
+            archivosAdjuntos: data.archivos.map((archivo: any) => ({
+              id: archivo.id,
+              nombre: archivo.nombre,
+              tipo: archivo.tipo,
+              url: archivo.url,
+              tamaño: archivo.tamano,
+              fechaSubida: archivo.created_at
+            }))
+          }
+        };
+        
+        setRecaudoSeleccionado(recaudoConDetalle);
+      }
+    } catch (error) {
+      console.error("Error al obtener detalles del recaudo:", error);
+      toast.error("Error al cargar los detalles del recaudo");
+    } finally {
+      setCargandoDetalle(false);
+    }
+  };
+
   // Función para filtrar recaudos
   const filtrarRecaudos = () => {
     let recaudosFiltrados = recaudosPendientes;
@@ -188,30 +239,64 @@ export const useRecaudos = () => {
   };
 
   // Función para marcar como pagado
-  const marcarComoPagado = (id: string) => {
-    // Aquí se enviaría la actualización a la API
-    toast.success(`Recaudo ${id} marcado como pagado`);
+  const marcarComoPagado = async (id: string) => {
+    const result = await updateRecaudoStatus(id, "Pagado");
     
-    // Actualizamos el estado local
-    const recaudosActualizados = recaudos.map(recaudo => 
-      recaudo.id === id ? { ...recaudo, estado: "Pagado", diasVencido: 0 } : recaudo
-    );
-    setRecaudos(recaudosActualizados);
+    if (result.success) {
+      // Actualizamos el estado local
+      const recaudosActualizados = recaudos.map(recaudo => 
+        recaudo.id === id ? { ...recaudo, estado: "Pagado", diasVencido: 0 } : recaudo
+      );
+      setRecaudos(recaudosActualizados);
+      
+      // Actualizar recaudo seleccionado si corresponde
+      if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
+        setRecaudoSeleccionado({ ...recaudoSeleccionado, estado: "Pagado", diasVencido: 0 });
+      }
+    }
   };
 
   // Función para cambiar estado
-  const cambiarEstado = (id: string, nuevoEstado: string) => {
+  const cambiarEstado = async (id: string, nuevoEstado: string) => {
     if (nuevoEstado) {
-      // Aquí se enviaría la actualización a la API
-      toast.success(`Estado de recaudo ${id} cambiado a ${nuevoEstado}`);
+      const result = await updateRecaudoStatus(id, nuevoEstado);
       
-      // Actualizamos el estado local
-      const recaudosActualizados = recaudos.map(recaudo => 
-        recaudo.id === id 
-          ? { ...recaudo, estado: nuevoEstado, diasVencido: nuevoEstado === "Pagado" ? 0 : recaudo.diasVencido } 
-          : recaudo
-      );
-      setRecaudos(recaudosActualizados);
+      if (result.success) {
+        // Actualizamos el estado local
+        const recaudosActualizados = recaudos.map(recaudo => 
+          recaudo.id === id 
+            ? { ...recaudo, estado: nuevoEstado, diasVencido: nuevoEstado === "Pagado" ? 0 : recaudo.diasVencido } 
+            : recaudo
+        );
+        setRecaudos(recaudosActualizados);
+        
+        // Actualizar recaudo seleccionado si corresponde
+        if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
+          setRecaudoSeleccionado({ 
+            ...recaudoSeleccionado, 
+            estado: nuevoEstado, 
+            diasVencido: nuevoEstado === "Pagado" ? 0 : recaudoSeleccionado.diasVencido 
+          });
+        }
+      }
+    }
+  };
+
+  // Función para actualizar notas
+  const actualizarNotas = async (id: string, nuevasNotas: string) => {
+    const result = await updateRecaudoNotes(id, nuevasNotas);
+    
+    if (result.success) {
+      // Actualizar recaudo seleccionado si corresponde
+      if (recaudoSeleccionado && recaudoSeleccionado.id === id) {
+        setRecaudoSeleccionado({
+          ...recaudoSeleccionado,
+          detalles: {
+            ...recaudoSeleccionado.detalles,
+            notas: nuevasNotas
+          }
+        });
+      }
     }
   };
 
@@ -231,6 +316,13 @@ export const useRecaudos = () => {
     setRecaudos(recaudosPendientes);
   };
 
+  // Cargar detalles cuando se selecciona un recaudo
+  useEffect(() => {
+    if (recaudoSeleccionado) {
+      obtenerDetalleRecaudo(recaudoSeleccionado.id);
+    }
+  }, [recaudoSeleccionado?.id]);
+
   useEffect(() => {
     filtrarRecaudos();
   }, [filtro, estado]);
@@ -239,6 +331,7 @@ export const useRecaudos = () => {
     recaudos,
     recaudoSeleccionado,
     setRecaudoSeleccionado,
+    cargandoDetalle,
     filtro,
     setFiltro,
     estado,
@@ -256,6 +349,7 @@ export const useRecaudos = () => {
     aplicarFiltros,
     handleLimpiarFiltros,
     marcarComoPagado,
-    cambiarEstado
+    cambiarEstado,
+    actualizarNotas
   };
 };

@@ -1,5 +1,5 @@
 
-import { useRef } from "react";
+import { useRef, useState } from "react";
 import { useReactToPrint } from "react-to-print";
 import { Recaudo } from "@/pages/recaudos/seguimiento";
 import { 
@@ -7,10 +7,12 @@ import {
   DialogContent, 
   DialogHeader, 
   DialogTitle,
-  DialogDescription 
+  DialogDescription,
+  DialogFooter
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Textarea } from "@/components/ui/textarea";
 import { 
   Printer, 
   Building, 
@@ -26,23 +28,43 @@ import {
   File,
   FileVideo,
   Download,
-  Paperclip
+  Paperclip,
+  Edit,
+  Save
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
+import { toast } from "sonner";
 
 interface RecaudoDetailDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   recaudo: Recaudo | null;
+  onEditStatus: (recaudo: Recaudo) => void;
+  onUpdateNotes: (id: string, notes: string) => void;
 }
 
-export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDetailDialogProps) => {
+export const RecaudoDetailDialog = ({ 
+  open, 
+  onOpenChange, 
+  recaudo,
+  onEditStatus,
+  onUpdateNotes
+}: RecaudoDetailDialogProps) => {
   const impresionRef = useRef<HTMLDivElement>(null);
+  const [editingNotes, setEditingNotes] = useState(false);
+  const [newNotes, setNewNotes] = useState("");
 
   // Para imprimir el detalle
   const handlePrint = useReactToPrint({
     content: () => impresionRef.current,
   });
+
+  // Inicializar notas cuando el recaudo cambia
+  React.useEffect(() => {
+    if (recaudo && recaudo.detalles?.notas) {
+      setNewNotes(recaudo.detalles.notas);
+    }
+  }, [recaudo]);
 
   if (!recaudo) return null;
 
@@ -93,9 +115,18 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
     return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
   };
 
+  // Función para guardar las notas
+  const handleSaveNotes = () => {
+    if (recaudo) {
+      onUpdateNotes(recaudo.id, newNotes);
+      setEditingNotes(false);
+      toast.success("Notas actualizadas correctamente");
+    }
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
+      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">Detalle del Recaudo #{recaudo.id}</DialogTitle>
           <DialogDescription>
@@ -103,7 +134,15 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
           </DialogDescription>
         </DialogHeader>
         <div className="mt-4">
-          <div className="flex justify-end mb-4">
+          <div className="flex justify-between flex-wrap gap-2 mb-4">
+            <Button 
+              variant="outline" 
+              className="bg-teal-50 text-teal-600 hover:bg-teal-100"
+              onClick={() => onEditStatus(recaudo)}
+            >
+              <Edit className="h-4 w-4 mr-2" />
+              Cambiar Estado
+            </Button>
             <Button 
               variant="outline" 
               className="bg-green-50 text-green-600 hover:bg-green-100"
@@ -117,10 +156,10 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
           <div ref={impresionRef} className="p-6 bg-white">
             {/* Encabezado con información principal */}
             <div className="border-b pb-4 mb-6">
-              <div className="flex justify-between items-start">
+              <div className="flex justify-between items-start flex-wrap gap-4">
                 <div>
                   <h2 className="text-2xl font-bold text-gray-800 flex items-center gap-2">
-                    <FileText className="h-5 w-5 text-teal" />
+                    <FileText className="h-5 w-5 text-teal-600" />
                     Recaudo {recaudo.id}
                   </h2>
                   <div className="flex items-center gap-2 mt-1">
@@ -155,7 +194,7 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-6">
               <div>
                 <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                  <Info className="h-4 w-4 text-teal" />
+                  <Info className="h-4 w-4 text-teal-600" />
                   Información General
                 </h3>
                 <div className="space-y-2">
@@ -176,7 +215,7 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
               
               <div>
                 <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                  <Calendar className="h-4 w-4 text-teal" />
+                  <Calendar className="h-4 w-4 text-teal-600" />
                   Fechas Importantes
                 </h3>
                 <div className="space-y-2">
@@ -199,53 +238,55 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
             </div>
 
             {/* Detalles de los artículos */}
-            <div className="mb-6">
+            <div className="mb-6 overflow-x-auto">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <FileText className="h-4 w-4 text-teal" />
+                <FileText className="h-4 w-4 text-teal-600" />
                 Detalle de Artículos
               </h3>
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="bg-gray-50">
-                    <th className="border p-2 text-left">Proveedor</th>
-                    <th className="border p-2 text-left">Artículo</th>
-                    <th className="border p-2 text-right">Cantidad</th>
-                    <th className="border p-2 text-right">Precio Unitario</th>
-                    <th className="border p-2 text-right">IVA</th>
-                    <th className="border p-2 text-right">Total</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {recaudo.detalles?.articulos.map((articulo, index) => (
-                    <tr key={index} className="border-b">
-                      <td className="border p-2">{articulo.proveedor || 'No especificado'}</td>
-                      <td className="border p-2">{articulo.nombre}</td>
-                      <td className="border p-2 text-right">{articulo.cantidad}</td>
-                      <td className="border p-2 text-right">${articulo.precio.toLocaleString()}</td>
-                      <td className="border p-2 text-right">${(articulo.iva || 0).toLocaleString()}</td>
-                      <td className="border p-2 text-right">${(articulo.cantidad * articulo.precio).toLocaleString()}</td>
+              <div className="min-w-full overflow-hidden">
+                <table className="w-full border-collapse">
+                  <thead>
+                    <tr className="bg-gray-50">
+                      <th className="border p-2 text-left">Proveedor</th>
+                      <th className="border p-2 text-left">Artículo</th>
+                      <th className="border p-2 text-right">Cantidad</th>
+                      <th className="border p-2 text-right">Precio Unitario</th>
+                      <th className="border p-2 text-right">IVA</th>
+                      <th className="border p-2 text-right">Total</th>
                     </tr>
-                  ))}
-                  <tr className="bg-gray-50">
-                    <td colSpan={4} className="border p-2 text-right font-medium">Subtotal:</td>
-                    <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.subtotal?.toLocaleString() || recaudo.monto.toLocaleString()}</td>
-                  </tr>
-                  <tr className="bg-gray-50">
-                    <td colSpan={4} className="border p-2 text-right font-medium">IVA Total:</td>
-                    <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.totalIva?.toLocaleString() || '0'}</td>
-                  </tr>
-                  <tr className="bg-gray-50 font-bold">
-                    <td colSpan={4} className="border p-2 text-right">Total:</td>
-                    <td colSpan={2} className="border p-2 text-right">${recaudo.monto.toLocaleString()}</td>
-                  </tr>
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {recaudo.detalles?.articulos.map((articulo, index) => (
+                      <tr key={index} className="border-b">
+                        <td className="border p-2">{articulo.proveedor || 'No especificado'}</td>
+                        <td className="border p-2">{articulo.nombre}</td>
+                        <td className="border p-2 text-right">{articulo.cantidad}</td>
+                        <td className="border p-2 text-right">${articulo.precio.toLocaleString()}</td>
+                        <td className="border p-2 text-right">${(articulo.iva || 0).toLocaleString()}</td>
+                        <td className="border p-2 text-right">${(articulo.cantidad * articulo.precio).toLocaleString()}</td>
+                      </tr>
+                    ))}
+                    <tr className="bg-gray-50">
+                      <td colSpan={4} className="border p-2 text-right font-medium">Subtotal:</td>
+                      <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.subtotal?.toLocaleString() || recaudo.monto.toLocaleString()}</td>
+                    </tr>
+                    <tr className="bg-gray-50">
+                      <td colSpan={4} className="border p-2 text-right font-medium">IVA Total:</td>
+                      <td colSpan={2} className="border p-2 text-right">${recaudo.detalles?.totalIva?.toLocaleString() || '0'}</td>
+                    </tr>
+                    <tr className="bg-gray-50 font-bold">
+                      <td colSpan={4} className="border p-2 text-right">Total:</td>
+                      <td colSpan={2} className="border p-2 text-right">${recaudo.monto.toLocaleString()}</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
 
             {/* Archivos adjuntos */}
             <div className="mb-6">
               <h3 className="font-semibold text-lg mb-3 flex items-center gap-2">
-                <Paperclip className="h-4 w-4 text-teal" />
+                <Paperclip className="h-4 w-4 text-teal-600" />
                 Archivos Adjuntos
               </h3>
               
@@ -259,7 +300,7 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
                       <div className="mr-3">
                         {getFileIcon(archivo.tipo)}
                       </div>
-                      <div className="flex-grow">
+                      <div className="flex-grow overflow-hidden">
                         <p className="font-medium truncate">{archivo.nombre}</p>
                         <p className="text-xs text-gray-500">{formatFileSize(archivo.tamaño)} • {formatDate(archivo.fechaSubida)}</p>
                       </div>
@@ -280,10 +321,43 @@ export const RecaudoDetailDialog = ({ open, onOpenChange, recaudo }: RecaudoDeta
 
             {/* Notas y observaciones */}
             <div className="mb-6">
-              <h3 className="font-semibold text-lg mb-2">Notas</h3>
-              <div className="p-3 bg-gray-50 rounded-md">
-                {recaudo.detalles?.notas || 'No hay notas adicionales.'}
+              <div className="flex justify-between items-center mb-2">
+                <h3 className="font-semibold text-lg">Notas</h3>
+                {!editingNotes ? (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={() => setEditingNotes(true)}
+                    className="text-teal-600"
+                  >
+                    <Edit className="h-3.5 w-3.5 mr-1" />
+                    Editar
+                  </Button>
+                ) : (
+                  <Button 
+                    variant="ghost" 
+                    size="sm" 
+                    onClick={handleSaveNotes}
+                    className="text-teal-600"
+                  >
+                    <Save className="h-3.5 w-3.5 mr-1" />
+                    Guardar
+                  </Button>
+                )}
               </div>
+              
+              {editingNotes ? (
+                <Textarea 
+                  value={newNotes} 
+                  onChange={(e) => setNewNotes(e.target.value)}
+                  className="min-h-[100px]"
+                  placeholder="Añadir notas aquí..."
+                />
+              ) : (
+                <div className="p-3 bg-gray-50 rounded-md">
+                  {recaudo.detalles?.notas || 'No hay notas adicionales.'}
+                </div>
+              )}
             </div>
 
             {/* Información de pagos */}

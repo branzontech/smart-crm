@@ -1,16 +1,9 @@
-import { useState, useRef } from "react";
+
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { Button } from "@/components/ui/button";
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableHead, 
-  TableHeader, 
-  TableRow 
-} from "@/components/ui/table";
 import { 
   Card, 
   CardContent, 
@@ -18,32 +11,7 @@ import {
   CardHeader, 
   CardTitle 
 } from "@/components/ui/card";
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
-} from "@/components/ui/select";
-import { Input } from "@/components/ui/input";
-import { 
-  ArrowLeft, 
-  Check, 
-  Coins, 
-  Search, 
-  Clock, 
-  AlertCircle, 
-  Eye, 
-  Printer,
-  MoreHorizontal,
-  Columns,
-  GripVertical,
-  Calendar,
-  DollarSign,
-  Building,
-  FileText,
-  Edit
-} from "lucide-react";
+import { ArrowLeft, Coins } from "lucide-react";
 import { RecaudoFilterBar } from "@/components/recaudos/RecaudoFilterBar";
 import { RecaudoTable } from "@/components/recaudos/RecaudoTable";
 import { RecaudoDetailDialog } from "@/components/recaudos/RecaudoDetailDialog";
@@ -108,7 +76,8 @@ const SeguimientoRecaudos = () => {
     recaudoSeleccionado, 
     setRecaudoSeleccionado,
     marcarComoPagado, 
-    cambiarEstado
+    cambiarEstado,
+    actualizarNotas
   } = useRecaudos();
   const [mostrarDetalle, setMostrarDetalle] = useState(false);
   const [mostrarPagoConfirmacion, setMostrarPagoConfirmacion] = useState(false);
@@ -191,7 +160,9 @@ const SeguimientoRecaudos = () => {
             <RecaudoDetailDialog 
               open={mostrarDetalle} 
               onOpenChange={setMostrarDetalle} 
-              recaudo={recaudoSeleccionado} 
+              recaudo={recaudoSeleccionado}
+              onEditStatus={abrirCambioEstado}
+              onUpdateNotes={actualizarNotas}
             />
 
             <RecaudoPaymentDialog 

@@ -163,13 +163,6 @@ export default function ClientesPage() {
                   <Filter className="h-4 w-4" />
                 </Button>
                 <CreateClienteDialog onClienteCreated={handleClienteCreated} />
-                <Button 
-                  onClick={() => navigate("/clientes/nuevo")}
-                  className="bg-teal hover:bg-teal/90"
-                >
-                  <UserPlus className="h-4 w-4 mr-2" />
-                  Nuevo
-                </Button>
               </div>
             </div>
 

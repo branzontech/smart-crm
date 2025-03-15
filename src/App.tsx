@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -64,6 +65,7 @@ import TiposServicios from "./pages/maestros/tiposServicios";
 import Paises from "./pages/maestros/paises";
 import Ciudades from "./pages/maestros/ciudades";
 import OrigenesCliente from "./pages/maestros/origenesCliente";
+import TiposProductos from "./pages/maestros/tiposProductos";
 
 export default function App() {
   return (
@@ -263,6 +265,11 @@ export default function App() {
             <Route path="/maestros/origenes-cliente" element={
               <ProtectedRoute>
                 <OrigenesCliente />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/tipos-productos" element={
+              <ProtectedRoute>
+                <TiposProductos />
               </ProtectedRoute>
             } />
             

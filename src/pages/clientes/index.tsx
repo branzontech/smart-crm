@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -229,7 +228,7 @@ export default function ClientesPage() {
                               {cliente.tipo_persona === 'juridica' 
                                 ? 'Empresa' 
                                 : cliente.empresa 
-                                  ? cliente.empresa 
+                                  ? 'Empresa' 
                                   : 'Individual'}
                             </TableCell>
                             <TableCell>{cliente.email}</TableCell>
@@ -279,7 +278,6 @@ export default function ClientesPage() {
         </main>
       </div>
 
-      {/* Confirmación de eliminación */}
       <Dialog 
         open={!!clienteIdToDelete} 
         onOpenChange={(open) => !open && setClienteIdToDelete(null)}

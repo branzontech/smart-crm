@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { NuevoArticuloForm, Articulo } from "./NuevoArticuloForm";
@@ -37,7 +36,7 @@ export function ArticulosSection({
     descripcion: "",
     cantidad: 1,
     valor_unitario: 0,
-    tasa_iva: 0.19,
+    tasa_iva: 0,
   });
 
   const calcularTotales = () => {
@@ -81,7 +80,7 @@ export function ArticulosSection({
       descripcion: "",
       cantidad: 1,
       valor_unitario: 0,
-      tasa_iva: 0.19,
+      tasa_iva: 0,
     });
     
     setProveedorQuery("");

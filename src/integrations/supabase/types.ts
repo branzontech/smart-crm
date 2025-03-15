@@ -283,6 +283,57 @@ export type Database = {
         }
         Relationships: []
       }
+      cotizaciones: {
+        Row: {
+          cliente: Json
+          created_at: string
+          empresa_emisor: Json
+          estado: string
+          fecha_emision: string
+          fecha_vencimiento: string
+          firma_nombre: string | null
+          firma_url: string | null
+          id: string
+          numero: string
+          subtotal: number
+          total: number
+          total_iva: number
+          updated_at: string
+        }
+        Insert: {
+          cliente: Json
+          created_at?: string
+          empresa_emisor: Json
+          estado?: string
+          fecha_emision: string
+          fecha_vencimiento: string
+          firma_nombre?: string | null
+          firma_url?: string | null
+          id?: string
+          numero: string
+          subtotal?: number
+          total?: number
+          total_iva?: number
+          updated_at?: string
+        }
+        Update: {
+          cliente?: Json
+          created_at?: string
+          empresa_emisor?: Json
+          estado?: string
+          fecha_emision?: string
+          fecha_vencimiento?: string
+          firma_nombre?: string | null
+          firma_url?: string | null
+          id?: string
+          numero?: string
+          subtotal?: number
+          total?: number
+          total_iva?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       empresas: {
         Row: {
           ciudad: string
@@ -378,6 +429,50 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      productos_cotizacion: {
+        Row: {
+          cantidad: number
+          cotizacion_id: string
+          created_at: string
+          descripcion: string
+          id: string
+          iva: number
+          precio_unitario: number
+          total: number
+          updated_at: string
+        }
+        Insert: {
+          cantidad: number
+          cotizacion_id: string
+          created_at?: string
+          descripcion: string
+          id?: string
+          iva?: number
+          precio_unitario: number
+          total: number
+          updated_at?: string
+        }
+        Update: {
+          cantidad?: number
+          cotizacion_id?: string
+          created_at?: string
+          descripcion?: string
+          id?: string
+          iva?: number
+          precio_unitario?: number
+          total?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "productos_cotizacion_cotizacion_id_fkey"
+            columns: ["cotizacion_id"]
+            isOneToOne: false
+            referencedRelation: "cotizaciones"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {

@@ -18,7 +18,7 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
   try {
     // First, insert the main quotation record
     const { data: cotizacionData, error: cotizacionError } = await supabase
-      .from("cotizaciones")
+      .from("cotizaciones" as any)
       .insert({
         numero: cotizacion.numero,
         fecha_emision: cotizacion.fechaEmision.toISOString(),
@@ -31,7 +31,7 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
         firma_nombre: cotizacion.firmaNombre,
         firma_url: cotizacion.firmaUrl,
         estado: cotizacion.estado
-      })
+      } as any)
       .select("id")
       .single();
 
@@ -51,8 +51,8 @@ export const saveCotizacion = async (cotizacion: Cotizacion): Promise<string | n
       }));
 
       const { error: productosError } = await supabase
-        .from("productos_cotizacion")
-        .insert(productosMapped);
+        .from("productos_cotizacion" as any)
+        .insert(productosMapped as any);
 
       if (productosError) throw productosError;
     }
@@ -70,7 +70,7 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
   try {
     // Get main quotation data
     const { data: cotizacionData, error: cotizacionError } = await supabase
-      .from("cotizaciones")
+      .from("cotizaciones" as any)
       .select("*")
       .eq("id", id)
       .single();
@@ -79,7 +79,7 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
 
     // Get products for this quotation
     const { data: productosData, error: productosError } = await supabase
-      .from("productos_cotizacion")
+      .from("productos_cotizacion" as any)
       .select("*")
       .eq("cotizacion_id", id);
 
@@ -93,7 +93,7 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
       fechaVencimiento: new Date(cotizacionData.fecha_vencimiento),
       empresaEmisor: cotizacionData.empresa_emisor,
       cliente: cotizacionData.cliente,
-      productos: productosData.map(p => ({
+      productos: productosData.map((p: any) => ({
         id: p.id,
         descripcion: p.descripcion,
         cantidad: p.cantidad,
@@ -120,13 +120,13 @@ export const getCotizacionById = async (id: string): Promise<Cotizacion | null> 
 export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
   try {
     const { data, error } = await supabase
-      .from("cotizaciones")
+      .from("cotizaciones" as any)
       .select("*")
       .order("fecha_emision", { ascending: false });
 
     if (error) throw error;
 
-    return data.map(item => ({
+    return data.map((item: any) => ({
       id: item.id,
       numero: item.numero,
       fechaEmision: new Date(item.fecha_emision),
@@ -151,7 +151,7 @@ export const getAllCotizaciones = async (): Promise<Cotizacion[]> => {
 export const updateCotizacionStatus = async (id: string, estado: string): Promise<boolean> => {
   try {
     const { error } = await supabase
-      .from("cotizaciones")
+      .from("cotizaciones" as any)
       .update({ estado })
       .eq("id", id);
 

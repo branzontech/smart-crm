@@ -165,6 +165,8 @@ export default function App() {
                 <SeguimientoRecaudos />
               </ProtectedRoute>
             } />
+            {/* Redirigir cualquier otra ruta de recaudos a la página principal de recaudos */}
+            <Route path="/recaudos/*" element={<Navigate to="/recaudos/seguimiento" replace />} />
             
             {/* Rutas de Ventas - Protegidas */}
             <Route path="/ventas" element={

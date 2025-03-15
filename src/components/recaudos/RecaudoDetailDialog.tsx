@@ -1,5 +1,5 @@
 
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import { useReactToPrint } from "react-to-print";
 import { Recaudo } from "@/pages/recaudos/seguimiento";
 import { 
@@ -60,7 +60,7 @@ export const RecaudoDetailDialog = ({
   });
 
   // Inicializar notas cuando el recaudo cambia
-  React.useEffect(() => {
+  useEffect(() => {
     if (recaudo && recaudo.detalles?.notas) {
       setNewNotes(recaudo.detalles.notas);
     }
@@ -396,3 +396,4 @@ export const RecaudoDetailDialog = ({
     </Dialog>
   );
 };
+

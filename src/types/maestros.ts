@@ -13,6 +13,9 @@ export interface TipoServicio extends MaestroBase {}
 
 export interface OrigenCliente extends MaestroBase {}
 
+// Nueva interfaz para tipos de productos
+export interface TipoProducto extends MaestroBase {}
+
 // Update Pais to include descripcion and change codigo to number type
 export interface Pais {
   id: string;

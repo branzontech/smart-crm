@@ -1,4 +1,3 @@
-
 import { supabase } from "@/integrations/supabase/client";
 
 export interface Proveedor {
@@ -12,9 +11,13 @@ export interface Proveedor {
   descripcion?: string;
   created_at: string;
   updated_at: string;
+  sectores?: {
+    id: string;
+    nombre: string;
+  };
 }
 
-export type CreateProveedorInput = Omit<Proveedor, "id" | "created_at" | "updated_at">;
+export type CreateProveedorInput = Omit<Proveedor, "id" | "created_at" | "updated_at" | "sectores">;
 
 export async function createProveedor(proveedor: CreateProveedorInput) {
   const { data, error } = await supabase

@@ -18,7 +18,7 @@ interface MaestroFormProps {
   };
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
-  tipo: "sector" | "tipoServicio" | "pais" | "origenCliente";
+  tipo: "sector" | "tipoServicio" | "pais" | "origenCliente" | "tipoProducto";
   includeCodigo?: boolean;
 }
 
@@ -82,6 +82,8 @@ export function MaestroForm({ initialData, onSubmit, onCancel, tipo, includeCodi
         return esNuevo ? "Nuevo Sector" : "Editar Sector";
       case "tipoServicio":
         return esNuevo ? "Nuevo Tipo de Servicio" : "Editar Tipo de Servicio";
+      case "tipoProducto":
+        return esNuevo ? "Nuevo Tipo de Producto" : "Editar Tipo de Producto";
       case "pais":
         return esNuevo ? "Nuevo País" : "Editar País";
       case "origenCliente":

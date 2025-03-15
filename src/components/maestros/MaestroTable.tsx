@@ -36,7 +36,7 @@ interface MaestroTableProps {
   onAdd: (data: any) => Promise<void>;
   onUpdate: (id: string, data: any) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
-  tipo: "sector" | "tipoServicio" | "pais" | "origenCliente";
+  tipo: "sector" | "tipoServicio" | "pais" | "origenCliente" | "tipoProducto";
   includeCodigo?: boolean;
 }
 
@@ -67,6 +67,8 @@ export function MaestroTable({
         return "Sectores";
       case "tipoServicio":
         return "Tipos de Servicio";
+      case "tipoProducto":
+        return "Tipos de Producto";
       case "pais":
         return "Países";
       case "origenCliente":

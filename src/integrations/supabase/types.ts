@@ -705,6 +705,10 @@ export type Database = {
         }
         Returns: string
       }
+      get_next_cotizacion_numero: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_next_recaudo_numero: {
         Args: Record<PropertyKey, never>
         Returns: string

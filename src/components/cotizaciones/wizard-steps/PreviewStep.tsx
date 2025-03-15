@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Button } from '@/components/ui/button';
@@ -49,21 +48,17 @@ export const PreviewStep: React.FC = () => {
     return format(date, "dd 'de' MMMM 'de' yyyy", { locale: es });
   };
   
-  // Validate if all required data is present
   const validateCotizacion = () => {
     const errors = [];
     
-    // Validate empresa emisora
     if (!cotizacion.empresaEmisor.nombre) {
       errors.push("Falta el nombre de la empresa emisora");
     }
     
-    // Validate cliente
     if (!cotizacion.cliente.nombre) {
       errors.push("Falta el nombre del cliente");
     }
     
-    // Validate productos
     if (cotizacion.productos.length === 0) {
       errors.push("No ha agregado productos a la cotización");
     }
@@ -96,7 +91,6 @@ export const PreviewStep: React.FC = () => {
       
       <div className="border rounded-md p-8 bg-white print:border-none">
         <div className="flex flex-col gap-8">
-          {/* Header */}
           <div className="flex justify-between items-start">
             <div>
               <h1 className="text-2xl font-bold">{cotizacion.empresaEmisor.nombre}</h1>
@@ -112,7 +106,6 @@ export const PreviewStep: React.FC = () => {
             </div>
           </div>
           
-          {/* Cliente */}
           <div className="border-t pt-4">
             <h3 className="font-semibold text-lg mb-2">Cliente</h3>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -139,7 +132,6 @@ export const PreviewStep: React.FC = () => {
             </div>
           </div>
           
-          {/* Productos */}
           <div className="border-t pt-4">
             <h3 className="font-semibold text-lg mb-2">Productos y Servicios</h3>
             <table className="min-w-full">
@@ -183,7 +175,6 @@ export const PreviewStep: React.FC = () => {
             </table>
           </div>
           
-          {/* Terms & Notes */}
           <div className="border-t pt-4">
             <h3 className="font-semibold text-lg mb-2">Términos y Condiciones</h3>
             <p className="text-sm text-gray-600">
@@ -194,7 +185,6 @@ export const PreviewStep: React.FC = () => {
             </p>
           </div>
           
-          {/* Firma */}
           <div className="border-t pt-4 mt-auto">
             <div className="flex flex-col items-center mt-8">
               <div className="border-t border-gray-400 w-48 mb-1 pt-2"></div>

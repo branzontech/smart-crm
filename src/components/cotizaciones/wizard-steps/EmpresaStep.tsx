@@ -45,11 +45,6 @@ export const EmpresaStep: React.FC = () => {
     }
   }, [hasLoadedData, updateEmpresaEmisor]);
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const { name, value } = e.target;
-    updateEmpresaEmisor({ [name]: value });
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -73,8 +68,9 @@ export const EmpresaStep: React.FC = () => {
               id="nombre"
               name="nombre"
               value={empresaEmisor.nombre}
-              onChange={handleInputChange}
-              placeholder="Nombre de la empresa"
+              readOnly
+              disabled
+              className="bg-gray-100"
             />
           </div>
 
@@ -84,8 +80,9 @@ export const EmpresaStep: React.FC = () => {
               id="nit"
               name="nit"
               value={empresaEmisor.nit}
-              onChange={handleInputChange}
-              placeholder="NIT"
+              readOnly
+              disabled
+              className="bg-gray-100"
             />
           </div>
 
@@ -95,8 +92,9 @@ export const EmpresaStep: React.FC = () => {
               id="telefono"
               name="telefono"
               value={empresaEmisor.telefono}
-              onChange={handleInputChange}
-              placeholder="Teléfono"
+              readOnly
+              disabled
+              className="bg-gray-100"
             />
           </div>
 
@@ -106,21 +104,15 @@ export const EmpresaStep: React.FC = () => {
               id="direccion"
               name="direccion"
               value={empresaEmisor.direccion}
-              onChange={handleInputChange}
-              placeholder="Dirección"
+              readOnly
+              disabled
+              className="bg-gray-100"
             />
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="logo">Logo de la Empresa (URL)</Label>
-            <Input
-              id="logo"
-              name="logo"
-              value={empresaEmisor.logo || ''}
-              onChange={handleInputChange}
-              placeholder="URL del logo"
-            />
-            {empresaEmisor.logo && (
+            <Label htmlFor="logo">Logo de la Empresa</Label>
+            {empresaEmisor.logo ? (
               <div className="mt-2">
                 <img 
                   src={empresaEmisor.logo} 
@@ -128,6 +120,8 @@ export const EmpresaStep: React.FC = () => {
                   className="h-16 object-contain"
                 />
               </div>
+            ) : (
+              <p className="text-sm text-gray-500 italic">No hay logo configurado</p>
             )}
           </div>
         </div>
@@ -138,6 +132,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               value={cotizacion.numero}
               readOnly
+              disabled
               className="bg-gray-100"
             />
             <p className="text-xs text-gray-500">
@@ -150,6 +145,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               value={format(fechaEmision, 'dd/MM/yyyy')}
               readOnly
+              disabled
               className="bg-gray-100"
             />
             <p className="text-xs text-gray-500">
@@ -176,6 +172,8 @@ export const EmpresaStep: React.FC = () => {
                   onSelect={(date) => date && updateFechaVencimiento(date)}
                   initialFocus
                   locale={es}
+                  disabled={date => date < new Date()}
+                  fromDate={new Date()}
                 />
               </PopoverContent>
             </Popover>

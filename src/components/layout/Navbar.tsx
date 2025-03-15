@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -132,6 +133,7 @@ export const Navbar = () => {
   }, []);
 
   useEffect(() => {
+    // Update CSS variable for sidebar width
     document.documentElement.style.setProperty(
       '--sidebar-width', 
       isExpanded ? '16rem' : '5rem'
@@ -141,6 +143,7 @@ export const Navbar = () => {
       setIsExpanded(false);
     }
     
+    // Properly handle main container class
     const mainContainer = document.querySelector('.main-container');
     if (mainContainer) {
       if (isExpanded) {
@@ -150,6 +153,7 @@ export const Navbar = () => {
       }
     }
     
+    // Update header position
     const header = document.querySelector('header > div');
     if (header) {
       header.classList.remove('ml-20', 'ml-64');
@@ -281,4 +285,3 @@ export const Navbar = () => {
     </aside>
   );
 };
-

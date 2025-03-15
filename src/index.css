@@ -1,4 +1,3 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -115,6 +114,7 @@
     min-height: 100vh;
     width: 100%;
     max-width: 100vw;
+    overflow-x: hidden;
   }
   
   /* Contenedor principal que se ajusta al ancho del sidebar */
@@ -125,11 +125,14 @@
     margin-left: var(--sidebar-width);
     width: calc(100% - var(--sidebar-width));
     transition: margin-left 0.3s ease, width 0.3s ease;
+    max-width: 100%;
+    overflow-x: hidden;
   }
   
   .main-container.expanded {
     margin-left: var(--sidebar-width-expanded);
     width: calc(100% - var(--sidebar-width-expanded));
+    max-width: calc(100% - var(--sidebar-width-expanded));
   }
 
   /* Estilos personalizados para el scrollbar */
@@ -162,7 +165,7 @@
   
   /* Estilos para contenedores de contenido */
   .content-container {
-    padding: 1.5rem;
+    padding: 1rem;
     width: 100%;
     max-width: 100%;
     overflow-x: hidden;

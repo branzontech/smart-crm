@@ -59,7 +59,7 @@ export const RecaudoFilterBar = () => {
 
   if (isMobile && isCollapsed) {
     return (
-      <div className="flex justify-between items-center mb-4">
+      <div className="flex justify-between items-center mb-4 w-full">
         <Button 
           variant="outline" 
           onClick={() => setIsCollapsed(false)}
@@ -74,7 +74,7 @@ export const RecaudoFilterBar = () => {
   }
 
   return (
-    <Card className="mb-6">
+    <Card className="mb-6 max-w-full">
       <CardHeader className="pb-3 flex flex-row justify-between items-start">
         <div>
           <CardTitle>Filtrar Recaudos</CardTitle>

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { Navbar } from "@/components/layout/Navbar";
@@ -6,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
-import { ArrowLeft, Save, Coins, BanknoteIcon, Plus, Trash2, Search } from "lucide-react";
+import { ArrowLeft, Save, Coins, Plus, Trash2, Search } from "lucide-react";
 import { 
   Select, 
   SelectContent, 
@@ -31,29 +32,32 @@ import { Label } from "@/components/ui/label";
 import { CreateClienteDialog } from "@/components/CreateClienteDialog";
 import { CreateProveedorDialog } from "@/components/CreateProveedorDialog";
 import { FileUpload } from "@/components/FileUpload";
+import { getClientes } from "@/services/clientesService";
+import { getNextRecaudoNumber, createRecaudo, ArticuloRecaudo } from "@/services/recaudosService";
+import { supabase } from "@/integrations/supabase/client";
 
 const articuloSchema = z.object({
   id: z.string().optional(),
-  proveedor: z.string().min(1, { message: "El proveedor es requerido" }),
+  proveedor_id: z.string().min(1, { message: "El proveedor es requerido" }),
   nombreProveedor: z.string().optional(),
   descripcion: z.string().min(1, { message: "La descripción es requerida" }),
   cantidad: z.number().min(1, { message: "La cantidad debe ser mayor a 0" }),
-  valorUnitario: z.number().min(0, { message: "El valor unitario debe ser mayor o igual a 0" }),
-  valorTotal: z.number().min(0, { message: "El valor total debe ser mayor o igual a 0" }),
-  tasaIva: z.number().min(0, { message: "La tasa de IVA debe ser mayor o igual a 0" }),
-  valorIva: z.number().min(0, { message: "El valor del IVA debe ser mayor o igual a 0" }),
+  valor_unitario: z.number().min(0, { message: "El valor unitario debe ser mayor o igual a 0" }),
+  valor_total: z.number().min(0, { message: "El valor total debe ser mayor o igual a 0" }),
+  tasa_iva: z.number().min(0, { message: "La tasa de IVA debe ser mayor o igual a 0" }),
+  valor_iva: z.number().min(0, { message: "El valor del IVA debe ser mayor o igual a 0" }),
 });
 
 const formSchema = z.object({
-  cliente: z.string().min(1, { message: "Seleccione un cliente" }),
+  cliente_id: z.string().min(1, { message: "Seleccione un cliente" }),
   clienteNombre: z.string().optional(),
   monto: z.string().min(1, { message: "Ingrese el monto" }),
   subtotal: z.number().min(0, { message: "El subtotal debe ser mayor o igual a 0" }),
   iva: z.number().min(0, { message: "El IVA debe ser mayor o igual a 0" }),
   total: z.number().min(0, { message: "El total debe ser mayor o igual a 0" }),
-  metodoPago: z.string().min(1, { message: "Seleccione un método de pago" }),
-  fechaPago: z.string().min(1, { message: "Seleccione una fecha de pago" }),
-  fechaVencimiento: z.string().min(1, { message: "Seleccione una fecha de vencimiento" }),
+  metodo_pago: z.string().min(1, { message: "Seleccione un método de pago" }),
+  fecha_pago: z.string().min(1, { message: "Seleccione una fecha de pago" }),
+  fecha_vencimiento: z.string().min(1, { message: "Seleccione una fecha de vencimiento" }),
   estado: z.string().min(1, { message: "Seleccione un estado" }),
   notas: z.string().optional(),
   archivos: z.array(z.instanceof(File)).optional(),
@@ -64,44 +68,31 @@ type Articulo = z.infer<typeof articuloSchema>;
 
 const NuevoRecaudo = () => {
   const navigate = useNavigate();
-  const [nextRecaudoNumber, setNextRecaudoNumber] = useState(1);
+  const [nextRecaudoNumber, setNextRecaudoNumber] = useState("");
   const [articulos, setArticulos] = useState<Articulo[]>([]);
   const [clienteQuery, setClienteQuery] = useState("");
   const [proveedorQuery, setProveedorQuery] = useState("");
   const [clientesFiltrados, setClientesFiltrados] = useState<any[]>([]);
   const [proveedoresFiltrados, setProveedoresFiltrados] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
   const [nuevoArticulo, setNuevoArticulo] = useState<{
-    proveedor: string;
+    proveedor_id: string;
     nombreProveedor: string;
     descripcion: string;
     cantidad: number;
-    valorUnitario: number;
-    tasaIva: number;
+    valor_unitario: number;
+    tasa_iva: number;
   }>({
-    proveedor: "",
+    proveedor_id: "",
     nombreProveedor: "",
     descripcion: "",
     cantidad: 1,
-    valorUnitario: 0,
-    tasaIva: 0.19,
+    valor_unitario: 0,
+    tasa_iva: 0.19,
   });
   const [archivos, setArchivos] = useState<File[]>([]);
-
-  const clientes = [
-    { id: "1", nombre: "Tech Solutions SA" },
-    { id: "2", nombre: "Green Energy Corp" },
-    { id: "3", nombre: "Global Logistics" },
-    { id: "4", nombre: "Digital Systems Inc" },
-    { id: "5", nombre: "Smart Solutions" },
-  ];
-
-  const proveedores = [
-    { id: "1", nombre: "ProveedorTech SA" },
-    { id: "2", nombre: "Insumos Digitales" },
-    { id: "3", nombre: "Servicios Globales" },
-    { id: "4", nombre: "Componentes XYZ" },
-    { id: "5", nombre: "Tecnología Avanzada" },
-  ];
+  const [clientes, setClientes] = useState<any[]>([]);
+  const [proveedores, setProveedores] = useState<any[]>([]);
 
   const metodosPago = [
     { id: "transferencia", nombre: "Transferencia Bancaria" },
@@ -126,13 +117,42 @@ const NuevoRecaudo = () => {
   ];
 
   useEffect(() => {
-    const fetchNextRecaudoNumber = () => {
-      setTimeout(() => {
-        setNextRecaudoNumber(123);
-      }, 500);
+    const loadInitialData = async () => {
+      setIsLoading(true);
+      try {
+        // Fetch next recaudo number
+        const recaudoNumber = await getNextRecaudoNumber();
+        setNextRecaudoNumber(recaudoNumber);
+        
+        // Fetch clientes
+        const { data: clientesData } = await getClientes();
+        if (clientesData) {
+          setClientes(clientesData.map(cliente => ({
+            id: cliente.id,
+            nombre: cliente.tipo_persona === 'juridica' 
+              ? cliente.empresa 
+              : `${cliente.nombre} ${cliente.apellidos || ''}`
+          })));
+        }
+        
+        // Fetch proveedores
+        const { data: proveedoresData, error: proveedoresError } = await supabase
+          .from('proveedores')
+          .select('id, nombre');
+          
+        if (proveedoresError) throw proveedoresError;
+        if (proveedoresData) {
+          setProveedores(proveedoresData);
+        }
+      } catch (error) {
+        console.error("Error loading initial data:", error);
+        toast.error("Error cargando datos iniciales");
+      } finally {
+        setIsLoading(false);
+      }
     };
     
-    fetchNextRecaudoNumber();
+    loadInitialData();
   }, []);
 
   useEffect(() => {
@@ -144,7 +164,7 @@ const NuevoRecaudo = () => {
     } else {
       setClientesFiltrados([]);
     }
-  }, [clienteQuery]);
+  }, [clienteQuery, clientes]);
 
   useEffect(() => {
     if (proveedorQuery) {
@@ -155,20 +175,20 @@ const NuevoRecaudo = () => {
     } else {
       setProveedoresFiltrados([]);
     }
-  }, [proveedorQuery]);
+  }, [proveedorQuery, proveedores]);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      cliente: "",
+      cliente_id: "",
       clienteNombre: "",
       monto: "",
       subtotal: 0,
       iva: 0,
       total: 0,
-      metodoPago: "transferencia",
-      fechaPago: new Date().toISOString().substring(0, 10),
-      fechaVencimiento: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().substring(0, 10),
+      metodo_pago: "transferencia",
+      fecha_pago: new Date().toISOString().substring(0, 10),
+      fecha_vencimiento: new Date(new Date().setDate(new Date().getDate() + 30)).toISOString().substring(0, 10),
       estado: "pendiente",
       notas: "",
       archivos: [],
@@ -176,8 +196,8 @@ const NuevoRecaudo = () => {
   });
 
   const calcularTotales = () => {
-    const subtotal = articulos.reduce((sum, item) => sum + (item.valorTotal || 0), 0);
-    const iva = articulos.reduce((sum, item) => sum + (item.valorIva || 0), 0);
+    const subtotal = articulos.reduce((sum, item) => sum + (item.valor_total || 0), 0);
+    const iva = articulos.reduce((sum, item) => sum + (item.valor_iva || 0), 0);
     const total = subtotal + iva;
     
     form.setValue('subtotal', subtotal);
@@ -187,36 +207,36 @@ const NuevoRecaudo = () => {
   };
 
   const agregarArticulo = () => {
-    if (!nuevoArticulo.proveedor || !nuevoArticulo.descripcion) {
+    if (!nuevoArticulo.proveedor_id || !nuevoArticulo.descripcion) {
       toast.error("El proveedor y la descripción son requeridos");
       return;
     }
     
-    const valorTotal = nuevoArticulo.cantidad * nuevoArticulo.valorUnitario;
-    const valorIva = valorTotal * nuevoArticulo.tasaIva;
+    const valorTotal = nuevoArticulo.cantidad * nuevoArticulo.valor_unitario;
+    const valorIva = valorTotal * nuevoArticulo.tasa_iva;
     
     const articulo: Articulo = {
       id: `art-${Date.now()}`,
-      proveedor: nuevoArticulo.proveedor,
+      proveedor_id: nuevoArticulo.proveedor_id,
       nombreProveedor: nuevoArticulo.nombreProveedor,
       descripcion: nuevoArticulo.descripcion,
       cantidad: nuevoArticulo.cantidad,
-      valorUnitario: nuevoArticulo.valorUnitario,
-      valorTotal,
-      tasaIva: nuevoArticulo.tasaIva,
-      valorIva,
+      valor_unitario: nuevoArticulo.valor_unitario,
+      valor_total: valorTotal,
+      tasa_iva: nuevoArticulo.tasa_iva,
+      valor_iva: valorIva,
     };
     
     const nuevosArticulos = [...articulos, articulo];
     setArticulos(nuevosArticulos);
     
     setNuevoArticulo({
-      proveedor: "",
+      proveedor_id: "",
       nombreProveedor: "",
       descripcion: "",
       cantidad: 1,
-      valorUnitario: 0,
-      tasaIva: 0.19,
+      valor_unitario: 0,
+      tasa_iva: 0.19,
     });
     
     setProveedorQuery("");
@@ -232,7 +252,7 @@ const NuevoRecaudo = () => {
   };
 
   const seleccionarCliente = (cliente: any) => {
-    form.setValue('cliente', cliente.id);
+    form.setValue('cliente_id', cliente.id);
     form.setValue('clienteNombre', cliente.nombre);
     setClienteQuery(cliente.nombre);
     setClientesFiltrados([]);
@@ -241,26 +261,44 @@ const NuevoRecaudo = () => {
   const seleccionarProveedor = (proveedor: any) => {
     setNuevoArticulo({
       ...nuevoArticulo,
-      proveedor: proveedor.id,
+      proveedor_id: proveedor.id,
       nombreProveedor: proveedor.nombre,
     });
     setProveedorQuery(proveedor.nombre);
     setProveedoresFiltrados([]);
   };
 
-  const handleClienteCreated = (cliente: { id: number; nombre: string }) => {
-    form.setValue('cliente', cliente.id.toString());
-    form.setValue('clienteNombre', cliente.nombre);
-    setClienteQuery(cliente.nombre);
+  const handleClienteCreated = (cliente: { id: number | string; nombre: string }) => {
+    // Add to the local list
+    const newCliente = {
+      id: cliente.id.toString(),
+      nombre: cliente.nombre
+    };
+    
+    setClientes([newCliente, ...clientes]);
+    
+    // Select the created cliente
+    form.setValue('cliente_id', newCliente.id);
+    form.setValue('clienteNombre', newCliente.nombre);
+    setClienteQuery(newCliente.nombre);
   };
 
-  const handleProveedorCreated = (proveedor: { id: number; nombre: string }) => {
+  const handleProveedorCreated = (proveedor: { id: number | string; nombre: string }) => {
+    // Add to the local list
+    const newProveedor = {
+      id: proveedor.id.toString(),
+      nombre: proveedor.nombre
+    };
+    
+    setProveedores([newProveedor, ...proveedores]);
+    
+    // Select the created proveedor
     setNuevoArticulo({
       ...nuevoArticulo,
-      proveedor: proveedor.id.toString(),
-      nombreProveedor: proveedor.nombre,
+      proveedor_id: newProveedor.id,
+      nombreProveedor: newProveedor.nombre,
     });
-    setProveedorQuery(proveedor.nombre);
+    setProveedorQuery(newProveedor.nombre);
   };
 
   const handleFilesChange = (files: File[]) => {
@@ -268,25 +306,45 @@ const NuevoRecaudo = () => {
     form.setValue('archivos', files);
   };
 
-  const onSubmit = (data: FormValues) => {
+  const onSubmit = async (data: FormValues) => {
     if (articulos.length === 0) {
       toast.error("Debe agregar al menos un artículo");
       return;
     }
     
-    const recaudoCompleto = {
-      ...data,
-      numero: `N°000${nextRecaudoNumber}`,
-      articulos,
-      archivos,
-    };
+    setIsLoading(true);
     
-    console.log("Datos del formulario:", recaudoCompleto);
-    toast.success("Recaudo creado con éxito");
-    
-    setTimeout(() => {
-      navigate("/recaudos");
-    }, 1500);
+    try {
+      // Prepare articulos for database
+      const articulosForDb: ArticuloRecaudo[] = articulos.map(articulo => ({
+        proveedor_id: articulo.proveedor_id,
+        descripcion: articulo.descripcion,
+        cantidad: articulo.cantidad,
+        valor_unitario: articulo.valor_unitario,
+        valor_total: articulo.valor_total,
+        tasa_iva: articulo.tasa_iva,
+        valor_iva: articulo.valor_iva
+      }));
+      
+      // Create recaudo
+      const { data: recaudoId, error } = await createRecaudo({
+        ...data,
+        articulos: articulosForDb
+      });
+      
+      if (error) throw error;
+      
+      toast.success(`Recaudo ${nextRecaudoNumber} creado exitosamente`);
+      
+      setTimeout(() => {
+        navigate("/recaudos");
+      }, 1500);
+    } catch (error: any) {
+      toast.error(`Error al crear recaudo: ${error.message}`);
+      console.error("Error creating recaudo:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -308,7 +366,7 @@ const NuevoRecaudo = () => {
                 </Button>
                 <h1 className="text-2xl font-semibold text-gray-900 flex items-center gap-2">
                   <Coins className="h-6 w-6 text-teal" />
-                  Nuevo Recaudo N°{String(nextRecaudoNumber).padStart(3, '0')}
+                  Nuevo Recaudo {nextRecaudoNumber}
                 </h1>
               </div>
             </div>
@@ -351,14 +409,14 @@ const NuevoRecaudo = () => {
                             </div>
                           )}
                           <FormMessage>
-                            {form.formState.errors.cliente?.message}
+                            {form.formState.errors.cliente_id?.message}
                           </FormMessage>
                         </div>
                       </div>
                       
                       <FormField
                         control={form.control}
-                        name="metodoPago"
+                        name="metodo_pago"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Método de Pago</FormLabel>
@@ -389,7 +447,7 @@ const NuevoRecaudo = () => {
                       
                       <FormField
                         control={form.control}
-                        name="fechaPago"
+                        name="fecha_pago"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Fecha de Pago</FormLabel>
@@ -406,7 +464,7 @@ const NuevoRecaudo = () => {
                       
                       <FormField
                         control={form.control}
-                        name="fechaVencimiento"
+                        name="fecha_vencimiento"
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel>Fecha de Vencimiento</FormLabel>
@@ -520,17 +578,17 @@ const NuevoRecaudo = () => {
                                 id="valorUnitario"
                                 type="number" 
                                 min="0" 
-                                value={nuevoArticulo.valorUnitario} 
-                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, valorUnitario: parseFloat(e.target.value) || 0})}
+                                value={nuevoArticulo.valor_unitario} 
+                                onChange={(e) => setNuevoArticulo({...nuevoArticulo, valor_unitario: parseFloat(e.target.value) || 0})}
                               />
                             </div>
                             <div>
                               <Label htmlFor="tasaIva">IVA</Label>
                               <Select 
-                                value={nuevoArticulo.tasaIva.toString()}
+                                value={nuevoArticulo.tasa_iva.toString()}
                                 onValueChange={(value) => setNuevoArticulo({
                                   ...nuevoArticulo, 
-                                  tasaIva: parseFloat(value)
+                                  tasa_iva: parseFloat(value)
                                 })}
                               >
                                 <SelectTrigger id="tasaIva">
@@ -552,7 +610,7 @@ const NuevoRecaudo = () => {
                               type="button" 
                               className="bg-teal hover:bg-sage text-white"
                               onClick={agregarArticulo}
-                              disabled={!nuevoArticulo.proveedor || !nuevoArticulo.descripcion}
+                              disabled={!nuevoArticulo.proveedor_id || !nuevoArticulo.descripcion}
                             >
                               <Plus className="h-4 w-4 mr-2" />
                               Agregar Artículo
@@ -581,16 +639,16 @@ const NuevoRecaudo = () => {
                                   <TableCell>{articulo.descripcion}</TableCell>
                                   <TableCell className="text-right">{articulo.cantidad}</TableCell>
                                   <TableCell className="text-right">
-                                    ${articulo.valorUnitario.toLocaleString()}
+                                    ${articulo.valor_unitario.toLocaleString()}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    {(articulo.tasaIva * 100).toFixed(0)}%
+                                    {(articulo.tasa_iva * 100).toFixed(0)}%
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    ${articulo.valorIva.toLocaleString()}
+                                    ${articulo.valor_iva.toLocaleString()}
                                   </TableCell>
                                   <TableCell className="text-right">
-                                    ${articulo.valorTotal.toLocaleString()}
+                                    ${articulo.valor_total.toLocaleString()}
                                   </TableCell>
                                   <TableCell className="text-center">
                                     <Button 
@@ -654,15 +712,17 @@ const NuevoRecaudo = () => {
                         type="button"
                         variant="outline"
                         onClick={() => navigate("/recaudos")}
+                        disabled={isLoading}
                       >
                         Cancelar
                       </Button>
                       <Button 
                         type="submit" 
                         className="bg-teal hover:bg-sage text-white"
+                        disabled={isLoading}
                       >
                         <Save className="mr-2 h-4 w-4" />
-                        Guardar Recaudo
+                        {isLoading ? "Guardando..." : "Guardar Recaudo"}
                       </Button>
                     </div>
                   </form>

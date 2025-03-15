@@ -30,7 +30,8 @@ import {
   Download,
   Paperclip,
   Edit,
-  Save
+  Save,
+  ExternalLink
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { toast } from "sonner";
@@ -53,6 +54,7 @@ export const RecaudoDetailDialog = ({
   const impresionRef = useRef<HTMLDivElement>(null);
   const [editingNotes, setEditingNotes] = useState(false);
   const [newNotes, setNewNotes] = useState("");
+  const [previewFile, setPreviewFile] = useState<{url: string, nombre: string, tipo: string} | null>(null);
 
   // Para imprimir el detalle
   const handlePrint = useReactToPrint({
@@ -113,6 +115,23 @@ export const RecaudoDetailDialog = ({
       setEditingNotes(false);
       toast.success("Notas actualizadas correctamente");
     }
+  };
+
+  // Función para descargar archivo
+  const handleDownloadFile = (url: string, fileName: string) => {
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = fileName;
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  // Función para previsualizar archivo
+  const handlePreviewFile = (file: {url: string, nombre: string, tipo: string}) => {
+    // Si es imagen o PDF, abrir en nueva pestaña
+    window.open(file.url, '_blank');
   };
 
   return (
@@ -303,11 +322,28 @@ export const RecaudoDetailDialog = ({
                         <p className="font-medium truncate">{archivo.nombre}</p>
                         <p className="text-xs text-gray-500">{formatFileSize(archivo.tamaño)} • {formatDate(archivo.fechaSubida)}</p>
                       </div>
-                      <Button variant="ghost" size="sm" className="ml-2" asChild>
-                        <a href={archivo.url} target="_blank" rel="noreferrer">
+                      <div className="flex space-x-1">
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-blue-600"
+                          onClick={() => handlePreviewFile({
+                            url: archivo.url,
+                            nombre: archivo.nombre,
+                            tipo: archivo.tipo
+                          })}
+                        >
+                          <ExternalLink className="h-4 w-4" />
+                        </Button>
+                        <Button 
+                          variant="ghost" 
+                          size="sm" 
+                          className="text-green-600"
+                          onClick={() => handleDownloadFile(archivo.url, archivo.nombre)}
+                        >
                           <Download className="h-4 w-4" />
-                        </a>
-                      </Button>
+                        </Button>
+                      </div>
                     </div>
                   ))}
                 </div>

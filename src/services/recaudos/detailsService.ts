@@ -44,11 +44,13 @@ export const getRecaudoDetails = async (id: string) => {
           .from('recaudos')
           .getPublicUrl(archivo.path);
         
-        archivosWithUrls.push({
-          ...archivo,
-          url: data.publicUrl,
-          tamano: archivo.tamano // Asegurarse de que se llame 'tamano' en lugar de 'tamaño'
-        });
+        if (data && data.publicUrl) {
+          archivosWithUrls.push({
+            ...archivo,
+            url: data.publicUrl,
+            tamano: archivo.tamano
+          });
+        }
       }
     }
 

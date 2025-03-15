@@ -5,6 +5,7 @@ import { v4 as uuidv4 } from "uuid";
 // Get file URL
 export const getRecaudoFileUrl = async (filePath: string): Promise<string | null> => {
   try {
+    // Get public URL directly - no need to call download
     const { data } = await supabase.storage
       .from('recaudos')
       .getPublicUrl(filePath);
@@ -53,3 +54,4 @@ export const deleteRecaudoFiles = async (paths: string[]) => {
   }
   return true;
 };
+

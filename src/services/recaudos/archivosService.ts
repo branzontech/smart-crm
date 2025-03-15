@@ -1,6 +1,6 @@
 
 import { supabase } from "@/integrations/supabase/client";
-import { uploadRecaudoFile } from "./fileService";
+import { uploadRecaudoFile, getRecaudoFileUrl } from "./fileService";
 
 // Insert archivos
 export const insertArchivosRecaudo = async (recaudoId: string, files: File[]) => {
@@ -28,12 +28,31 @@ export const insertArchivosRecaudo = async (recaudoId: string, files: File[]) =>
   return { error: null };
 };
 
-// Get archivos for a recaudo
+// Get archivos for a recaudo with their public URLs
 export const getArchivosRecaudo = async (recaudoId: string) => {
-  return await supabase
+  const { data, error } = await supabase
     .from('archivos_recaudo')
     .select('*')
     .eq('recaudo_id', recaudoId);
+    
+  if (error) return { data: null, error };
+  
+  // Get public URLs for each file
+  if (data && data.length > 0) {
+    const archivosWithUrls = await Promise.all(
+      data.map(async (archivo) => {
+        const publicUrl = await getRecaudoFileUrl(archivo.path);
+        return {
+          ...archivo,
+          url: publicUrl
+        };
+      })
+    );
+    
+    return { data: archivosWithUrls, error: null };
+  }
+  
+  return { data, error };
 };
 
 // Get file paths for deletion

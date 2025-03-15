@@ -225,11 +225,7 @@ export default function ClientesPage() {
                               </div>
                             </TableCell>
                             <TableCell>
-                              {cliente.tipo_persona === 'juridica' 
-                                ? 'Empresa' 
-                                : cliente.empresa 
-                                  ? 'Empresa' 
-                                  : 'Individual'}
+                              {getTipoPersonaLabel(cliente.tipo_persona)}
                             </TableCell>
                             <TableCell>{cliente.email}</TableCell>
                             <TableCell>{cliente.telefono}</TableCell>

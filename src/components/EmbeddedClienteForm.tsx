@@ -23,8 +23,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { fetchSectores, fetchPaises } from "@/services/maestrosService";
-import { Sector, Pais } from "@/types/maestros";
+import { Textarea } from "@/components/ui/textarea";
+import { fetchSectores, fetchPaises, fetchCiudades, fetchTiposServicios, fetchOrigenesCliente } from "@/services/maestrosService";
+import { Sector, Pais, Ciudad, TipoServicio, OrigenCliente } from "@/types/maestros";
 import { createCliente, ClienteForm } from "@/services/clientesService";
 import { fetchEmpresas, Empresa } from "@/services/empresaService";
 
@@ -35,7 +36,14 @@ const clienteSimpleSchema = z.object({
   telefono: z.string().optional(),
   sector: z.string().min(2, "El sector es requerido"),
   pais: z.string().min(2, "El país es requerido"),
+  ciudad: z.string().optional(),
+  direccion: z.string().default("Por definir"),
+  tipoServicio: z.string().optional(),
+  origen: z.string().optional(),
   empresa: z.string().optional(),
+  tipoPersona: z.enum(["natural", "juridica"]).default("natural"),
+  tipoDocumento: z.enum(["CC", "NIT", "CE", "pasaporte"]).default("CC"),
+  tipo: z.enum(["potencial", "activo", "inactivo", "recurrente", "referido", "suspendido", "corporativo"]).default("potencial"),
 });
 
 type ClienteSimpleForm = z.infer<typeof clienteSimpleSchema>;
@@ -49,6 +57,10 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
   const [isLoading, setIsLoading] = useState(false);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [paises, setPaises] = useState<Pais[]>([]);
+  const [ciudades, setCiudades] = useState<Ciudad[]>([]);
+  const [ciudadesFiltradas, setCiudadesFiltradas] = useState<Ciudad[]>([]);
+  const [tiposServicio, setTiposServicio] = useState<TipoServicio[]>([]);
+  const [origenesCliente, setOrigenesCliente] = useState<OrigenCliente[]>([]);
   const [empresas, setEmpresas] = useState<Empresa[]>([]);
   const [isLoadingMaestros, setIsLoadingMaestros] = useState(false);
   const navigate = useNavigate();
@@ -62,7 +74,14 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
       telefono: "",
       sector: "",
       pais: "",
+      ciudad: "",
+      direccion: "Por definir",
+      tipoServicio: "",
+      origen: "",
       empresa: "",
+      tipoPersona: "natural",
+      tipoDocumento: "CC",
+      tipo: "potencial",
     },
   });
 
@@ -71,14 +90,20 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
     const loadMaestros = async () => {
       setIsLoadingMaestros(true);
       try {
-        const [sectoresData, paisesData, empresasData] = await Promise.all([
+        const [sectoresData, paisesData, ciudadesData, tiposServicioData, origenesData, empresasData] = await Promise.all([
           fetchSectores(),
           fetchPaises(),
+          fetchCiudades(),
+          fetchTiposServicios(),
+          fetchOrigenesCliente(),
           fetchEmpresas(),
         ]);
         
         setSectores(sectoresData);
         setPaises(paisesData);
+        setCiudades(ciudadesData);
+        setTiposServicio(tiposServicioData);
+        setOrigenesCliente(origenesData);
         setEmpresas(empresasData);
       } catch (error) {
         console.error("Error al cargar datos maestros:", error);
@@ -91,6 +116,23 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
     loadMaestros();
   }, []);
 
+  // Filtrar ciudades cuando cambia el país seleccionado
+  const paisId = form.watch("pais");
+  useEffect(() => {
+    if (paisId && ciudades.length > 0) {
+      const filtradas = ciudades.filter(ciudad => ciudad.pais_id === paisId);
+      setCiudadesFiltradas(filtradas);
+      
+      // Si ya hay una ciudad seleccionada y no está en el país actual, limpiar el campo
+      const ciudadActual = form.getValues("ciudad");
+      if (ciudadActual && !filtradas.some(c => c.id === ciudadActual)) {
+        form.setValue("ciudad", "");
+      }
+    } else {
+      setCiudadesFiltradas([]);
+    }
+  }, [paisId, ciudades, form]);
+
   const goToFullClientForm = () => {
     if (onCancel) onCancel();
     navigate("/clientes/nuevo");
@@ -101,20 +143,20 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
     try {
       // Convertir a formato completo para la API
       const clienteCompleto: ClienteForm = {
-        tipoPersona: "natural" as const,
-        tipoDocumento: "CC",
+        tipoPersona: data.tipoPersona,
+        tipoDocumento: data.tipoDocumento,
         documento: data.documento,
         nombre: data.nombre.trim(),
         email: data.email || "",
         telefono: data.telefono || "",
-        tipo: "potencial",
+        tipo: data.tipo,
         sector: data.sector,
         pais: data.pais,
-        tipoServicio: "", // Estos campos son requeridos por el esquema
-        direccion: "Por definir", // Valores por defecto
-        ciudad: data.pais, // Usamos el mismo país como ciudad temporalmente
-        origen: data.sector, // Usamos el sector como origen temporalmente
-        empresa: data.empresa, // Usamos la empresa seleccionada
+        ciudad: data.ciudad || data.pais, // Usamos el mismo país como ciudad si no se seleccionó
+        tipoServicio: data.tipoServicio || "", 
+        direccion: data.direccion || "Por definir",
+        origen: data.origen || data.sector, // Usamos el sector como origen si no se seleccionó
+        empresa: data.empresa || "", // Empresa seleccionada
       };
 
       const result = await createCliente(clienteCompleto);
@@ -150,6 +192,60 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
             <div className="grid gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="tipoPersona"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo Persona *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="natural">Persona Natural</SelectItem>
+                          <SelectItem value="juridica">Persona Jurídica</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="tipoDocumento"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tipo Documento *</FormLabel>
+                      <Select
+                        onValueChange={field.onChange}
+                        defaultValue={field.value}
+                      >
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Selecciona tipo" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="CC">Cédula de Ciudadanía</SelectItem>
+                          <SelectItem value="NIT">NIT</SelectItem>
+                          <SelectItem value="CE">Cédula de Extranjería</SelectItem>
+                          <SelectItem value="pasaporte">Pasaporte</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
               <FormField
                 control={form.control}
                 name="nombre"
@@ -270,6 +366,97 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
               
               <FormField
                 control={form.control}
+                name="ciudad"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Ciudad</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                      disabled={!paisId || ciudadesFiltradas.length === 0}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder={
+                            !paisId 
+                              ? "Selecciona primero un país" 
+                              : ciudadesFiltradas.length === 0 
+                                ? "No hay ciudades disponibles" 
+                                : "Selecciona una ciudad"
+                          } />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {ciudadesFiltradas.map((ciudad) => (
+                          <SelectItem key={ciudad.id} value={ciudad.id}>
+                            {ciudad.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="tipoServicio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tipo de Servicio</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona un tipo de servicio" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {tiposServicio.map((tipoServicio) => (
+                          <SelectItem key={tipoServicio.id} value={tipoServicio.id}>
+                            {tipoServicio.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="origen"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Origen del Cliente</FormLabel>
+                    <Select
+                      onValueChange={field.onChange}
+                      value={field.value}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Selecciona el origen" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {origenesCliente.map((origen) => (
+                          <SelectItem key={origen.id} value={origen.id}>
+                            {origen.nombre}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
                 name="email"
                 render={({ field }) => (
                   <FormItem>
@@ -295,6 +482,23 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
                     <FormControl>
                       <Input
                         placeholder="Número de teléfono"
+                        {...field}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="direccion"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Dirección</FormLabel>
+                    <FormControl>
+                      <Textarea
+                        placeholder="Dirección del cliente"
                         {...field}
                       />
                     </FormControl>

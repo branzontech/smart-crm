@@ -1,5 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Cotizacion, CotizacionStep, ProductoCotizacion, Cliente, EmpresaEmisor } from '@/types/cotizacion';
+import { generateCotizacionNumber } from '@/services/cotizacionService';
 
 interface CotizacionContextType {
   cotizacion: Cotizacion;
@@ -16,10 +18,10 @@ interface CotizacionContextType {
 }
 
 const defaultEmpresa: EmpresaEmisor = {
-  nombre: 'Tu Empresa S.A.',
-  nit: '900.123.456-7',
-  telefono: '+57 (1) 123-4567',
-  direccion: 'Calle Principal #123, Ciudad',
+  nombre: '',
+  nit: '',
+  telefono: '',
+  direccion: '',
 };
 
 const defaultCliente: Cliente = {
@@ -31,14 +33,6 @@ const defaultCliente: Cliente = {
   pais_id: '',
   ciudad_id: '',
   sector_id: ''
-};
-
-const generateCotizacionNumber = (): string => {
-  const date = new Date();
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-  return `COT-${year}${month}-${random}`;
 };
 
 const createDefaultCotizacion = (): Cotizacion => {

@@ -17,13 +17,19 @@ import {
   Users, 
   ShoppingCart, 
   FileText,
-  CheckCircle2
+  CheckCircle2,
+  Loader2
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
+import { saveCotizacion } from '@/services/cotizacionService';
+import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 export const CotizacionWizard: React.FC = () => {
   const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
+  const [isSaving, setIsSaving] = useState(false);
+  const navigate = useNavigate();
 
   const handlePrevious = () => {
     if (currentStep === 'cliente') setCurrentStep('empresa');
@@ -70,6 +76,23 @@ export const CotizacionWizard: React.FC = () => {
       return false;
     }
     return true;
+  };
+
+  const handleSaveCotizacion = async () => {
+    setIsSaving(true);
+    try {
+      const cotizacionId = await saveCotizacion(cotizacion);
+      if (cotizacionId) {
+        toast.success("Cotización guardada correctamente");
+        // You can redirect to the quotation list or details page
+        navigate('/ventas/cotizaciones');
+      }
+    } catch (error) {
+      console.error("Error saving quotation:", error);
+      toast.error("Error al guardar la cotización");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const renderStep = () => {
@@ -187,10 +210,16 @@ export const CotizacionWizard: React.FC = () => {
               <>
                 <Button
                   variant="outline"
-                  onClick={() => toast.success("Cotización guardada correctamente")}
+                  onClick={handleSaveCotizacion}
+                  disabled={isSaving}
                   className="flex items-center gap-2 transition-all hover:bg-gray-100"
                 >
-                  <Save className="h-4 w-4" /> Guardar
+                  {isSaving ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Guardar
                 </Button>
                 <Button
                   variant="outline"

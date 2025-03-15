@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -7,17 +7,51 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
+import { CalendarIcon, Loader2 } from 'lucide-react';
 import { es } from 'date-fns/locale';
+import { fetchCompanyConfig } from '@/services/configService';
 
 export const EmpresaStep: React.FC = () => {
   const { cotizacion, updateEmpresaEmisor, updateFechaVencimiento } = useCotizacion();
   const { empresaEmisor, fechaEmision, fechaVencimiento } = cotizacion;
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const loadCompanyData = async () => {
+      setIsLoading(true);
+      try {
+        const config = await fetchCompanyConfig();
+        if (config) {
+          updateEmpresaEmisor({
+            nombre: config.razon_social,
+            nit: config.nit,
+            telefono: config.telefono,
+            direccion: config.direccion,
+            logo: config.logo_path
+          });
+        }
+      } catch (error) {
+        console.error('Error loading company config:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadCompanyData();
+  }, [updateEmpresaEmisor]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     updateEmpresaEmisor({ [name]: value });
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6 w-full">

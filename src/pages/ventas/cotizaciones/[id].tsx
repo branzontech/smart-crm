@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -43,7 +42,10 @@ const CotizacionDetalle = () => {
   }, [id, navigate]);
 
   const handlePrint = () => {
-    window.print();
+    // Make sure any hidden elements get a chance to render
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   const formatCurrency = (value: number) => {
@@ -104,9 +106,9 @@ const CotizacionDetalle = () => {
 
   return (
     <Layout>
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto cotizacion-container">
         {/* Header with actions */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4 print:hidden">
           <div className="flex items-center gap-2">
             <Button 
               variant="ghost" 
@@ -150,7 +152,7 @@ const CotizacionDetalle = () => {
         </div>
         
         {/* Main content */}
-        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none">
+        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none cotizacion-printable">
           {/* Colored header */}
           <div className="bg-[#2d1e2f] text-white p-6 print:bg-primary print:text-primary-foreground">
             <div className="flex justify-between">

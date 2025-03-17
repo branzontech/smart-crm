@@ -1,29 +1,46 @@
 
 @media print {
-  /* Reset visibility for everything first */
+  /* Reset page settings first */
+  @page {
+    size: auto;
+    margin: 0.75cm;
+  }
+  
+  /* First make everything visible but hidden to avoid blank page */
+  body {
+    visibility: visible;
+    height: auto !important;
+    overflow: visible !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Then hide what we don't want */
   body * {
     visibility: hidden;
   }
   
-  /* Make only the cotización preview and its children visible */
+  /* Then explicitly make the preview visible */
   #cotizacion-preview,
   #cotizacion-preview * {
     visibility: visible !important;
     display: block !important;
     opacity: 1 !important;
+    height: auto !important;
+    overflow: visible !important;
   }
   
-  /* Positioning for print */
+  /* Positioning for print - no absolute to avoid issues */
   #cotizacion-preview {
-    position: absolute !important;
+    position: relative !important;
     left: 0 !important;
     top: 0 !important;
     width: 100% !important;
-    height: auto !important;
-    overflow: visible !important;
     margin: 0 !important;
     padding: 0 !important;
     box-shadow: none !important;
+    page-break-after: avoid !important;
   }
   
   /* Remove backgrounds that don't print well */
@@ -79,12 +96,6 @@
     page-break-inside: avoid;
   }
   
-  /* Proper page margins */
-  @page {
-    size: auto;
-    margin: 0.75cm;
-  }
-  
   /* Remove rounded corners in print */
   .rounded-lg {
     border-radius: 0 !important;
@@ -128,12 +139,7 @@
     color-adjust: exact !important;
   }
   
-  /* Hide any URLs, dates and times added by the browser */
-  @page {
-    margin: 0.75cm;
-    size: auto;
-  }
-  
+  /* Hide any browser-added headers and footers */
   @page :first {
     margin-top: 0.75cm;
   }
@@ -146,27 +152,32 @@
     margin-right: 0.75cm;
   }
   
-  /* Hide headers/footers and other unwanted elements */
-  html {
-    height: 100%;
-  }
-  
-  /* Better approach to hide unwanted elements */
-  body > *:not(#root),
-  #root > *:not(#cotizacion-preview) {
+  /* Hide specific elements by class name */
+  .navbar,
+  .smooth-sail-navbar,
+  .footer,
+  .footer-content,
+  nav,
+  header,
+  footer {
     display: none !important;
     visibility: hidden !important;
   }
   
-  /* Hide specific elements that might be causing issues */
-  html body header,
-  html body footer,
-  html body nav,
-  html body .navbar,
-  html body .smooth-sail-navbar,
-  html body .footer-content {
+  /* Better selector approach for hiding unwanted elements */
+  body > *:not(#root) {
     display: none !important;
-    visibility: hidden !important;
+  }
+  
+  /* Target only what we want to print and nothing else */
+  #root > *:not(:has(#cotizacion-preview)) {
+    display: none !important;
+  }
+  
+  /* Make sure the preview container is seen */
+  .max-w-5xl {
+    max-width: 100% !important;
+    margin: 0 !important;
   }
   
   /* Remove browser-generated content */
@@ -176,32 +187,22 @@
   html:before {
     content: none !important;
     display: none !important;
-    visibility: hidden !important;
   }
-  
-  /* Additional selector to hide browser-generated content */
-  html::before,
-  html::after,
-  body::before,
-  body::after {
-    display: none !important;
-    content: none !important;
+
+  /* Ensure content is always visible during print */
+  #cotizacion-preview * {
+    page-break-inside: avoid;
+    break-inside: avoid;
   }
-  
-  /* Fix for blank pages */
-  @page :blank {
-    margin: 0.75cm;
-  }
-  
-  /* Make sure content is never hidden */
-  #cotizacion-preview > * {
-    display: block !important;
-    position: relative !important;
-    opacity: 1 !important;
-  }
-  
-  /* Fix for layout shift during print */
+
+  /* Remove layout shift during print */
   #cotizacion-preview {
     transform: none !important;
+  }
+  
+  /* Fix for blank pages by ensuring display properties */
+  @page :blank {
+    margin: 0;
+    visibility: hidden;
   }
 }

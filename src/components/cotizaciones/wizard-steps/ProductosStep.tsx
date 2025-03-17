@@ -30,17 +30,23 @@ export const ProductosStep: React.FC = () => {
 
   const handleAddProducto = () => {
     if (!descripcion) {
-      toast.error('La descripción del producto es requerida');
+      toast.error('La descripción del producto es requerida', {
+        position: "top-center"
+      });
       return;
     }
 
     if (!cantidad || cantidad <= 0) {
-      toast.error('La cantidad debe ser mayor a cero');
+      toast.error('La cantidad debe ser mayor a cero', {
+        position: "top-center"
+      });
       return;
     }
 
     if (!precioUnitario || precioUnitario <= 0) {
-      toast.error('El precio unitario debe ser mayor a cero');
+      toast.error('El precio unitario debe ser mayor a cero', {
+        position: "top-center"
+      });
       return;
     }
 
@@ -70,7 +76,7 @@ export const ProductosStep: React.FC = () => {
     // Show toast notification with a shorter duration
     toast.success('Producto agregado correctamente', {
       duration: 2000,
-      position: 'top-right',
+      position: "top-center",
     });
     
     // Reset the isSubmitting state after a short delay
@@ -101,17 +107,23 @@ export const ProductosStep: React.FC = () => {
     if (!editingProductId) return;
 
     if (!descripcion) {
-      toast.error('La descripción del producto es requerida');
+      toast.error('La descripción del producto es requerida', {
+        position: "top-center"
+      });
       return;
     }
 
     if (!cantidad || cantidad <= 0) {
-      toast.error('La cantidad debe ser mayor a cero');
+      toast.error('La cantidad debe ser mayor a cero', {
+        position: "top-center"
+      });
       return;
     }
 
     if (!precioUnitario || precioUnitario <= 0) {
-      toast.error('El precio unitario debe ser mayor a cero');
+      toast.error('El precio unitario debe ser mayor a cero', {
+        position: "top-center"
+      });
       return;
     }
 
@@ -145,7 +157,7 @@ export const ProductosStep: React.FC = () => {
     // Show toast notification with a shorter duration
     toast.success('Producto actualizado correctamente', {
       duration: 2000,
-      position: 'top-right',
+      position: "top-center",
     });
     
     // Reset the isSubmitting state after a short delay
@@ -163,7 +175,7 @@ export const ProductosStep: React.FC = () => {
     // Show toast notification with a shorter duration
     toast.success('Producto eliminado correctamente', {
       duration: 2000,
-      position: 'top-right',
+      position: "top-center",
     });
   };
 

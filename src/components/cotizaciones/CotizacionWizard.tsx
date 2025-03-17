@@ -55,7 +55,9 @@ export const CotizacionWizard: React.FC = () => {
   const validateEmpresaStep = (): boolean => {
     const { empresaEmisor } = cotizacion;
     if (!empresaEmisor.nombre || !empresaEmisor.nit) {
-      toast.error('La información de la empresa es requerida');
+      toast.error('La información de la empresa es requerida', {
+        position: "top-center"
+      });
       return false;
     }
     return true;
@@ -64,7 +66,9 @@ export const CotizacionWizard: React.FC = () => {
   const validateClienteStep = (): boolean => {
     const { cliente } = cotizacion;
     if (!cliente.nombre || !cliente.nit) {
-      toast.error('La información del cliente es requerida');
+      toast.error('La información del cliente es requerida', {
+        position: "top-center"
+      });
       return false;
     }
     return true;
@@ -72,7 +76,9 @@ export const CotizacionWizard: React.FC = () => {
 
   const validateProductosStep = (): boolean => {
     if (cotizacion.productos.length === 0) {
-      toast.error('Debe agregar al menos un producto');
+      toast.error('Debe agregar al menos un producto', {
+        position: "top-center"
+      });
       return false;
     }
     return true;
@@ -83,12 +89,16 @@ export const CotizacionWizard: React.FC = () => {
     try {
       const cotizacionId = await saveCotizacion(cotizacion);
       if (cotizacionId) {
-        toast.success("Cotización guardada correctamente");
+        toast.success("Cotización guardada correctamente", {
+          position: "top-center"
+        });
         navigate('/ventas/cotizaciones');
       }
     } catch (error) {
       console.error("Error saving quotation:", error);
-      toast.error("Error al guardar la cotización");
+      toast.error("Error al guardar la cotización", {
+        position: "top-center"
+      });
     } finally {
       setIsSaving(false);
     }

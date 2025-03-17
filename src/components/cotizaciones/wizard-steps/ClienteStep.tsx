@@ -48,7 +48,9 @@ export const ClienteStep: React.FC = () => {
         setSectores(sectoresData);
       } catch (error) {
         console.error("Error al cargar datos maestros:", error);
-        toast.error("Error al cargar datos de referencia");
+        toast.error("Error al cargar datos de referencia", {
+          position: "top-center"
+        });
       } finally {
         setIsLoadingMaestros(false);
       }
@@ -75,7 +77,9 @@ export const ClienteStep: React.FC = () => {
 
   const handleSearch = async () => {
     if (!searchTerm) {
-      toast.error('Ingrese un término de búsqueda');
+      toast.error('Ingrese un término de búsqueda', {
+        position: "top-center"
+      });
       return;
     }
     
@@ -96,12 +100,16 @@ export const ClienteStep: React.FC = () => {
         setShowResults(true);
         
         if (results.length === 0) {
-          toast.info('No se encontraron clientes con ese criterio');
+          toast.info('No se encontraron clientes con ese criterio', {
+            position: "top-center"
+          });
         }
       }
     } catch (error) {
       console.error("Error al buscar clientes:", error);
-      toast.error("Error al buscar clientes");
+      toast.error("Error al buscar clientes", {
+        position: "top-center"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -131,7 +139,9 @@ export const ClienteStep: React.FC = () => {
     
     updateCliente(clienteData);
     setShowResults(false);
-    toast.success(`Cliente ${selectedCliente.nombre} seleccionado`);
+    toast.success(`Cliente ${selectedCliente.nombre} seleccionado`, {
+      position: "top-center"
+    });
   };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {

@@ -1,22 +1,28 @@
 
 @media print {
-  /* Hide everything except the cotización preview */
+  /* Reset visibility for everything first */
   body * {
     visibility: hidden;
   }
   
+  /* Make only the cotización preview and its children visible */
   #cotizacion-preview,
   #cotizacion-preview * {
-    visibility: visible;
+    visibility: visible !important;
+    display: block !important;
+    opacity: 1 !important;
   }
   
+  /* Positioning for print */
   #cotizacion-preview {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 100%;
-    margin: 0;
-    padding: 0;
+    position: absolute !important;
+    left: 0 !important;
+    top: 0 !important;
+    width: 100% !important;
+    height: auto !important;
+    overflow: visible !important;
+    margin: 0 !important;
+    padding: 0 !important;
     box-shadow: none !important;
   }
   
@@ -122,7 +128,7 @@
     color-adjust: exact !important;
   }
   
-  /* More aggressive header/footer removal for all browsers */
+  /* Hide any URLs, dates and times added by the browser */
   @page {
     margin: 0.75cm;
     size: auto;
@@ -140,29 +146,30 @@
     margin-right: 0.75cm;
   }
   
-  /* Remove all headers/footers with stronger selectors */
+  /* Hide headers/footers and other unwanted elements */
   html {
     height: 100%;
   }
   
-  /* Hide unwanted elements with stronger selectors */
+  /* Better approach to hide unwanted elements */
+  body > *:not(#root),
+  #root > *:not(#cotizacion-preview) {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Hide specific elements that might be causing issues */
   html body header,
   html body footer,
   html body nav,
   html body .navbar,
   html body .smooth-sail-navbar,
-  html body .footer-content,
-  #root > :not(#cotizacion-preview) {
+  html body .footer-content {
     display: none !important;
     visibility: hidden !important;
-    height: 0 !important;
-    width: 0 !important;
-    position: absolute !important;
-    overflow: hidden !important;
-    z-index: -9999 !important;
   }
   
-  /* Completely hide any URLs, dates and times added by the browser */
+  /* Remove browser-generated content */
   body:after,
   body:before,
   html:after,
@@ -173,18 +180,28 @@
   }
   
   /* Additional selector to hide browser-generated content */
-  @media print {
-    html::before,
-    html::after,
-    body::before,
-    body::after {
-      display: none !important;
-      content: none !important;
-    }
+  html::before,
+  html::after,
+  body::before,
+  body::after {
+    display: none !important;
+    content: none !important;
   }
   
-  /* Important override for all margins on all pages */
+  /* Fix for blank pages */
   @page :blank {
     margin: 0.75cm;
+  }
+  
+  /* Make sure content is never hidden */
+  #cotizacion-preview > * {
+    display: block !important;
+    position: relative !important;
+    opacity: 1 !important;
+  }
+  
+  /* Fix for layout shift during print */
+  #cotizacion-preview {
+    transform: none !important;
   }
 }

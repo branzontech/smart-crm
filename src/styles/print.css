@@ -120,4 +120,39 @@
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
   }
+  
+  /* Hide URL, date/time, and headers/footers added by browser */
+  @page {
+    margin: 0.75cm;
+  }
+  
+  /* Hide header and footer completely */
+  @page :first {
+    margin-top: 0;
+  }
+  
+  @page :left {
+    margin-left: 0;
+  }
+  
+  @page :right {
+    margin-right: 0;
+  }
+  
+  /* Remove all headers/footers */
+  html {
+    height: 100%;
+  }
+  
+  /* Hide unwanted elements specifically */
+  header, footer, nav, .navbar, .smooth-sail-navbar, .footer-content {
+    display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Completely hide any URLs, dates and times added by the browser */
+  body:after, body:before {
+    content: none !important;
+    display: none !important;
+  }
 }

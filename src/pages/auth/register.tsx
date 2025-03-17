@@ -6,7 +6,7 @@ import { toast } from 'sonner';
 
 const RegisterPage: React.FC = () => {
   const navigate = useNavigate();
-  const { register } = useAuth();
+  const { signup } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -16,7 +16,11 @@ const RegisterPage: React.FC = () => {
     setIsLoading(true);
 
     try {
-      await register(email, password);
+      await signup(email, password, {
+        username: email.split('@')[0],
+        nombre: '',
+        apellido: ''
+      });
       toast.success('Registro exitoso. Inicia sesión para continuar.');
       navigate('/login');
     } catch (error: any) {

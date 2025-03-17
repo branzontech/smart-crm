@@ -119,40 +119,72 @@
   * {
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
+    color-adjust: exact !important;
   }
   
-  /* Hide URL, date/time, and headers/footers added by browser */
+  /* More aggressive header/footer removal for all browsers */
   @page {
     margin: 0.75cm;
+    size: auto;
   }
   
-  /* Hide header and footer completely */
   @page :first {
-    margin-top: 0;
+    margin-top: 0.75cm;
   }
   
   @page :left {
-    margin-left: 0;
+    margin-left: 0.75cm;
   }
   
   @page :right {
-    margin-right: 0;
+    margin-right: 0.75cm;
   }
   
-  /* Remove all headers/footers */
+  /* Remove all headers/footers with stronger selectors */
   html {
     height: 100%;
   }
   
-  /* Hide unwanted elements specifically */
-  header, footer, nav, .navbar, .smooth-sail-navbar, .footer-content {
+  /* Hide unwanted elements with stronger selectors */
+  html body header,
+  html body footer,
+  html body nav,
+  html body .navbar,
+  html body .smooth-sail-navbar,
+  html body .footer-content,
+  #root > :not(#cotizacion-preview) {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    width: 0 !important;
+    position: absolute !important;
+    overflow: hidden !important;
+    z-index: -9999 !important;
+  }
+  
+  /* Completely hide any URLs, dates and times added by the browser */
+  body:after,
+  body:before,
+  html:after,
+  html:before {
+    content: none !important;
     display: none !important;
     visibility: hidden !important;
   }
   
-  /* Completely hide any URLs, dates and times added by the browser */
-  body:after, body:before {
-    content: none !important;
-    display: none !important;
+  /* Additional selector to hide browser-generated content */
+  @media print {
+    html::before,
+    html::after,
+    body::before,
+    body::after {
+      display: none !important;
+      content: none !important;
+    }
+  }
+  
+  /* Important override for all margins on all pages */
+  @page :blank {
+    margin: 0.75cm;
   }
 }

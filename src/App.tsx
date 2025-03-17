@@ -1,3 +1,4 @@
+
 import React from 'react';
 import {
   BrowserRouter as Router,
@@ -55,7 +56,7 @@ const routes = [
     element: <RequireAuth><EditClientePage /></RequireAuth>,
   },
   {
-    path: "ventas/cotizaciones/:id",
+    path: "/ventas/cotizaciones/:id",
     element: <RequireAuth><CotizacionDetailPage /></RequireAuth>,
   },
   {

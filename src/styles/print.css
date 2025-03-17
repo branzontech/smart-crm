@@ -1,6 +1,6 @@
 
 @media print {
-  /* Hide everything except the quotation content */
+  /* Hide everything except the cotización preview */
   body * {
     visibility: hidden;
   }
@@ -17,45 +17,19 @@
     width: 100%;
   }
   
-  /* Ensure the page has proper margins */
+  /* Remove backgrounds that don't print well */
+  .print\:bg-primary {
+    background-color: #f9fafb !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  .print\:text-primary-foreground {
+    color: #111827 !important;
+  }
+  
+  /* Add some margins */
   @page {
     margin: 1.5cm;
-  }
-  
-  /* Hide elements that shouldn't be printed */
-  .print\:hidden {
-    display: none !important;
-  }
-  
-  /* Show elements that should only be visible when printing */
-  .print\:block {
-    display: block !important;
-  }
-  
-  /* Make sure text is black for better printing */
-  #cotizacion-preview {
-    color: black;
-  }
-  
-  /* Ensure all content fits on page */
-  table {
-    page-break-inside: avoid;
-  }
-  
-  tr {
-    page-break-inside: avoid;
-  }
-  
-  /* Ensure background colors print correctly */
-  .bg-\[\#f15025\], .text-\[\#f15025\] {
-    color: #f15025 !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
-  }
-  
-  .bg-\[\#2d1e2f\], .text-\[\#2d1e2f\] {
-    color: #2d1e2f !important;
-    -webkit-print-color-adjust: exact;
-    print-color-adjust: exact;
   }
 }

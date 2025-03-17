@@ -1,3 +1,4 @@
+
 import { supabase } from "@/integrations/supabase/client";
 import { Cotizacion } from "@/types/cotizacion";
 import { handleSupabaseError } from "@/utils/supabaseHelpers";

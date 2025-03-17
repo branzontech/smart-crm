@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 // Define user types
 type User = {
@@ -53,11 +54,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Check for active session on component mount
     const checkSession = async () => {
       try {
+        console.log("Verificando sesión existente...");
         const { data: { session: activeSession } } = await supabase.auth.getSession();
         setSession(activeSession);
         
         if (activeSession) {
+          console.log("Sesión encontrada, obteniendo perfil de usuario...");
           await fetchUserProfile(activeSession.user.id);
+        } else {
+          console.log("No hay sesión activa");
         }
       } catch (error) {
         console.error("Error checking session:", error);
@@ -75,8 +80,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(newSession);
         
         if (event === "SIGNED_IN" && newSession) {
+          toast.info("Sesión iniciada");
           await fetchUserProfile(newSession.user.id);
         } else if (event === "SIGNED_OUT") {
+          toast.info("Sesión cerrada");
           setUser(null);
         }
       }
@@ -91,6 +98,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Fetch user profile
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Obteniendo perfil para el usuario:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -102,7 +110,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       }
 
       if (data) {
+        console.log("Perfil encontrado:", data);
         setUser(data as User);
+      } else {
+        console.log("No se encontró perfil para este usuario");
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
@@ -114,6 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Intentando iniciar sesión con email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -121,6 +133,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) throw error;
       
+      console.log("Login exitoso:", data);
       // Session and user will be updated via the auth state change listener
     } catch (error) {
       console.error("Error de inicio de sesión:", error);
@@ -135,6 +148,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Registrando nuevo usuario:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -145,6 +159,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) throw error;
       
+      console.log("Registro exitoso:", data);
       // Session and user will be updated via the auth state change listener
     } catch (error) {
       console.error("Error de registro:", error);
@@ -159,10 +174,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Cerrando sesión...");
       const { error } = await supabase.auth.signOut();
       
       if (error) throw error;
       
+      console.log("Sesión cerrada correctamente");
       // Session and user will be updated via the auth state change listener
     } catch (error) {
       console.error("Error al cerrar sesión:", error);

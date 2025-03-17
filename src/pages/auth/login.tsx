@@ -1,12 +1,12 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, LogIn, User, Key } from "lucide-react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -21,7 +21,11 @@ const Login = () => {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
+  const location = useLocation();
   const { login } = useAuth();
+  
+  // Get the return path from location state or default to dashboard
+  const from = location.state?.from || "/dashboard";
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -56,7 +60,8 @@ const Login = () => {
         // Handle login
         await login(email, password, rememberMe);
         toast.success("¡Bienvenido al sistema!");
-        navigate("/dashboard");
+        console.log("Redirigiendo a:", from);
+        navigate(from);
       }
     } catch (error: any) {
       console.error("Error de autenticación:", error);

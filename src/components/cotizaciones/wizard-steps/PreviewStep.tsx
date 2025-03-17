@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Button } from '@/components/ui/button';
@@ -14,8 +13,6 @@ export const PreviewStep: React.FC = () => {
   const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
-  
-  // Removed handleBack since it's now handled by the wizard navigation
   
   const handleSave = async () => {
     setIsSaving(true);
@@ -204,7 +201,20 @@ export const PreviewStep: React.FC = () => {
         </div>
       </div>
       
-      {/* Removed footer navigation section with redundant buttons - this will now be handled by CotizacionWizard */}
+      <div className="flex justify-between">
+        <Button variant="outline" onClick={() => setCurrentStep(currentStep - 1)}>
+          <Save className="mr-2" />
+          Guardar
+        </Button>
+        <Button variant="outline" onClick={handleSave}>
+          <Save className="mr-2" />
+          Guardar y Imprimir
+        </Button>
+        <Button variant="outline" onClick={() => navigate(`/ventas/cotizaciones`)}>
+          <Download className="mr-2" />
+          Descargar
+        </Button>
+      </div>
     </div>
   );
 };

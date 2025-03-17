@@ -9,11 +9,11 @@ interface CotizacionColoredHeaderProps {
 
 export const CotizacionColoredHeader = ({ empresaEmisor, numero, fechaFormateada }: CotizacionColoredHeaderProps) => {
   return (
-    <div className="bg-[#2d1e2f] text-white p-6 print:bg-primary print:text-primary-foreground print:p-3">
+    <div className="bg-[#2d1e2f] text-white p-6 print:bg-[#2d1e2f] print:text-white print:p-3 print:color-adjust-exact">
       <div className="flex justify-between items-center">
         <div className="flex items-center gap-4">
           {empresaEmisor.logo && (
-            <div className="flex-shrink-0 w-16 h-16 print:w-12 print:h-12">
+            <div className="flex-shrink-0 w-16 h-16 print:w-14 print:h-14">
               <img 
                 src={empresaEmisor.logo} 
                 alt={`${empresaEmisor.nombre} logo`} 

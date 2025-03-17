@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -24,10 +23,8 @@ const Login = () => {
   const location = useLocation();
   const { login, isAuthenticated } = useAuth();
   
-  // Get the return path from location state or default to dashboard
   const from = location.state?.from || "/dashboard";
 
-  // Redireccionar si ya está autenticado
   useEffect(() => {
     if (isAuthenticated) {
       console.log("Usuario ya autenticado, redirigiendo a:", from);
@@ -47,7 +44,6 @@ const Login = () => {
     
     try {
       if (isSignUp) {
-        // Handle sign up
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -56,9 +52,7 @@ const Login = () => {
               nombre,
               apellido,
               username: email.split('@')[0],
-            },
-            // Asegurar persistencia de sesión
-            persistSession: true
+            }
           },
         });
 
@@ -67,7 +61,6 @@ const Login = () => {
         toast.success("Cuenta creada exitosamente. Por favor inicia sesión.");
         setIsSignUp(false);
       } else {
-        // Handle login
         await login(email, password, rememberMe);
         toast.success("¡Bienvenido al sistema!");
         console.log("Redirigiendo a:", from);

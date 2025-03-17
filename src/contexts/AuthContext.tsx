@@ -129,13 +129,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     
     try {
       console.log("Intentando iniciar sesión con email:", email);
+      // Nota: Removimos la opción persistSession que no es soportada en esta versión
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
-        password,
-        options: {
-          // Configuración explícita para persistencia de sesión
-          persistSession: true
-        }
+        password
       });
       
       if (error) throw error;
@@ -160,9 +157,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         email,
         password,
         options: {
-          data: userData,
-          // Configuración explícita para persistencia de sesión
-          persistSession: true
+          data: userData
+          // Nota: Removimos la opción persistSession que no es soportada en esta versión
         },
       });
       

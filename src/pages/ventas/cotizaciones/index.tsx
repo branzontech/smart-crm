@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
@@ -64,7 +63,6 @@ const CotizacionesIndex = () => {
     validezHasta: true,
   });
 
-  // Fetch cotizaciones from database
   useEffect(() => {
     const fetchCotizaciones = async () => {
       try {
@@ -173,7 +171,6 @@ const CotizacionesIndex = () => {
   };
 
   const getEstadoDisplayName = (estado: string) => {
-    // Capitalize first letter
     return estado.charAt(0).toUpperCase() + estado.slice(1);
   };
 
@@ -234,7 +231,7 @@ const CotizacionesIndex = () => {
                       <SelectValue placeholder="Todos los estados" />
                     </SelectTrigger>
                     <SelectContent>
-                      <SelectItem value="">Todos los estados</SelectItem>
+                      <SelectItem value="all">Todos los estados</SelectItem>
                       <SelectItem value="borrador">Borrador</SelectItem>
                       <SelectItem value="enviada">Enviada</SelectItem>
                       <SelectItem value="aprobada">Aprobada</SelectItem>
@@ -501,3 +498,4 @@ const CotizacionesIndex = () => {
 };
 
 export default CotizacionesIndex;
+

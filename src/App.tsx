@@ -38,6 +38,7 @@ import Ventas from "./pages/ventas";
 import Oportunidades from "./pages/ventas/oportunidades";
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import Cotizaciones from "./pages/ventas/cotizaciones";
+import CotizacionDetalle from "./pages/ventas/cotizaciones/[id]";
 import NuevaCotizacion from "./pages/ventas/cotizaciones/nueva";
 import NuevaCotizacionWizard from "./pages/ventas/cotizaciones/nueva-cotizacion";
 import Contratos from "./pages/ventas/contratos";
@@ -164,7 +165,6 @@ export default function App() {
                 <SeguimientoRecaudos />
               </ProtectedRoute>
             } />
-            {/* Redirigir cualquier otra ruta de recaudos a la página principal de recaudos */}
             <Route path="/recaudos/*" element={<Navigate to="/recaudos" replace />} />
             
             {/* Rutas de Ventas - Protegidas */}
@@ -186,6 +186,11 @@ export default function App() {
             <Route path="/ventas/cotizaciones" element={
               <ProtectedRoute>
                 <Cotizaciones />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/cotizaciones/:id" element={
+              <ProtectedRoute>
+                <CotizacionDetalle />
               </ProtectedRoute>
             } />
             <Route path="/ventas/cotizaciones/nueva" element={

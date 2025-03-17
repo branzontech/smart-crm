@@ -3,7 +3,7 @@ import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
-import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, MoreHorizontal, Loader2 } from "lucide-react";
+import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, MoreHorizontal, Loader2, Eye, CheckCircle, XCircle, Clock, Send } from "lucide-react";
 import {
   Table,
   TableHeader,
@@ -32,6 +32,7 @@ import { Label } from "@/components/ui/label";
 import { getAllCotizaciones } from "@/services/cotizacionService";
 import { Cotizacion } from "@/types/cotizacion";
 import { toast } from "sonner";
+import { Badge } from "@/components/ui/badge";
 
 const CotizacionesIndex = () => {
   const navigate = useNavigate();
@@ -167,6 +168,23 @@ const CotizacionesIndex = () => {
         return "bg-yellow-100 text-yellow-800";
       default:
         return "bg-gray-100 text-gray-800";
+    }
+  };
+
+  const getEstadoIcon = (estado: string) => {
+    switch (estado) {
+      case 'aprobada':
+        return <CheckCircle className="h-4 w-4 text-green-600" />;
+      case 'enviada':
+        return <Send className="h-4 w-4 text-blue-600" />;
+      case 'borrador':
+        return <FileText className="h-4 w-4 text-gray-600" />;
+      case 'rechazada':
+        return <XCircle className="h-4 w-4 text-red-600" />;
+      case 'vencida':
+        return <Clock className="h-4 w-4 text-yellow-600" />;
+      default:
+        return <FileText className="h-4 w-4 text-gray-600" />;
     }
   };
 
@@ -425,9 +443,12 @@ const CotizacionesIndex = () => {
                             
                             {visibleColumns.estado && (
                               <TableCell>
-                                <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
-                                  {getEstadoDisplayName(cotizacion.estado)}
-                                </span>
+                                <div className="flex items-center gap-1.5">
+                                  {getEstadoIcon(cotizacion.estado)}
+                                  <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
+                                    {getEstadoDisplayName(cotizacion.estado)}
+                                  </span>
+                                </div>
                               </TableCell>
                             )}
                             
@@ -449,7 +470,8 @@ const CotizacionesIndex = () => {
                                 </DropdownMenuTrigger>
                                 <DropdownMenuContent align="end">
                                   <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
-                                    Ver detalles
+                                    <Eye className="h-4 w-4 mr-2" />
+                                    Ver
                                   </DropdownMenuItem>
                                   <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
                                     Editar
@@ -498,4 +520,3 @@ const CotizacionesIndex = () => {
 };
 
 export default CotizacionesIndex;
-

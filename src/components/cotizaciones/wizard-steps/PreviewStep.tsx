@@ -91,11 +91,22 @@ export const PreviewStep: React.FC = () => {
       <div className="border rounded-md p-8 bg-white print:border-none">
         <div className="flex flex-col gap-8">
           <div className="flex justify-between items-start">
-            <div>
-              <h1 className="text-2xl font-bold">{cotizacion.empresaEmisor.nombre}</h1>
-              <p className="text-gray-600">NIT: {cotizacion.empresaEmisor.nit}</p>
-              <p className="text-gray-600">{cotizacion.empresaEmisor.direccion}</p>
-              <p className="text-gray-600">Teléfono: {cotizacion.empresaEmisor.telefono}</p>
+            <div className="flex items-center gap-4">
+              {cotizacion.empresaEmisor.logo && (
+                <div className="w-16 h-16 flex-shrink-0">
+                  <img 
+                    src={cotizacion.empresaEmisor.logo} 
+                    alt={`${cotizacion.empresaEmisor.nombre} logo`} 
+                    className="w-full h-full object-contain rounded-md"
+                  />
+                </div>
+              )}
+              <div>
+                <h1 className="text-2xl font-bold">{cotizacion.empresaEmisor.nombre}</h1>
+                <p className="text-gray-600">NIT: {cotizacion.empresaEmisor.nit}</p>
+                <p className="text-gray-600">{cotizacion.empresaEmisor.direccion}</p>
+                <p className="text-gray-600">Teléfono: {cotizacion.empresaEmisor.telefono}</p>
+              </div>
             </div>
             <div className="text-right">
               <h2 className="text-xl font-semibold text-primary">COTIZACIÓN</h2>

@@ -30,6 +30,7 @@ const CotizacionDetalle = () => {
         setIsLoading(true);
         const data = await getCotizacionById(id);
         if (data) {
+          console.log("Cotización cargada:", data);
           setCotizacion(data);
         } else {
           toast.error("No se pudo encontrar la cotización");
@@ -72,7 +73,7 @@ const CotizacionDetalle = () => {
         
         {/* Main content - optimized for printing */}
         <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none cotizacion-printable">
-          {/* Colored header */}
+          {/* Colored header with logo */}
           <CotizacionColoredHeader 
             empresaEmisor={cotizacion.empresaEmisor} 
             numero={cotizacion.numero} 

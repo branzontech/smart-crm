@@ -84,7 +84,6 @@ export const CotizacionWizard: React.FC = () => {
       const cotizacionId = await saveCotizacion(cotizacion);
       if (cotizacionId) {
         toast.success("Cotización guardada correctamente");
-        // You can redirect to the quotation list or details page
         navigate('/ventas/cotizaciones');
       }
     } catch (error) {
@@ -130,6 +129,24 @@ export const CotizacionWizard: React.FC = () => {
     if (stepIndex < currentIndex) return 'completed';
     if (stepIndex === currentIndex) return 'current';
     return 'upcoming';
+  };
+
+  const validateCotizacion = () => {
+    const errors = [];
+    
+    if (!cotizacion.empresaEmisor.nombre) {
+      errors.push("Falta el nombre de la empresa emisora");
+    }
+    
+    if (!cotizacion.cliente.nombre) {
+      errors.push("Falta el nombre del cliente");
+    }
+    
+    if (cotizacion.productos.length === 0) {
+      errors.push("No ha agregado productos a la cotización");
+    }
+    
+    return errors.length === 0;
   };
 
   return (
@@ -210,23 +227,22 @@ export const CotizacionWizard: React.FC = () => {
               <>
                 <Button
                   variant="outline"
-                  onClick={handleSaveCotizacion}
-                  disabled={isSaving}
+                  onClick={() => window.print()}
                   className="flex items-center gap-2 transition-all hover:bg-gray-100"
+                >
+                  <Printer className="h-4 w-4" /> Imprimir
+                </Button>
+                <Button
+                  onClick={handleSaveCotizacion}
+                  disabled={isSaving || !validateCotizacion()}
+                  className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
                 >
                   {isSaving ? (
                     <Loader2 className="h-4 w-4 animate-spin" />
                   ) : (
                     <Save className="h-4 w-4" />
                   )}
-                  Guardar
-                </Button>
-                <Button
-                  variant="outline"
-                  onClick={() => window.print()}
-                  className="flex items-center gap-2 transition-all hover:bg-gray-100"
-                >
-                  <Printer className="h-4 w-4" /> Imprimir
+                  {isSaving ? "Guardando..." : "Guardar y finalizar"}
                 </Button>
                 <Button
                   onClick={() => toast.success("Cotización enviada por correo electrónico")}

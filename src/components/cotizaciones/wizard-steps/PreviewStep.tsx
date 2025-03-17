@@ -1,7 +1,8 @@
+
 import React, { useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Save, Printer, Download } from 'lucide-react';
+import { Save, Printer, Download } from 'lucide-react';
 import { saveCotizacion } from '@/services/cotizacionService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -14,9 +15,7 @@ export const PreviewStep: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const navigate = useNavigate();
   
-  const handleBack = () => {
-    setCurrentStep('productos');
-  };
+  // Removed handleBack since it's now handled by the wizard navigation
   
   const handleSave = async () => {
     setIsSaving(true);
@@ -194,28 +193,7 @@ export const PreviewStep: React.FC = () => {
         </div>
       </div>
       
-      <div className="flex justify-between pt-4 border-t">
-        <Button onClick={handleBack} variant="outline" type="button">
-          <ArrowLeft className="h-4 w-4 mr-2" />
-          Volver
-        </Button>
-        
-        <div className="space-x-2">
-          <Button onClick={handleSave} type="button" disabled={isSaving || hasErrors} className="bg-primary text-primary-foreground">
-            {isSaving ? (
-              <>
-                <span className="animate-spin mr-2">◌</span>
-                Guardando...
-              </>
-            ) : (
-              <>
-                <Save className="h-4 w-4 mr-2" />
-                Guardar Cotización
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
+      {/* Removed footer navigation section with redundant buttons - this will now be handled by CotizacionWizard */}
     </div>
   );
 };

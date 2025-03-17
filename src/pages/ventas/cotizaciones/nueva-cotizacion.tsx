@@ -3,7 +3,7 @@ import React from 'react';
 import { Navbar } from "@/components/layout/Navbar";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { ArrowLeft, FileText, Receipt } from "lucide-react";
+import { ArrowLeft, Receipt } from "lucide-react";
 import { CotizacionProvider } from "@/contexts/CotizacionContext";
 import { CotizacionWizard } from "@/components/cotizaciones/CotizacionWizard";
 import { Header } from "@/components/layout/Header";

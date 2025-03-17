@@ -107,6 +107,13 @@ export const ClienteStep: React.FC = () => {
     }
   };
 
+  const handleKeyPress = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      handleSearch();
+    }
+  };
+
   const selectCliente = (selectedCliente: ClienteType) => {
     // Transformar el cliente de la base de datos al formato requerido por la cotización
     const clienteData = {
@@ -174,6 +181,7 @@ export const ClienteStep: React.FC = () => {
             id="search"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
+            onKeyDown={handleKeyPress}
             placeholder="Buscar por nombre o documento"
             className="flex-1"
           />

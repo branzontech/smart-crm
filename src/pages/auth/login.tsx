@@ -1,11 +1,12 @@
-import { useState, useEffect } from "react";
+
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Eye, EyeOff, LogIn, User, Key } from "lucide-react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
@@ -20,17 +21,7 @@ const Login = () => {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
-  const location = useLocation();
-  const { login, isAuthenticated } = useAuth();
-  
-  const from = location.state?.from || "/dashboard";
-
-  useEffect(() => {
-    if (isAuthenticated) {
-      console.log("Usuario ya autenticado, redirigiendo a:", from);
-      navigate(from);
-    }
-  }, [isAuthenticated, navigate, from]);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,6 +35,7 @@ const Login = () => {
     
     try {
       if (isSignUp) {
+        // Handle sign up
         const { data, error } = await supabase.auth.signUp({
           email,
           password,
@@ -52,7 +44,7 @@ const Login = () => {
               nombre,
               apellido,
               username: email.split('@')[0],
-            }
+            },
           },
         });
 
@@ -61,10 +53,10 @@ const Login = () => {
         toast.success("Cuenta creada exitosamente. Por favor inicia sesión.");
         setIsSignUp(false);
       } else {
+        // Handle login
         await login(email, password, rememberMe);
         toast.success("¡Bienvenido al sistema!");
-        console.log("Redirigiendo a:", from);
-        navigate(from);
+        navigate("/dashboard");
       }
     } catch (error: any) {
       console.error("Error de autenticación:", error);

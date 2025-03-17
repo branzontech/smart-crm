@@ -15,6 +15,9 @@
     left: 0;
     top: 0;
     width: 100%;
+    margin: 0;
+    padding: 0;
+    box-shadow: none !important;
   }
   
   /* Remove backgrounds that don't print well */
@@ -51,8 +54,70 @@
     print-color-adjust: exact;
   }
   
-  /* Add some margins */
+  /* Fix for background color in header */
+  .bg-\[\#2d1e2f\] {
+    background-color: #2d1e2f !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Improve text contrast for printing */
+  .bg-\[\#2d1e2f\] * {
+    color: white !important;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+  
+  /* Ensure tables print well */
+  table {
+    page-break-inside: avoid;
+  }
+  
+  /* Proper page margins */
   @page {
-    margin: 1.5cm;
+    size: auto;
+    margin: 0.75cm;
+  }
+  
+  /* Remove rounded corners in print */
+  .rounded-lg {
+    border-radius: 0 !important;
+  }
+  
+  /* Ensure proper spacing */
+  .p-6 {
+    padding: 1.5rem !important;
+  }
+  
+  /* Ensure header looks good */
+  #cotizacion-preview > div:first-child {
+    padding: 1.5rem !important;
+    margin-bottom: 0 !important;
+  }
+  
+  /* Fix for overflow issues */
+  .overflow-hidden,
+  .overflow-x-auto {
+    overflow: visible !important;
+  }
+  
+  /* Avoid page breaks inside important elements */
+  .space-y-8 > div {
+    page-break-inside: avoid;
+  }
+  
+  /* Optimize font sizes for print */
+  body {
+    font-size: 12pt !important;
+  }
+  
+  h1, h2, h3 {
+    page-break-after: avoid;
+  }
+  
+  /* Force background coloring for print */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
   }
 }

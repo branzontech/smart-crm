@@ -56,6 +56,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       try {
         console.log("Verificando sesión existente...");
         const { data: { session: activeSession } } = await supabase.auth.getSession();
+        
+        console.log("Sesión encontrada:", activeSession ? "Sí" : "No");
         setSession(activeSession);
         
         if (activeSession) {
@@ -106,6 +108,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) {
+        console.error("Error al obtener perfil:", error);
         throw error;
       }
 
@@ -129,6 +132,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
+        options: {
+          // Configuración explícita para persistencia de sesión
+          persistSession: true
+        }
       });
       
       if (error) throw error;
@@ -154,6 +161,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         password,
         options: {
           data: userData,
+          // Configuración explícita para persistencia de sesión
+          persistSession: true
         },
       });
       

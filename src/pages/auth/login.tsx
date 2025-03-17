@@ -22,10 +22,18 @@ const Login = () => {
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
   const location = useLocation();
-  const { login } = useAuth();
+  const { login, isAuthenticated } = useAuth();
   
   // Get the return path from location state or default to dashboard
   const from = location.state?.from || "/dashboard";
+
+  // Redireccionar si ya está autenticado
+  useEffect(() => {
+    if (isAuthenticated) {
+      console.log("Usuario ya autenticado, redirigiendo a:", from);
+      navigate(from);
+    }
+  }, [isAuthenticated, navigate, from]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,6 +57,8 @@ const Login = () => {
               apellido,
               username: email.split('@')[0],
             },
+            // Asegurar persistencia de sesión
+            persistSession: true
           },
         });
 

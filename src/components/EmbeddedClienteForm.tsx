@@ -87,9 +87,9 @@ export function EmbeddedClienteForm({
         tipoServicio: cliente.tipo_servicio_id || "",
         origen: cliente.origen_id || "",
         empresa: cliente.empresa || "",
-        tipoPersona: cliente.tipo_persona || "natural",
-        tipoDocumento: cliente.tipo_documento || "CC",
-        tipo: cliente.tipo || "potencial",
+        tipoPersona: (cliente.tipo_persona || "natural") as "natural" | "juridica",
+        tipoDocumento: (cliente.tipo_documento || "CC") as "CC" | "NIT" | "CE" | "pasaporte",
+        tipo: (cliente.tipo || "potencial") as "potencial" | "activo" | "inactivo" | "recurrente" | "referido" | "suspendido" | "corporativo",
       };
     }
     
@@ -105,9 +105,9 @@ export function EmbeddedClienteForm({
       tipoServicio: "",
       origen: "",
       empresa: "",
-      tipoPersona: "natural",
-      tipoDocumento: "CC",
-      tipo: "potencial",
+      tipoPersona: "natural" as const,
+      tipoDocumento: "CC" as const,
+      tipo: "potencial" as const,
     };
   };
 
@@ -581,4 +581,3 @@ export function EmbeddedClienteForm({
     </>
   );
 }
-

@@ -105,10 +105,10 @@ const OportunidadesIndex = () => {
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Oportunidades</h1>
           </div>
           
-          {/* This is the button that should always be visible */}
+          {/* Updated button with gradient background */}
           <Button
             onClick={() => navigate("/ventas/oportunidades/nueva")}
-            className="bg-teal-500 hover:bg-teal-600 text-white transition-colors duration-200 w-full sm:w-auto"
+            className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white transition-colors duration-200 w-full sm:w-auto border-0"
           >
             <Plus className="mr-2 h-4 w-4" />
             Nueva Oportunidad
@@ -210,9 +210,10 @@ const OportunidadesIndex = () => {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500">No se encontraron oportunidades con ese criterio</p>
+              {/* Also update this button with the same gradient */}
               <Button 
                 onClick={() => navigate("/ventas/oportunidades/nueva")} 
-                className="bg-teal-500 hover:bg-teal-600 text-white mt-4"
+                className="bg-gradient-to-r from-emerald-500 to-teal-500 hover:from-emerald-600 hover:to-teal-600 text-white mt-4 border-0"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Crear Nueva Oportunidad

@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
 import { UserPlus, Users } from "lucide-react";
@@ -20,6 +20,7 @@ import { UserTable } from "@/components/configuracion/UserTable";
 import { UserForm } from "@/components/configuracion/UserForm";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { useEffect } from "react";
 
 const ConfiguracionUsuarios = () => {
   const [activeTab, setActiveTab] = useState("listado");

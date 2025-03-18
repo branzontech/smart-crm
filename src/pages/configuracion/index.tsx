@@ -1,12 +1,50 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Settings } from "lucide-react";
+import { Settings, Save, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
+import { toast } from "sonner";
+import { useTheme } from "@/contexts/ThemeContext";
+import { CompanyConfigForm } from "@/components/configuracion/CompanyConfigForm";
+import { CompanyConfig, fetchCompanyConfig, saveCompanyConfig } from "@/services/configService";
 
 const ConfiguracionIndex = () => {
+  const { currentTheme } = useTheme();
+  const [companyConfig, setCompanyConfig] = useState<CompanyConfig | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+  
+  useEffect(() => {
+    const loadConfig = async () => {
+      setIsLoading(true);
+      try {
+        const config = await fetchCompanyConfig();
+        setCompanyConfig(config);
+      } catch (error) {
+        console.error("Error loading company config:", error);
+        toast.error("Error al cargar la configuración de la empresa");
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    
+    loadConfig();
+  }, []);
+  
+  const handleSaveConfig = async (data: CompanyConfig) => {
+    try {
+      const savedConfig = await saveCompanyConfig(data);
+      if (savedConfig) {
+        setCompanyConfig(savedConfig);
+      }
+    } catch (error) {
+      console.error("Error saving company config:", error);
+      toast.error("Error al guardar la configuración de la empresa");
+    }
+  };
+
   return (
     <div className="min-h-screen flex bg-background">
       <Navbar />
@@ -16,25 +54,47 @@ const ConfiguracionIndex = () => {
           <div className="max-w-4xl mx-auto">
             <div className="flex items-center gap-2 mb-6">
               <Settings className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-semibold text-foreground">Configuración del Sistema</h1>
+              <h1 className="text-2xl font-semibold text-foreground">Configuración</h1>
             </div>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Configuración General</CardTitle>
-                <CardDescription>
-                  Gestiona la configuración general del sistema
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <p className="text-muted-foreground">
-                  Selecciona una opción del menú de navegación para gestionar distintos aspectos de la configuración.
-                </p>
-                <p className="mt-2">
-                  • <strong>Usuarios</strong>: Gestiona los usuarios que tienen acceso al sistema.
-                </p>
-              </CardContent>
-            </Card>
+            <Tabs defaultValue="general" className="space-y-6">
+              <TabsList className="grid w-full grid-cols-2 mb-4">
+                <TabsTrigger value="general">General</TabsTrigger>
+                <TabsTrigger value="temas" className="flex items-center gap-1">
+                  <Palette className="h-4 w-4" />
+                  Personalización
+                </TabsTrigger>
+              </TabsList>
+
+              <TabsContent value="general" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Configuración General</CardTitle>
+                    <CardDescription>Configura los datos principales de tu empresa</CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <CompanyConfigForm 
+                      initialData={companyConfig}
+                      onSubmit={handleSaveConfig}
+                    />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+
+              <TabsContent value="temas" className="space-y-6">
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Personalización del Tema</CardTitle>
+                    <CardDescription>
+                      Personaliza los colores y el aspecto visual de tu CRM
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <ThemeCustomizer />
+                  </CardContent>
+                </Card>
+              </TabsContent>
+            </Tabs>
           </div>
         </main>
       </div>

@@ -55,12 +55,8 @@ import Calendario from "./pages/calendario";
 // Comunicaciones
 import Comunicaciones from "./pages/comunicaciones";
 
-// Personalización (anteriormente Configuración)
-import PersonalizacionIndex from "./pages/personalizacion";
-
-// Configuración (nueva sección)
-import ConfiguracionIndex from "./pages/configuracion";
-import ConfiguracionUsuarios from "./pages/configuracion/usuarios";
+// Configuración
+import Configuracion from "./pages/configuracion";
 
 // Cuentas de Cobro (nuevo módulo)
 import CuentasCobro from "./pages/cuentasCobro";
@@ -253,23 +249,10 @@ export default function App() {
               </ProtectedRoute>
             } />
             
-            {/* Rutas de Personalización (anteriormente Configuración) - Protegidas */}
-            <Route path="/personalizacion" element={
-              <ProtectedRoute>
-                <PersonalizacionIndex />
-              </ProtectedRoute>
-            } />
-            
-            {/* Rutas de Configuración (nueva sección) - Protegidas */}
+            {/* Ruta de Configuración - Protegida */}
             <Route path="/configuracion" element={
               <ProtectedRoute>
-                <ConfiguracionIndex />
-              </ProtectedRoute>
-            } />
-            
-            <Route path="/configuracion/usuarios" element={
-              <ProtectedRoute>
-                <ConfiguracionUsuarios />
+                <Configuracion />
               </ProtectedRoute>
             } />
             

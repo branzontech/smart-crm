@@ -12,13 +12,12 @@ import {
   Store,
   FileText,
   Database,
-  Palette,
 } from "lucide-react";
 import { NavItem } from "./types/navbar.types";
 
 // Lista de enlaces de navegación
 export const navigationLinks: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
   { label: "Clientes", icon: Users, path: "/clientes" },
   { label: "Empresas", icon: Building2, path: "/empresas" },
   { label: "Proveedores", icon: Store, path: "/proveedores" },
@@ -65,15 +64,6 @@ export const navigationLinks: NavItem[] = [
   { label: "Reportes", icon: BarChart3, path: "/reportes" },
   { label: "Calendario", icon: Calendar, path: "/calendario" },
   { label: "Comunicaciones", icon: Mail, path: "/comunicaciones" },
-  { 
-    label: "Personalización", 
-    icon: Palette, 
-    path: "/personalizacion",
-    subItems: [
-      { label: "General", path: "/personalizacion" },
-      { label: "Temas", path: "/personalizacion/temas" },
-    ],
-  },
   { 
     label: "Configuración", 
     icon: Settings, 

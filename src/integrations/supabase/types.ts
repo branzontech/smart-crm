@@ -379,6 +379,42 @@ export type Database = {
         }
         Relationships: []
       }
+      oportunidades: {
+        Row: {
+          cliente: string
+          created_at: string
+          descripcion: string | null
+          etapa: string
+          fecha_cierre: string
+          id: string
+          probabilidad: number
+          updated_at: string
+          valor: number
+        }
+        Insert: {
+          cliente: string
+          created_at?: string
+          descripcion?: string | null
+          etapa: string
+          fecha_cierre: string
+          id?: string
+          probabilidad: number
+          updated_at?: string
+          valor: number
+        }
+        Update: {
+          cliente?: string
+          created_at?: string
+          descripcion?: string | null
+          etapa?: string
+          fecha_cierre?: string
+          id?: string
+          probabilidad?: number
+          updated_at?: string
+          valor?: number
+        }
+        Relationships: []
+      }
       origenes_cliente: {
         Row: {
           created_at: string

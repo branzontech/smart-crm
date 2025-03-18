@@ -1,42 +1,60 @@
 
+import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Plus, Search } from "lucide-react";
+import { ClipboardList, Plus, Search, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { getOportunidades, deleteOportunidad } from "@/services/oportunidadesService";
+import { toast } from "sonner";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+
+interface Oportunidad {
+  id: string;
+  cliente: string;
+  valor: number;
+  etapa: string;
+  probabilidad: number;
+  fecha_cierre: string;
+  descripcion?: string;
+}
 
 const OportunidadesIndex = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
+  const [oportunidades, setOportunidades] = useState<Oportunidad[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const oportunidades = [
-    {
-      id: 1,
-      cliente: "Tech Solutions SA",
-      valor: 25000,
-      etapa: "Calificación",
-      probabilidad: 30,
-      fechaCierre: "2024-04-15",
-    },
-    {
-      id: 2,
-      cliente: "Green Energy Corp",
-      valor: 45000,
-      etapa: "Propuesta",
-      probabilidad: 60,
-      fechaCierre: "2024-03-30",
-    },
-    {
-      id: 3,
-      cliente: "Global Logistics",
-      valor: 15000,
-      etapa: "Negociación",
-      probabilidad: 80,
-      fechaCierre: "2024-04-05",
-    },
-  ];
+  const fetchOportunidades = async () => {
+    setIsLoading(true);
+    try {
+      const data = await getOportunidades();
+      setOportunidades(data);
+    } catch (error) {
+      console.error("Error fetching oportunidades:", error);
+      toast.error("No se pudieron cargar las oportunidades");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchOportunidades();
+  }, []);
+
+  const handleDeleteOportunidad = async (id: string) => {
+    try {
+      const success = await deleteOportunidad(id);
+      if (success) {
+        toast.success("Oportunidad eliminada exitosamente");
+        fetchOportunidades(); // Refresh the list
+      }
+    } catch (error) {
+      console.error("Error deleting oportunidad:", error);
+      toast.error("No se pudo eliminar la oportunidad");
+    }
+  };
 
   const filteredOportunidades = oportunidades.filter(
     (oportunidad) =>
@@ -75,14 +93,18 @@ const OportunidadesIndex = () => {
           </div>
 
           <div className="grid gap-4">
-            {filteredOportunidades.length > 0 ? (
+            {isLoading ? (
+              <div className="text-center py-8">
+                <p className="text-gray-500">Cargando oportunidades...</p>
+              </div>
+            ) : filteredOportunidades.length > 0 ? (
               filteredOportunidades.map((oportunidad) => (
                 <Card key={oportunidad.id} className="p-4 transition-all hover:shadow-md">
                   <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                     <div>
                       <h3 className="font-semibold text-lg">{oportunidad.cliente}</h3>
                       <p className="text-sm text-gray-500">
-                        Cierre estimado: {new Date(oportunidad.fechaCierre).toLocaleDateString()}
+                        Cierre estimado: {new Date(oportunidad.fecha_cierre).toLocaleDateString()}
                       </p>
                     </div>
                     <div className="sm:text-right">
@@ -103,7 +125,7 @@ const OportunidadesIndex = () => {
                       </div>
                     </div>
                   </div>
-                  <div className="mt-4 flex justify-end">
+                  <div className="mt-4 flex justify-end gap-2">
                     <Button
                       variant="ghost"
                       className="text-teal hover:text-sage hover:bg-mint/20"
@@ -111,6 +133,31 @@ const OportunidadesIndex = () => {
                     >
                       Ver detalles
                     </Button>
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-100">
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Eliminar oportunidad?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Eliminará permanentemente esta oportunidad
+                            de ventas.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction 
+                            onClick={() => handleDeleteOportunidad(oportunidad.id)}
+                            className="bg-red-500 hover:bg-red-600 text-white"
+                          >
+                            Eliminar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   </div>
                 </Card>
               ))

@@ -25,13 +25,15 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { createOportunidad } from "@/services/oportunidadesService";
+import { useState } from "react";
 
 const oportunidadSchema = z.object({
   cliente: z.string().min(2, "El cliente es requerido"),
   valor: z.string().min(1, "El valor es requerido"),
   etapa: z.string().min(1, "La etapa es requerida"),
   probabilidad: z.string().min(1, "La probabilidad es requerida"),
-  fechaCierre: z.string().min(1, "La fecha de cierre es requerida"),
+  fecha_cierre: z.string().min(1, "La fecha de cierre es requerida"),
   descripcion: z.string().optional(),
 });
 
@@ -39,17 +41,44 @@ type OportunidadForm = z.infer<typeof oportunidadSchema>;
 
 export default function NuevaOportunidad() {
   const navigate = useNavigate();
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
   const form = useForm<OportunidadForm>({
     resolver: zodResolver(oportunidadSchema),
+    defaultValues: {
+      cliente: "",
+      valor: "",
+      etapa: "",
+      probabilidad: "",
+      fecha_cierre: "",
+      descripcion: "",
+    }
   });
 
   const onSubmit = async (data: OportunidadForm) => {
+    setIsSubmitting(true);
     try {
-      console.log(data);
-      toast.success("Oportunidad creada exitosamente");
-      navigate("/ventas/oportunidades");
+      // Convert form data to proper types
+      const oportunidadData = {
+        cliente: data.cliente,
+        valor: parseFloat(data.valor),
+        etapa: data.etapa,
+        probabilidad: parseInt(data.probabilidad),
+        fecha_cierre: data.fecha_cierre,
+        descripcion: data.descripcion || undefined,
+      };
+      
+      const id = await createOportunidad(oportunidadData);
+      
+      if (id) {
+        toast.success("Oportunidad creada exitosamente");
+        navigate("/ventas/oportunidades");
+      }
     } catch (error) {
+      console.error("Error creating opportunity:", error);
       toast.error("Error al crear la oportunidad");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -159,7 +188,7 @@ export default function NuevaOportunidad() {
                     />
                     <FormField
                       control={form.control}
-                      name="fechaCierre"
+                      name="fecha_cierre"
                       render={({ field }) => (
                         <FormItem>
                           <FormLabel>Fecha Estimada de Cierre</FormLabel>
@@ -192,8 +221,9 @@ export default function NuevaOportunidad() {
                     <Button 
                       type="submit" 
                       className="bg-teal hover:bg-sage text-white w-full sm:w-auto"
+                      disabled={isSubmitting}
                     >
-                      Crear Oportunidad
+                      {isSubmitting ? "Guardando..." : "Crear Oportunidad"}
                     </Button>
                   </div>
                 </form>

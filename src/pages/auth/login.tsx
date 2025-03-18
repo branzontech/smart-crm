@@ -61,17 +61,17 @@ const Login = () => {
 
         toast.success("Cuenta creada exitosamente. Por favor inicia sesión.");
         setIsSignUp(false);
+        setFormSubmitting(false);
       } else {
         // Handle login
         await login(email, password, rememberMe);
-        console.log("Login successful, redirecting to dashboard");
         toast.success("¡Bienvenido al sistema!");
-        navigate("/dashboard");
+        console.log("Login successful, redirecting to dashboard");
+        // Let the auth context handle the redirect
       }
     } catch (error: any) {
       console.error("Error de autenticación:", error);
       toast.error(error.message || "Error al procesar la solicitud");
-    } finally {
       setFormSubmitting(false);
     }
   };

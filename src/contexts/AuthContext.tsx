@@ -86,6 +86,9 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
           console.log("User signed out, clearing user data");
           setUser(null);
           setIsLoading(false);
+        } else {
+          // Make sure we set loading to false for other auth events too
+          setIsLoading(false);
         }
       }
     );
@@ -126,10 +129,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   // Login function
   const login = async (email: string, password: string, remember: boolean): Promise<void> => {
-    setIsLoading(true);
-    
     try {
       console.log("Attempting login for:", email);
+      setIsLoading(true);
+      
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -137,25 +140,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) {
         console.error("Login error:", error);
+        setIsLoading(false); // Make sure to set loading to false on error
         throw error;
       }
       
       console.log("Login successful:", data);
-      // Session and user will be updated via the auth state change listener
+      // Don't set isLoading to false here, as the auth state change listener will handle it
     } catch (error) {
       console.error("Error de inicio de sesión:", error);
+      setIsLoading(false); // Make sure to set loading to false on error
       throw error;
-    } finally {
-      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 
   // Sign up function
   const signup = async (email: string, password: string, userData: any): Promise<void> => {
-    setIsLoading(true);
-    
     try {
       console.log("Attempting signup for:", email);
+      setIsLoading(true);
+      
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -166,39 +169,39 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       if (error) {
         console.error("Signup error:", error);
+        setIsLoading(false); // Make sure to set loading to false on error
         throw error;
       }
       
       console.log("Signup successful:", data);
-      // Session and user will be updated via the auth state change listener
+      // Don't set isLoading to false here, as the auth state change listener will handle it
     } catch (error) {
       console.error("Error de registro:", error);
+      setIsLoading(false); // Make sure to set loading to false on error
       throw error;
-    } finally {
-      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 
   // Logout function
   const logout = async () => {
-    setIsLoading(true);
-    
     try {
       console.log("Logging out...");
+      setIsLoading(true);
+      
       const { error } = await supabase.auth.signOut();
       
       if (error) {
         console.error("Logout error:", error);
+        setIsLoading(false); // Make sure to set loading to false on error
         throw error;
       }
       
       console.log("Logout successful");
-      // Session and user will be updated via the auth state change listener
+      // Don't set isLoading to false here, as the auth state change listener will handle it
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      setIsLoading(false); // Make sure to set loading to false on error
       toast.error("Error al cerrar sesión");
-    } finally {
-      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 

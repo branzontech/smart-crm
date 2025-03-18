@@ -42,7 +42,8 @@ const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   // If not authenticated and not in development mode, redirect to login
   if (!isAuthenticated) {
     console.log('User not authenticated, redirecting to login');
-    toast.error('Sesión no válida. Por favor inicia sesión.');
+    // Remove this toast to prevent multiple toasts during navigation
+    // toast.error('Sesión no válida. Por favor inicia sesión.');
     return <Navigate to="/auth/login" replace />;
   }
 

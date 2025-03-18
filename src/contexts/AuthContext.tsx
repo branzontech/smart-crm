@@ -3,6 +3,7 @@ import React, { createContext, useState, useContext, ReactNode, useEffect } from
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
 import { toast } from "sonner";
+import { UserRole } from "@/services/userService";
 
 // Define user types
 type User = {
@@ -12,6 +13,7 @@ type User = {
   apellido: string;
   email: string;
   rol: string;
+  rol_usuario: UserRole;
 };
 
 // Auth context state

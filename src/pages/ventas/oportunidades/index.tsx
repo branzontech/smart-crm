@@ -104,6 +104,8 @@ const OportunidadesIndex = () => {
             <ClipboardList className="h-6 w-6 text-teal-500" />
             <h1 className="text-xl sm:text-2xl font-semibold text-gray-900">Oportunidades</h1>
           </div>
+          
+          {/* This is the button that should always be visible */}
           <Button
             onClick={() => navigate("/ventas/oportunidades/nueva")}
             className="bg-teal-500 hover:bg-teal-600 text-white transition-colors duration-200 w-full sm:w-auto"

@@ -20,23 +20,25 @@ export interface CompanyConfig {
 // Fetch company configuration
 export const fetchCompanyConfig = async (): Promise<CompanyConfig | null> => {
   try {
+    // Query without single() to handle empty result properly
     const { data, error } = await supabase
       .from("config_empresas")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(1)
-      .single();
+      .limit(1);
     
     if (error) {
-      // If no configuration exists yet, don't throw an error
-      if (error.code === 'PGRST116') {
-        return null;
-      }
       throw error;
     }
     
-    console.log("Fetched company config with email:", data?.email || 'No email configured');
-    return data as CompanyConfig;
+    // Check if we got any results
+    if (!data || data.length === 0) {
+      console.log("No company configuration found");
+      return null;
+    }
+    
+    console.log("Fetched company config with email:", data[0]?.email || 'No email configured');
+    return data[0] as CompanyConfig;
   } catch (error) {
     handleSupabaseError(error, "Error al obtener la configuración de la empresa");
     return null;

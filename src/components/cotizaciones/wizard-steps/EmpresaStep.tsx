@@ -18,16 +18,19 @@ export const EmpresaStep: React.FC = () => {
   const { empresaEmisor, fechaEmision, fechaVencimiento } = cotizacion;
   const [isLoading, setIsLoading] = useState(true);
   const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     // Solo cargar los datos si no se han cargado previamente
     if (!hasLoadedData) {
       const loadCompanyData = async () => {
         setIsLoading(true);
+        setLoadError(null);
         try {
           const config = await fetchCompanyConfig();
+          console.log("Company config fetched:", config);
+          
           if (config) {
-            console.log("Loading company config with email:", config.email || "No email configured");
             updateEmpresaEmisor({
               nombre: config.razon_social,
               nit: config.nit,
@@ -36,9 +39,12 @@ export const EmpresaStep: React.FC = () => {
               logo: config.logo_path,
               email: config.email || ''
             });
+          } else {
+            setLoadError('No se encontró configuración de empresa. Por favor, configure los datos de su empresa en la sección de Configuración.');
           }
         } catch (error) {
           console.error('Error loading company config:', error);
+          setLoadError('Error al cargar la configuración de la empresa. Intente nuevamente.');
         } finally {
           setIsLoading(false);
           setHasLoadedData(true);
@@ -64,6 +70,14 @@ export const EmpresaStep: React.FC = () => {
         Esta información aparecerá en el encabezado de la cotización.
       </p>
 
+      {loadError && (
+        <Alert className="bg-red-50 border-red-200">
+          <AlertDescription className="text-red-700">
+            {loadError}
+          </AlertDescription>
+        </Alert>
+      )}
+
       {!empresaEmisor.email && (
         <Alert className="bg-amber-50 border-amber-200">
           <AlertDescription className="text-amber-700">
@@ -80,7 +94,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="nombre"
               name="nombre"
-              value={empresaEmisor.nombre}
+              value={empresaEmisor.nombre || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -92,7 +106,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="nit"
               name="nit"
-              value={empresaEmisor.nit}
+              value={empresaEmisor.nit || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -104,7 +118,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="telefono"
               name="telefono"
-              value={empresaEmisor.telefono}
+              value={empresaEmisor.telefono || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -116,7 +130,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="direccion"
               name="direccion"
-              value={empresaEmisor.direccion}
+              value={empresaEmisor.direccion || ''}
               readOnly
               disabled
               className="bg-gray-100"

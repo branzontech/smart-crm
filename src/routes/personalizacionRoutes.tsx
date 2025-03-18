@@ -2,6 +2,7 @@
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import PersonalizacionIndex from "@/pages/personalizacion";
+import PersonalizacionTemas from "@/pages/personalizacion/temas";
 
 const PersonalizacionRoutes = () => {
   return (
@@ -11,7 +12,11 @@ const PersonalizacionRoutes = () => {
           <PersonalizacionIndex />
         </ProtectedRoute>
       } />
-      {/* Add temas route here if needed */}
+      <Route path="/temas" element={
+        <ProtectedRoute>
+          <PersonalizacionTemas />
+        </ProtectedRoute>
+      } />
     </Routes>
   );
 };

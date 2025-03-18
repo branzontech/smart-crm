@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import {
   Sheet,
@@ -39,7 +40,7 @@ interface NavLink {
 // Define el tipo para las secciones de enlaces de navegación
 interface NavLinkSection {
   title: string;
-  icon: LucideIcon;
+  icon: React.ReactNode;
   links: NavLink[];
 }
 
@@ -75,7 +76,7 @@ export function Navbar() {
         {
           href: "/",
           label: "Dashboard",
-          icon: <Home className="w-4 h-4" />,
+          icon: Home,
           activeWhen: "/",
         },
       ],
@@ -87,19 +88,19 @@ export function Navbar() {
         {
           href: "/ventas/cotizaciones",
           label: "Cotizaciones",
-          icon: <Coins className="w-4 h-4" />,
+          icon: Coins,
           activeWhen: "/ventas/cotizaciones",
         },
         {
           href: "/ventas/clientes",
           label: "Clientes",
-          icon: <Contact2 className="w-4 h-4" />,
+          icon: Contact2,
           activeWhen: "/ventas/clientes",
         },
         {
           href: "/ventas/oportunidades",
           label: "Oportunidades",
-          icon: <Building2 className="w-4 h-4" />,
+          icon: Building2,
           activeWhen: "/ventas/oportunidades",
         },
       ],
@@ -111,7 +112,7 @@ export function Navbar() {
         {
           href: "/recaudos",
           label: "Recaudos",
-          icon: <Coins className="w-4 h-4" />,
+          icon: Coins,
           activeWhen: "/recaudos",
         },
       ],
@@ -123,7 +124,7 @@ export function Navbar() {
         {
           href: "/agenda",
           label: "Calendario",
-          icon: <Calendar className="w-4 h-4" />,
+          icon: Calendar,
           activeWhen: "/agenda",
         },
       ],
@@ -135,13 +136,13 @@ export function Navbar() {
         {
           href: "/configuracion",
           label: "General",
-          icon: <Sliders className="w-4 h-4" />,
+          icon: Sliders,
           activeWhen: "/configuracion/index",
         },
         {
           href: "/configuracion/usuarios",
           label: "Usuarios",
-          icon: <Users className="w-4 h-4" />,
+          icon: Users,
           activeWhen: "/configuracion/usuarios",
           requiredRoles: ["Administrador"], // Solo visible para administradores
         },
@@ -192,7 +193,7 @@ export function Navbar() {
                         }`}
                       onClick={() => setIsMenuOpen(false)}
                     >
-                      {link.icon}
+                      {React.createElement(link.icon, { className: "w-4 h-4" })}
                       <span>{link.label}</span>
                     </Link>
                   ) : null
@@ -246,7 +247,7 @@ export function Navbar() {
                       : "text-muted-foreground"
                       }`}
                   >
-                    {link.icon}
+                    {React.createElement(link.icon, { className: "w-4 h-4" })}
                     <span>{link.label}</span>
                   </Link>
                 ) : null

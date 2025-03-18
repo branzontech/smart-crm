@@ -7,8 +7,16 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
+// Check if we're in development mode
+const isDevelopment = import.meta.env.DEV;
+
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();
+
+  // In development mode, skip authentication check
+  if (isDevelopment) {
+    return <>{children}</>;
+  }
 
   // Show loading state
   if (isLoading) {

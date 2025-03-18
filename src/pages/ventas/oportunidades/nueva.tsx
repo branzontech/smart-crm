@@ -63,9 +63,9 @@ export default function NuevaOportunidad() {
   ];
 
   return (
-    <div className="min-h-screen flex bg-gray-50">
+    <div className="min-h-screen flex flex-col lg:flex-row bg-gray-50">
       <Navbar />
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-4 sm:p-6 lg:p-8 w-full overflow-auto pt-[calc(var(--header-height)+1rem)]">
         <div className="max-w-4xl mx-auto">
           <div className="mb-6">
             <Button
@@ -81,7 +81,7 @@ export default function NuevaOportunidad() {
             <CardHeader className="space-y-1">
               <div className="flex items-center gap-2">
                 <ClipboardList className="h-6 w-6 text-teal" />
-                <CardTitle className="text-2xl font-semibold">Nueva Oportunidad</CardTitle>
+                <CardTitle className="text-xl sm:text-2xl font-semibold">Nueva Oportunidad</CardTitle>
               </div>
             </CardHeader>
             <CardContent>
@@ -188,8 +188,11 @@ export default function NuevaOportunidad() {
                       </FormItem>
                     )}
                   />
-                  <div className="flex justify-end">
-                    <Button type="submit" className="bg-teal hover:bg-sage text-white">
+                  <div className="flex justify-end mt-6">
+                    <Button 
+                      type="submit" 
+                      className="bg-teal hover:bg-sage text-white w-full sm:w-auto"
+                    >
                       Crear Oportunidad
                     </Button>
                   </div>

@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -64,7 +65,7 @@ export const EmpresaStep: React.FC = () => {
       </p>
 
       {!empresaEmisor.email && (
-        <Alert variant="warning" className="bg-amber-50 border-amber-200">
+        <Alert className="bg-amber-50 border-amber-200">
           <AlertDescription className="text-amber-700">
             No hay correo electrónico configurado para la empresa. Esto es necesario para enviar cotizaciones por email.
             Configure un correo electrónico en la sección de Configuración.

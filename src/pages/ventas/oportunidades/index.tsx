@@ -3,18 +3,21 @@ import { useEffect, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Navbar } from "@/components/layout/Navbar";
 import { useNavigate } from "react-router-dom";
-import { ClipboardList, Plus, Search, Trash2 } from "lucide-react";
+import { ClipboardList, Plus, Search, Trash2, Edit, Eye } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { getOportunidades, deleteOportunidad, Oportunidad } from "@/services/oportunidadesService";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
+import { OportunidadDrawer } from "@/components/oportunidades/OportunidadDrawer";
 
 const OportunidadesIndex = () => {
   const navigate = useNavigate();
   const [searchTerm, setSearchTerm] = useState("");
   const [oportunidades, setOportunidades] = useState<Oportunidad[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedOportunidadId, setSelectedOportunidadId] = useState<string | null>(null);
+  const [isDrawerOpen, setIsDrawerOpen] = useState(false);
 
   const fetchOportunidades = async () => {
     setIsLoading(true);
@@ -44,6 +47,15 @@ const OportunidadesIndex = () => {
       console.error("Error deleting oportunidad:", error);
       toast.error("No se pudo eliminar la oportunidad");
     }
+  };
+
+  const handleOpenDrawer = (id: string) => {
+    setSelectedOportunidadId(id);
+    setIsDrawerOpen(true);
+  };
+
+  const handleCloseDrawer = () => {
+    setIsDrawerOpen(false);
   };
 
   const filteredOportunidades = oportunidades.filter(
@@ -117,15 +129,26 @@ const OportunidadesIndex = () => {
                   </div>
                   <div className="mt-4 flex justify-end gap-2">
                     <Button
-                      variant="ghost"
+                      variant="outline"
+                      size="sm"
                       className="text-teal hover:text-sage hover:bg-mint/20"
+                      onClick={() => handleOpenDrawer(oportunidad.id)}
+                    >
+                      <Edit className="h-4 w-4 mr-1" />
+                      Editar
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="text-gray-500 hover:text-gray-700 hover:bg-gray-100"
                       onClick={() => navigate(`/ventas/oportunidades/${oportunidad.id}`)}
                     >
-                      Ver detalles
+                      <Eye className="h-4 w-4 mr-1" />
+                      Ver
                     </Button>
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
-                        <Button variant="ghost" className="text-red-500 hover:text-red-700 hover:bg-red-100">
+                        <Button variant="ghost" size="sm" className="text-red-500 hover:text-red-700 hover:bg-red-100">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </AlertDialogTrigger>
@@ -159,6 +182,14 @@ const OportunidadesIndex = () => {
           </div>
         </div>
       </main>
+
+      {/* Drawer for editing opportunity */}
+      <OportunidadDrawer 
+        isOpen={isDrawerOpen}
+        onClose={handleCloseDrawer}
+        oportunidadId={selectedOportunidadId}
+        onUpdate={fetchOportunidades}
+      />
     </div>
   );
 };

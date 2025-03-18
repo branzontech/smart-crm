@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -22,13 +23,16 @@ import {
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { saveCotizacion } from '@/services/cotizacionService';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { emailService } from '@/services/emailService';
 
 export const CotizacionWizard: React.FC = () => {
   const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const navigate = useNavigate();
+  const cotizacionRef = useRef<HTMLDivElement>(null);
 
   const handlePrevious = () => {
     if (currentStep === 'cliente') setCurrentStep('empresa');
@@ -103,6 +107,36 @@ export const CotizacionWizard: React.FC = () => {
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!cotizacion.cliente.email) {
+      toast.error("No se puede enviar el correo: el cliente no tiene dirección de correo electrónico");
+      return;
+    }
+
+    try {
+      setIsSendingEmail(true);
+      toast("Preparando el envío de la cotización...");
+
+      const htmlContent = cotizacionRef.current?.outerHTML || "";
+      if (!htmlContent) {
+        throw new Error("No se pudo obtener el contenido de la cotización");
+      }
+
+      const result = await emailService.sendQuotationEmail(cotizacion, htmlContent);
+
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast.error(`Error al enviar el correo: ${error.message || "Error desconocido"}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'empresa':
@@ -112,7 +146,7 @@ export const CotizacionWizard: React.FC = () => {
       case 'productos':
         return <ProductosStep />;
       case 'preview':
-        return <PreviewStep />;
+        return <PreviewStep cotizacionRef={cotizacionRef} />;
       default:
         return <EmpresaStep />;
     }
@@ -250,10 +284,16 @@ export const CotizacionWizard: React.FC = () => {
                   {isSaving ? "Guardando..." : "Guardar y finalizar"}
                 </Button>
                 <Button
-                  onClick={() => toast.success("Cotización enviada por correo electrónico")}
+                  onClick={handleSendEmail}
+                  disabled={isSendingEmail || !cotizacion.cliente.email || !cotizacion.empresaEmisor.email}
                   className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
                 >
-                  <Send className="h-4 w-4" /> Enviar
+                  {isSendingEmail ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {isSendingEmail ? "Enviando..." : "Enviar por correo"}
                 </Button>
               </>
             ) : (

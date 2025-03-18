@@ -1,7 +1,7 @@
 import React, { useState, useRef } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Button } from '@/components/ui/button';
-import { Save, Printer, Download, Send, AlertCircle } from 'lucide-react';
+import { Save, Printer, Download, Send, AlertCircle, Loader2 } from 'lucide-react';
 import { saveCotizacion } from '@/services/cotizacionService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
@@ -16,12 +16,17 @@ import { CotizacionFooter } from '../CotizacionFooter';
 import { emailService } from '@/services/emailService';
 import { Progress } from '@/components/ui/progress';
 
-export const PreviewStep: React.FC = () => {
-  const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
+interface PreviewStepProps {
+  cotizacionRef?: React.RefObject<HTMLDivElement>;
+}
+
+export const PreviewStep: React.FC<PreviewStepProps> = ({ cotizacionRef }) => {
+  const { cotizacion, setCurrentStep } = useCotizacion();
   const [isSaving, setIsSaving] = useState(false);
   const [isSendingEmail, setIsSendingEmail] = useState(false);
   const navigate = useNavigate();
-  const cotizacionRef = useRef<HTMLDivElement>(null);
+  const localCotizacionRef = useRef<HTMLDivElement>(null);
+  const effectiveRef = cotizacionRef || localCotizacionRef;
   
   const handleSave = async () => {
     setIsSaving(true);
@@ -91,7 +96,7 @@ export const PreviewStep: React.FC = () => {
       setIsSendingEmail(true);
       toast("Preparando el envío de la cotización...");
 
-      const htmlContent = cotizacionRef.current?.outerHTML || "";
+      const htmlContent = effectiveRef.current?.outerHTML || "";
       if (!htmlContent) {
         throw new Error("No se pudo obtener el contenido de la cotización");
       }
@@ -163,7 +168,7 @@ export const PreviewStep: React.FC = () => {
         </Alert>
       )}
       
-      <div id="cotizacion-preview" className="border rounded-md bg-white print:border-none print:shadow-none" ref={cotizacionRef}>
+      <div id="cotizacion-preview" className="border rounded-md bg-white print:border-none print:shadow-none" ref={effectiveRef}>
         <CotizacionColoredHeader 
           empresaEmisor={cotizacion.empresaEmisor}
           numero={cotizacion.numero}

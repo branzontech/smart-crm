@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -17,6 +18,8 @@ import { CotizacionEmpty } from "@/components/cotizaciones/CotizacionEmpty";
 import { formatCurrency, formatDate, getEstadoClass } from "@/components/cotizaciones/cotizacionUtils";
 import { emailService } from "@/services/emailService";
 import { Progress } from "@/components/ui/progress";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle } from "lucide-react";
 
 const CotizacionDetalle = () => {
   const { id } = useParams<{ id: string }>();
@@ -87,12 +90,6 @@ const CotizacionDetalle = () => {
       return;
     }
 
-    // Validate sender email
-    if (!cotizacion.empresaEmisor.email) {
-      toast.error("No se puede enviar el correo: la empresa emisora no tiene dirección de correo electrónico");
-      return;
-    }
-
     try {
       setIsSendingEmail(true);
       toast("Preparando el envío de la cotización...");
@@ -130,6 +127,17 @@ const CotizacionDetalle = () => {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto cotizacion-container">
+        {/* Missing email warning */}
+        {!cotizacion.empresaEmisor.email && (
+          <Alert variant="destructive" className="mb-4">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>
+              La empresa emisora no tiene configurada una dirección de correo electrónico. 
+              Configure un correo electrónico en la sección de Configuración para poder enviar cotizaciones por correo.
+            </AlertDescription>
+          </Alert>
+        )}
+        
         {/* Email sending progress indicator */}
         {isSendingEmail && (
           <div className="mb-4 bg-white p-4 rounded-lg shadow-sm border">

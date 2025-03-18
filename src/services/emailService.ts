@@ -24,7 +24,7 @@ export const emailService = {
         senderEmail: quotation.empresaEmisor?.email
       });
 
-      // Validate required fields with detailed logging
+      // Validate quotation ID and client email
       if (!quotation.id || !quotation.cliente?.email) {
         const missingFields = [];
         if (!quotation.id) missingFields.push("ID de cotización");
@@ -35,10 +35,39 @@ export const emailService = {
         throw new Error(errorMsg);
       }
 
-      if (!quotation.empresaEmisor?.email) {
-        console.error("Missing sender email in empresaEmisor:", quotation.empresaEmisor);
+      // Check if we have a sender email, if not, try to get it from the database
+      let senderEmail = quotation.empresaEmisor?.email;
+      let senderName = quotation.empresaEmisor?.nombre;
+
+      console.log("Initial sender email check:", { senderEmail });
+
+      // If the sender email is missing, try to fetch it from the latest company config
+      if (!senderEmail) {
+        console.log("Sender email missing, fetching from config_empresas table");
+        const { data: configData, error: configError } = await supabase
+          .from("config_empresas")
+          .select("razon_social, email")
+          .order("created_at", { ascending: false })
+          .limit(1)
+          .single();
+          
+        if (configError) {
+          console.error("Error fetching company config:", configError);
+        } else if (configData && configData.email) {
+          senderEmail = configData.email;
+          // Only update the sender name if it was not already set
+          if (!senderName) {
+            senderName = configData.razon_social;
+          }
+          console.log("Retrieved sender email from config:", senderEmail);
+        }
+      }
+
+      // Final check if sender email exists
+      if (!senderEmail) {
+        console.error("Missing sender email, checked both quotation and database");
         throw new Error(
-          "No se puede enviar el correo: falta el correo del emisor"
+          "No se puede enviar el correo: falta el correo del emisor. Por favor configure un correo electrónico en la sección de Configuración."
         );
       }
 
@@ -55,8 +84,8 @@ export const emailService = {
         quotationNumber: quotation.numero,
         clientEmail: quotation.cliente.email,
         clientName: quotation.cliente.nombre,
-        senderEmail: quotation.empresaEmisor.email,
-        senderName: quotation.empresaEmisor.nombre,
+        senderEmail: senderEmail,
+        senderName: senderName || quotation.empresaEmisor.nombre,
         quotationHtml: cleanHtml,
       };
 

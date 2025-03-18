@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -16,6 +15,7 @@ import Login from "./pages/auth/login";
 import Clientes from "./pages/clientes";
 import DetalleCliente from "./pages/clientes/[id]";
 import NuevoCliente from "./pages/clientes/nuevo";
+import EditarCliente from "./pages/clientes/[id]/editar"; // New import
 
 // Empresas
 import Empresas from "./pages/empresas";
@@ -104,6 +104,12 @@ export default function App() {
             <Route path="/clientes/:id" element={
               <ProtectedRoute>
                 <DetalleCliente />
+              </ProtectedRoute>
+            } />
+            {/* Nueva ruta para editar cliente */}
+            <Route path="/clientes/:id/editar" element={
+              <ProtectedRoute>
+                <EditarCliente />
               </ProtectedRoute>
             } />
             

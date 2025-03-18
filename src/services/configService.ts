@@ -35,6 +35,7 @@ export const fetchCompanyConfig = async (): Promise<CompanyConfig | null> => {
       throw error;
     }
     
+    console.log("Fetched company config with email:", data?.email || 'No email configured');
     return data as CompanyConfig;
   } catch (error) {
     handleSupabaseError(error, "Error al obtener la configuración de la empresa");
@@ -45,6 +46,8 @@ export const fetchCompanyConfig = async (): Promise<CompanyConfig | null> => {
 // Save or update company configuration
 export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyConfig | null> => {
   try {
+    console.log("Saving company config with email:", config.email || 'No email provided');
+    
     let result;
     
     if (config.id) {
@@ -88,6 +91,7 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
       result = data;
     }
     
+    console.log("Company config saved successfully with email:", result?.email || 'No email saved');
     toast.success("Configuración guardada correctamente");
     return result as CompanyConfig;
   } catch (error) {

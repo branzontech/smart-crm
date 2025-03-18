@@ -53,13 +53,21 @@ export const emailService = {
           
         if (configError) {
           console.error("Error fetching company config:", configError);
-        } else if (configData && configData.email) {
-          senderEmail = configData.email;
-          // Only update the sender name if it was not already set
-          if (!senderName) {
-            senderName = configData.razon_social;
+          // Don't throw an error here, continue checking if email exists
+        } else if (configData) {
+          console.log("Retrieved config data:", configData);
+          if (configData.email) {
+            senderEmail = configData.email;
+            // Only update the sender name if it was not already set
+            if (!senderName) {
+              senderName = configData.razon_social;
+            }
+            console.log("Retrieved sender email from config:", senderEmail);
+          } else {
+            console.error("Email field exists in config but is empty or null");
           }
-          console.log("Retrieved sender email from config:", senderEmail);
+        } else {
+          console.error("No company config found in the database");
         }
       }
 

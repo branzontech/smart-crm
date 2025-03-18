@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -7,9 +6,11 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Info } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { fetchCompanyConfig } from '@/services/configService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const EmpresaStep: React.FC = () => {
   const { cotizacion, updateEmpresaEmisor, updateFechaVencimiento } = useCotizacion();
@@ -25,7 +26,7 @@ export const EmpresaStep: React.FC = () => {
         try {
           const config = await fetchCompanyConfig();
           if (config) {
-            console.log("Loading company config with email:", config.email);
+            console.log("Loading company config with email:", config.email || "No email configured");
             updateEmpresaEmisor({
               nombre: config.razon_social,
               nit: config.nit,
@@ -61,6 +62,15 @@ export const EmpresaStep: React.FC = () => {
       <p className="text-gray-500">
         Esta información aparecerá en el encabezado de la cotización.
       </p>
+
+      {!empresaEmisor.email && (
+        <Alert variant="warning" className="bg-amber-50 border-amber-200">
+          <AlertDescription className="text-amber-700">
+            No hay correo electrónico configurado para la empresa. Esto es necesario para enviar cotizaciones por email.
+            Configure un correo electrónico en la sección de Configuración.
+          </AlertDescription>
+        </Alert>
+      )}
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
@@ -113,15 +123,30 @@ export const EmpresaStep: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Correo Electrónico</Label>
+            <Label htmlFor="email" className="flex items-center gap-1">
+              Correo Electrónico
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-primary cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Necesario para enviar cotizaciones por email</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Label>
             <Input
               id="email"
               name="email"
-              value={empresaEmisor.email}
+              value={empresaEmisor.email || ''}
               readOnly
               disabled
-              className="bg-gray-100"
+              className={`bg-gray-100 ${!empresaEmisor.email ? 'border-amber-300' : ''}`}
             />
+            {!empresaEmisor.email && (
+              <p className="text-sm text-amber-600">No configurado</p>
+            )}
           </div>
 
           <div className="space-y-2">

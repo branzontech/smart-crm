@@ -2,7 +2,6 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { DevModeProvider } from "@/contexts/DevModeContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import "./App.css";
 import "./styles/print.css"; // Import print styles
@@ -74,231 +73,229 @@ export default function App() {
   return (
     <ThemeProvider>
       <AuthProvider>
-        <DevModeProvider>
-          <Router>
-            <Routes>
-              {/* Redireccionar la ruta raíz a la página de login */}
-              <Route path="/" element={<Navigate to="/auth/login" replace />} />
-              
-              {/* Rutas de Autenticación */}
-              <Route path="/auth/login" element={<Login />} />
-              
-              {/* Ruta del Dashboard - Protegida */}
-              <Route path="/dashboard" element={
-                <ProtectedRoute>
-                  <Index />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Clientes - Protegidas */}
-              <Route path="/clientes" element={
-                <ProtectedRoute>
-                  <Clientes />
-                </ProtectedRoute>
-              } />
-              <Route path="/clientes/nuevo" element={
-                <ProtectedRoute>
-                  <NuevoCliente />
-                </ProtectedRoute>
-              } />
-              <Route path="/clientes/:id" element={
-                <ProtectedRoute>
-                  <DetalleCliente />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Empresas - Protegidas */}
-              <Route path="/empresas" element={
-                <ProtectedRoute>
-                  <Empresas />
-                </ProtectedRoute>
-              } />
-              <Route path="/empresas/nuevo" element={
-                <ProtectedRoute>
-                  <NuevaEmpresa />
-                </ProtectedRoute>
-              } />
-              <Route path="/empresas/:id" element={
-                <ProtectedRoute>
-                  <DetalleEmpresa />
-                </ProtectedRoute>
-              } />
-              <Route path="/empresas/:id/editar" element={
-                <ProtectedRoute>
-                  <EditarEmpresa />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Proveedores - Protegidas */}
-              <Route path="/proveedores" element={
-                <ProtectedRoute>
-                  <Proveedores />
-                </ProtectedRoute>
-              } />
-              <Route path="/proveedores/nuevo" element={
-                <ProtectedRoute>
-                  <NuevoProveedor />
-                </ProtectedRoute>
-              } />
-              <Route path="/proveedores/:id" element={
-                <ProtectedRoute>
-                  <DetalleProveedor />
-                </ProtectedRoute>
-              } />
-              <Route path="/proveedores/:id/editar" element={
-                <ProtectedRoute>
-                  <EditarProveedor />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Recaudos - Protegidas */}
-              <Route path="/recaudos" element={
-                <ProtectedRoute>
-                  <Recaudos />
-                </ProtectedRoute>
-              } />
-              <Route path="/recaudos/nuevo" element={
-                <ProtectedRoute>
-                  <NuevoRecaudo />
-                </ProtectedRoute>
-              } />
-              <Route path="/recaudos/seguimiento" element={
-                <ProtectedRoute>
-                  <SeguimientoRecaudos />
-                </ProtectedRoute>
-              } />
-              <Route path="/recaudos/*" element={<Navigate to="/recaudos" replace />} />
-              
-              {/* Rutas de Ventas - Protegidas */}
-              <Route path="/ventas" element={
-                <ProtectedRoute>
-                  <Ventas />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/oportunidades" element={
-                <ProtectedRoute>
-                  <Oportunidades />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/oportunidades/nueva" element={
-                <ProtectedRoute>
-                  <NuevaOportunidad />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/cotizaciones" element={
-                <ProtectedRoute>
-                  <Cotizaciones />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/cotizaciones/:id" element={
-                <ProtectedRoute>
-                  <CotizacionDetalle />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/cotizaciones/nueva" element={
-                <ProtectedRoute>
-                  <NuevaCotizacion />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/cotizaciones/nueva-wizard" element={
-                <ProtectedRoute>
-                  <NuevaCotizacionWizard />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/contratos" element={
-                <ProtectedRoute>
-                  <Contratos />
-                </ProtectedRoute>
-              } />
-              <Route path="/ventas/contratos/nuevo" element={
-                <ProtectedRoute>
-                  <NuevoContrato />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Reportes - Protegidas */}
-              <Route path="/reportes" element={
-                <ProtectedRoute>
-                  <Reportes />
-                </ProtectedRoute>
-              } />
-              
-              {/* Ruta de Calendario - Protegida */}
-              <Route path="/calendario" element={
-                <ProtectedRoute>
-                  <Calendario />
-                </ProtectedRoute>
-              } />
-              
-              {/* Ruta de Comunicaciones - Protegida */}
-              <Route path="/comunicaciones" element={
-                <ProtectedRoute>
-                  <Comunicaciones />
-                </ProtectedRoute>
-              } />
-              
-              {/* Ruta de Configuración - Protegida */}
-              <Route path="/configuracion" element={
-                <ProtectedRoute>
-                  <Configuracion />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Cuentas de Cobro - Protegidas */}
-              <Route path="/cuentas-cobro" element={
-                <ProtectedRoute>
-                  <CuentasCobro />
-                </ProtectedRoute>
-              } />
-              <Route path="/cuentas-cobro/nueva" element={
-                <ProtectedRoute>
-                  <NuevaCuentaCobro />
-                </ProtectedRoute>
-              } />
-              
-              {/* Rutas de Datos Maestros - Protegidas */}
-              <Route path="/maestros" element={
-                <ProtectedRoute>
-                  <MaestrosIndex />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/sectores" element={
-                <ProtectedRoute>
-                  <Sectores />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/tipos-servicios" element={
-                <ProtectedRoute>
-                  <TiposServicios />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/paises" element={
-                <ProtectedRoute>
-                  <Paises />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/ciudades" element={
-                <ProtectedRoute>
-                  <Ciudades />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/origenes-cliente" element={
-                <ProtectedRoute>
-                  <OrigenesCliente />
-                </ProtectedRoute>
-              } />
-              <Route path="/maestros/tipos-productos" element={
-                <ProtectedRoute>
-                  <TiposProductos />
-                </ProtectedRoute>
-              } />
-              
-              {/* Ruta para página no encontrada */}
-              <Route path="*" element={<NotFound />} />
-            </Routes>
-            <Toaster />
-          </Router>
-        </DevModeProvider>
+        <Router>
+          <Routes>
+            {/* Redireccionar la ruta raíz a la página de login */}
+            <Route path="/" element={<Navigate to="/auth/login" replace />} />
+            
+            {/* Rutas de Autenticación */}
+            <Route path="/auth/login" element={<Login />} />
+            
+            {/* Ruta del Dashboard - Protegida */}
+            <Route path="/dashboard" element={
+              <ProtectedRoute>
+                <Index />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Clientes - Protegidas */}
+            <Route path="/clientes" element={
+              <ProtectedRoute>
+                <Clientes />
+              </ProtectedRoute>
+            } />
+            <Route path="/clientes/nuevo" element={
+              <ProtectedRoute>
+                <NuevoCliente />
+              </ProtectedRoute>
+            } />
+            <Route path="/clientes/:id" element={
+              <ProtectedRoute>
+                <DetalleCliente />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Empresas - Protegidas */}
+            <Route path="/empresas" element={
+              <ProtectedRoute>
+                <Empresas />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresas/nuevo" element={
+              <ProtectedRoute>
+                <NuevaEmpresa />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresas/:id" element={
+              <ProtectedRoute>
+                <DetalleEmpresa />
+              </ProtectedRoute>
+            } />
+            <Route path="/empresas/:id/editar" element={
+              <ProtectedRoute>
+                <EditarEmpresa />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Proveedores - Protegidas */}
+            <Route path="/proveedores" element={
+              <ProtectedRoute>
+                <Proveedores />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores/nuevo" element={
+              <ProtectedRoute>
+                <NuevoProveedor />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores/:id" element={
+              <ProtectedRoute>
+                <DetalleProveedor />
+              </ProtectedRoute>
+            } />
+            <Route path="/proveedores/:id/editar" element={
+              <ProtectedRoute>
+                <EditarProveedor />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Recaudos - Protegidas */}
+            <Route path="/recaudos" element={
+              <ProtectedRoute>
+                <Recaudos />
+              </ProtectedRoute>
+            } />
+            <Route path="/recaudos/nuevo" element={
+              <ProtectedRoute>
+                <NuevoRecaudo />
+              </ProtectedRoute>
+            } />
+            <Route path="/recaudos/seguimiento" element={
+              <ProtectedRoute>
+                <SeguimientoRecaudos />
+              </ProtectedRoute>
+            } />
+            <Route path="/recaudos/*" element={<Navigate to="/recaudos" replace />} />
+            
+            {/* Rutas de Ventas - Protegidas */}
+            <Route path="/ventas" element={
+              <ProtectedRoute>
+                <Ventas />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/oportunidades" element={
+              <ProtectedRoute>
+                <Oportunidades />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/oportunidades/nueva" element={
+              <ProtectedRoute>
+                <NuevaOportunidad />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/cotizaciones" element={
+              <ProtectedRoute>
+                <Cotizaciones />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/cotizaciones/:id" element={
+              <ProtectedRoute>
+                <CotizacionDetalle />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/cotizaciones/nueva" element={
+              <ProtectedRoute>
+                <NuevaCotizacion />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/cotizaciones/nueva-wizard" element={
+              <ProtectedRoute>
+                <NuevaCotizacionWizard />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/contratos" element={
+              <ProtectedRoute>
+                <Contratos />
+              </ProtectedRoute>
+            } />
+            <Route path="/ventas/contratos/nuevo" element={
+              <ProtectedRoute>
+                <NuevoContrato />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Reportes - Protegidas */}
+            <Route path="/reportes" element={
+              <ProtectedRoute>
+                <Reportes />
+              </ProtectedRoute>
+            } />
+            
+            {/* Ruta de Calendario - Protegida */}
+            <Route path="/calendario" element={
+              <ProtectedRoute>
+                <Calendario />
+              </ProtectedRoute>
+            } />
+            
+            {/* Ruta de Comunicaciones - Protegida */}
+            <Route path="/comunicaciones" element={
+              <ProtectedRoute>
+                <Comunicaciones />
+              </ProtectedRoute>
+            } />
+            
+            {/* Ruta de Configuración - Protegida */}
+            <Route path="/configuracion" element={
+              <ProtectedRoute>
+                <Configuracion />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Cuentas de Cobro - Protegidas */}
+            <Route path="/cuentas-cobro" element={
+              <ProtectedRoute>
+                <CuentasCobro />
+              </ProtectedRoute>
+            } />
+            <Route path="/cuentas-cobro/nueva" element={
+              <ProtectedRoute>
+                <NuevaCuentaCobro />
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas de Datos Maestros - Protegidas */}
+            <Route path="/maestros" element={
+              <ProtectedRoute>
+                <MaestrosIndex />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/sectores" element={
+              <ProtectedRoute>
+                <Sectores />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/tipos-servicios" element={
+              <ProtectedRoute>
+                <TiposServicios />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/paises" element={
+              <ProtectedRoute>
+                <Paises />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/ciudades" element={
+              <ProtectedRoute>
+                <Ciudades />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/origenes-cliente" element={
+              <ProtectedRoute>
+                <OrigenesCliente />
+              </ProtectedRoute>
+            } />
+            <Route path="/maestros/tipos-productos" element={
+              <ProtectedRoute>
+                <TiposProductos />
+              </ProtectedRoute>
+            } />
+            
+            {/* Ruta para página no encontrada */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+          <Toaster />
+        </Router>
       </AuthProvider>
     </ThemeProvider>
   );

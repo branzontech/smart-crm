@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -10,27 +10,18 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
-import { useDevMode } from "@/contexts/DevModeContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [formSubmitting, setFormSubmitting] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
-  const { isDevelopmentMode } = useDevMode();
-
-  useEffect(() => {
-    if (isAuthenticated || isDevelopmentMode) {
-      console.log("User already authenticated or in dev mode, redirecting to dashboard");
-      navigate("/dashboard");
-    }
-  }, [isAuthenticated, isDevelopmentMode, navigate]);
+  const { login } = useAuth();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -40,7 +31,7 @@ const Login = () => {
       return;
     }
     
-    setFormSubmitting(true);
+    setIsLoading(true);
     
     try {
       if (isSignUp) {
@@ -61,27 +52,23 @@ const Login = () => {
 
         toast.success("Cuenta creada exitosamente. Por favor inicia sesión.");
         setIsSignUp(false);
-        setFormSubmitting(false);
       } else {
         // Handle login
         await login(email, password, rememberMe);
         toast.success("¡Bienvenido al sistema!");
-        console.log("Login successful, redirecting to dashboard");
-        // Let the auth context handle the redirect
+        navigate("/dashboard");
       }
     } catch (error: any) {
       console.error("Error de autenticación:", error);
       toast.error(error.message || "Error al procesar la solicitud");
-      setFormSubmitting(false);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
   };
-
-  // Determine if any loading is happening
-  const isLoading = formSubmitting || authLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal to-sage p-4">

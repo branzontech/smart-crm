@@ -72,7 +72,7 @@ const CotizacionDetalle = () => {
         />
         
         {/* Main content - optimized for printing */}
-        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none cotizacion-printable">
+        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none print:rounded-none">
           {/* Colored header with logo */}
           <CotizacionColoredHeader 
             empresaEmisor={cotizacion.empresaEmisor} 
@@ -81,11 +81,11 @@ const CotizacionDetalle = () => {
           />
           
           {/* Content with more compact spacing for printing */}
-          <div className="p-6 space-y-8 print:p-3 print:space-y-3">
+          <div className="p-6 space-y-6 print:p-4 print:space-y-4">
             {/* Client info with more compact layout */}
             <CotizacionClienteInfo cotizacion={cotizacion} formatDate={formatDate} />
             
-            <Separator className="print:my-1" />
+            <Separator className="print:my-2" />
             
             {/* Products with compact table for printing */}
             <CotizacionProductosTable 
@@ -96,7 +96,7 @@ const CotizacionDetalle = () => {
               total={cotizacion.total} 
             />
             
-            <Separator className="print:my-1" />
+            <Separator className="print:my-2" />
             
             {/* Terms and conditions with compact text for printing */}
             <CotizacionTerminos />

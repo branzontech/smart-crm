@@ -11,6 +11,9 @@ import { es } from 'date-fns/locale';
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { CotizacionColoredHeader } from '../CotizacionColoredHeader';
 import { CotizacionProductosTable } from '../CotizacionProductosTable';
+import { Separator } from '@/components/ui/separator';
+import { CotizacionTerminos } from '../CotizacionTerminos';
+import { CotizacionFooter } from '../CotizacionFooter';
 
 export const PreviewStep: React.FC = () => {
   const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
@@ -70,8 +73,13 @@ export const PreviewStep: React.FC = () => {
   const fechaFormateada = formatDate(cotizacion.fechaEmision);
 
   const handleGoBack = () => {
-    // Fixed: Using the string literal 'productos' instead of currentStep - 1
     setCurrentStep('productos');
+  };
+
+  const handlePrint = () => {
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
 
   return (
@@ -94,75 +102,67 @@ export const PreviewStep: React.FC = () => {
         </Alert>
       )}
       
-      <div id="cotizacion-preview" className="border rounded-md p-8 bg-white print:border-none">
-        <div className="flex flex-col gap-8">
-          <CotizacionColoredHeader 
-            empresaEmisor={cotizacion.empresaEmisor}
-            numero={cotizacion.numero}
-            fechaFormateada={fechaFormateada}
+      <div id="cotizacion-preview" className="border rounded-md bg-white print:border-none print:shadow-none">
+        <CotizacionColoredHeader 
+          empresaEmisor={cotizacion.empresaEmisor}
+          numero={cotizacion.numero}
+          fechaFormateada={fechaFormateada}
+        />
+        
+        <div className="p-6 space-y-6 print:p-4 print:space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:gap-2">
+            <div>
+              <h3 className="font-semibold text-lg mb-2 text-[#2d1e2f]">Cliente</h3>
+              <div className="space-y-1">
+                <p><span className="font-medium">Nombre:</span> {cotizacion.cliente.nombre}</p>
+                <p><span className="font-medium">NIT:</span> {cotizacion.cliente.nit}</p>
+                <p><span className="font-medium">Dirección:</span> {cotizacion.cliente.direccion}</p>
+                <p><span className="font-medium">Teléfono:</span> {cotizacion.cliente.telefono}</p>
+              </div>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2 text-[#2d1e2f]">Detalles de la Cotización</h3>
+              <div className="space-y-1">
+                <p><span className="font-medium">Fecha de emisión:</span> {fechaFormateada}</p>
+                <p><span className="font-medium">Válida hasta:</span> {formatDate(cotizacion.fechaVencimiento)}</p>
+                <p><span className="font-medium">Estado:</span> {cotizacion.estado.charAt(0).toUpperCase() + cotizacion.estado.slice(1)}</p>
+              </div>
+            </div>
+          </div>
+          
+          <Separator className="print:my-2" />
+          
+          <CotizacionProductosTable 
+            productos={cotizacion.productos}
+            formatCurrency={formatCurrency}
+            subtotal={cotizacion.subtotal}
+            totalIva={cotizacion.totalIva}
+            total={cotizacion.total}
           />
           
-          <div className="px-6 pt-4">
-            <h3 className="font-semibold text-lg mb-2 text-[#2d1e2f]">Cliente</h3>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              <div>
-                <p className="font-medium">Nombre:</p>
-                <p>{cotizacion.cliente.nombre}</p>
-              </div>
-              <div>
-                <p className="font-medium">NIT:</p>
-                <p>{cotizacion.cliente.nit}</p>
-              </div>
-              <div>
-                <p className="font-medium">Dirección:</p>
-                <p>{cotizacion.cliente.direccion}</p>
-              </div>
-              <div>
-                <p className="font-medium">Teléfono:</p>
-                <p>{cotizacion.cliente.telefono}</p>
-              </div>
-              <div>
-                <p className="font-medium">Contacto:</p>
-                <p>{cotizacion.cliente.contacto}</p>
+          <Separator className="print:my-2" />
+          
+          <CotizacionTerminos />
+          
+          {cotizacion.firmaNombre && (
+            <div className="mt-10 pt-6 border-t text-center">
+              <div className="w-48 border-t border-gray-400 pt-2 mx-auto">
+                <p className="font-medium">{cotizacion.firmaNombre}</p>
+                <p className="text-sm text-gray-600">{cotizacion.empresaEmisor.nombre}</p>
               </div>
             </div>
-          </div>
-          
-          <div className="px-6">
-            <CotizacionProductosTable 
-              productos={cotizacion.productos}
-              formatCurrency={formatCurrency}
-              subtotal={cotizacion.subtotal}
-              totalIva={cotizacion.totalIva}
-              total={cotizacion.total}
-            />
-          </div>
-          
-          <div className="px-6 border-t pt-4">
-            <h3 className="font-semibold text-lg mb-2 text-[#2d1e2f]">Términos y Condiciones</h3>
-            <p className="text-sm text-gray-600">
-              1. Esta cotización es válida por 30 días a partir de la fecha de emisión.<br />
-              2. Los precios pueden estar sujetos a cambios sin previo aviso.<br />
-              3. Los tiempos de entrega son estimados y pueden variar.<br />
-              4. Los precios incluyen IVA según corresponda.
-            </p>
-          </div>
-          
-          <div className="px-6 border-t pt-4 mt-auto">
-            <div className="flex flex-col items-center mt-8">
-              <div className="border-t border-gray-400 w-48 mb-1 pt-2"></div>
-              <p className="font-medium">{cotizacion.empresaEmisor.nombre}</p>
-            </div>
-          </div>
+          )}
         </div>
+        
+        <CotizacionFooter empresaEmisor={cotizacion.empresaEmisor} />
       </div>
       
-      <div className="flex justify-between">
+      <div className="flex justify-between print:hidden">
         <Button variant="outline" onClick={handleGoBack}>
           Anterior
         </Button>
         <div className="flex gap-2">
-          <Button variant="outline" onClick={() => window.print()}>
+          <Button variant="outline" onClick={handlePrint}>
             <Printer className="mr-2" />
             Imprimir
           </Button>

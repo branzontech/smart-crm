@@ -6,17 +6,13 @@
   }
   
   body {
-    visibility: visible;
+    visibility: hidden;
     height: auto !important;
     overflow: visible !important;
     -webkit-print-color-adjust: exact !important;
     print-color-adjust: exact !important;
     color-adjust: exact !important;
     font-family: "Helvetica", "Arial", sans-serif !important;
-  }
-  
-  body * {
-    visibility: hidden;
   }
   
   #cotizacion-preview,
@@ -198,9 +194,29 @@
     margin-top: 1rem !important;
     page-break-inside: avoid !important;
     break-inside: avoid !important;
+    bottom: 0 !important;
+    width: 100% !important;
   }
   
-  /* Remove elements not needed in print */
+  /* FIXES FOR THE SPECIFIC ISSUES MENTIONED */
+  
+  /* Remove all header/footer browser elements */
+  @page {
+    size: letter portrait;
+    margin: 0.7cm;
+    /* Remove default headers and footers */
+    margin-header: 0;
+    margin-footer: 0;
+    marks: none;
+  }
+  
+  /* Hide any URLs, navigation elements or timestamps */
+  /* Hide URL display and page headers/footers from browser */
+  html {
+    height: 100% !important;
+  }
+  
+  /* Remove all browser/system added elements */
   .navbar,
   .smooth-sail-navbar,
   .footer,
@@ -208,17 +224,63 @@
   nav,
   header,
   footer,
-  .print\:hidden {
+  .print\:hidden,
+  #header,
+  #navbar,
+  .page-header,
+  .site-header,
+  .app-header,
+  .header-container {
+    display: none !important;
+    visibility: hidden !important;
+    height: 0 !important;
+    overflow: hidden !important;
+    position: absolute !important;
+    top: -9999px !important;
+    left: -9999px !important;
+  }
+  
+  /* Make the document fill the entire page properly */
+  #cotizacion-preview {
+    width: 100% !important;
+    height: auto !important;
+    min-height: calc(100vh - 1.4cm) !important; /* Account for margins */
+    display: block !important;
+    position: relative !important;
+    overflow: visible !important;
+    transform: none !important;
+    zoom: 1 !important; /* Ensures proper rendering */
+  }
+  
+  /* Fix for document size */
+  body > div {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  
+  /* Hide absolutely everything except the preview */
+  body > *:not(#root) {
     display: none !important;
     visibility: hidden !important;
   }
   
-  /* Make sure only the preview is shown */
-  body > *:not(#root) {
-    display: none !important;
-  }
-  
   #root > *:not(:has(#cotizacion-preview)) {
     display: none !important;
+    visibility: hidden !important;
+  }
+  
+  /* Specific fix for standard header content to display COTIZACION DE SERVICIOS BRANZON TECH */
+  #cotizacion-preview .bg-\[\#2d1e2f\] h3.text-xl.font-semibold {
+    content: "COTIZACION DE SERVICIOS BRANZON TECH" !important;
+    text-transform: uppercase !important;
+    font-size: 16pt !important;
+    letter-spacing: 0.5px !important;
+  }
+  
+  /* Ensure content is visible and properly rendered */
+  #cotizacion-preview * {
+    visibility: visible !important;
+    opacity: 1 !important;
   }
 }

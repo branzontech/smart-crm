@@ -47,9 +47,25 @@ const CotizacionDetalle = () => {
   }, [id]);
 
   const handlePrint = () => {
-    // Make sure any hidden elements get a chance to render
+    // Hide elements that shouldn't appear in print
+    document.querySelectorAll('.navbar, .header, .smooth-sail-navbar, footer').forEach(el => {
+      if (el instanceof HTMLElement) {
+        el.style.display = 'none';
+      }
+    });
+    
+    // Give the browser a moment to update the DOM
     setTimeout(() => {
       window.print();
+      
+      // Restore elements after printing
+      setTimeout(() => {
+        document.querySelectorAll('.navbar, .header, .smooth-sail-navbar, footer').forEach(el => {
+          if (el instanceof HTMLElement) {
+            el.style.display = '';
+          }
+        });
+      }, 100);
     }, 100);
   };
 

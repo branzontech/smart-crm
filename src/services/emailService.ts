@@ -15,7 +15,7 @@ export const emailService = {
   async sendQuotationEmail(
     quotation: Cotizacion,
     htmlContent: string
-  ): Promise<{ success: boolean; message: string }> {
+  ): Promise<{ success: boolean; message: string; testMode?: boolean; testModeInfo?: string }> {
     try {
       console.log("Preparing to send quotation email", {
         quotationId: quotation.id,
@@ -35,45 +35,15 @@ export const emailService = {
         throw new Error(errorMsg);
       }
 
-      // Check if we have a sender email, if not, try to get it from the database
+      // Check if we have a sender email, which is required for Resend test mode
       let senderEmail = quotation.empresaEmisor?.email;
       let senderName = quotation.empresaEmisor?.nombre;
 
       console.log("Initial sender email check:", { senderEmail });
 
-      // If the sender email is missing, try to fetch it from the latest company config
+      // In Resend test mode, the sender email is required
       if (!senderEmail) {
-        console.log("Sender email missing, fetching from config_empresas table");
-        const { data: configData, error: configError } = await supabase
-          .from("config_empresas")
-          .select("razon_social, email")
-          .order("created_at", { ascending: false })
-          .limit(1)
-          .single();
-          
-        if (configError) {
-          console.error("Error fetching company config:", configError);
-          // Don't throw an error here, continue checking if email exists
-        } else if (configData) {
-          console.log("Retrieved config data:", configData);
-          if (configData.email) {
-            senderEmail = configData.email;
-            // Only update the sender name if it was not already set
-            if (!senderName) {
-              senderName = configData.razon_social;
-            }
-            console.log("Retrieved sender email from config:", senderEmail);
-          } else {
-            console.error("Email field exists in config but is empty or null");
-          }
-        } else {
-          console.error("No company config found in the database");
-        }
-      }
-
-      // Final check if sender email exists
-      if (!senderEmail) {
-        console.error("Missing sender email, checked both quotation and database");
+        console.error("Missing sender email, required for Resend test mode");
         throw new Error(
           "No se puede enviar el correo: falta el correo del emisor. Por favor configure un correo electrónico en la sección de Configuración."
         );
@@ -121,13 +91,20 @@ export const emailService = {
       if (!data || !data.success) {
         const errorMsg = data?.error || "Error desconocido al enviar el correo";
         console.error("Error sending email:", errorMsg);
-        throw new Error(`Error al enviar el correo: ${errorMsg}`);
+        
+        return {
+          success: false,
+          message: `Error al enviar el correo: ${errorMsg}`,
+          testModeInfo: data?.testModeInfo
+        };
       }
 
       console.log("Email sent successfully:", data);
       return {
         success: true,
         message: "Cotización enviada por correo electrónico con éxito",
+        testMode: data.testMode,
+        testModeInfo: data.testModeInfo
       };
     } catch (error) {
       console.error("Error in sendQuotationEmail:", error);

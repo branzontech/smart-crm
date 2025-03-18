@@ -90,6 +90,12 @@ const CotizacionDetalle = () => {
       return;
     }
 
+    // Validate sender email (required for Resend's test mode)
+    if (!cotizacion.empresaEmisor.email) {
+      toast.error("No se puede enviar el correo: la empresa emisora no tiene dirección de correo electrónico");
+      return;
+    }
+
     try {
       setIsSendingEmail(true);
       toast("Preparando el envío de la cotización...");
@@ -104,9 +110,17 @@ const CotizacionDetalle = () => {
       const result = await emailService.sendQuotationEmail(cotizacion, htmlContent);
 
       if (result.success) {
-        toast.success(result.message);
+        if (result.testMode) {
+          toast.success(`${result.message} (MODO PRUEBA: El correo fue enviado a ${cotizacion.empresaEmisor.email})`);
+          toast.info("Para enviar a los clientes, verifica tu dominio en Resend.com");
+        } else {
+          toast.success(result.message);
+        }
       } else {
         toast.error(result.message);
+        if (result.testModeInfo) {
+          toast.info(result.testModeInfo);
+        }
       }
     } catch (error) {
       console.error("Error sending email:", error);

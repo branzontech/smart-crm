@@ -108,26 +108,39 @@ serve(async (req) => {
 
         // Log debugging information
         console.log("Preparing email with the following parameters:");
-        console.log(`- From: TEMP "onboarding@resend.dev" (usando correo temporal de Resend)`);
-        console.log(`- To: ${requestData.clientEmail}`);
+        
+        // En el modo de prueba de Resend, solo podemos enviar a la dirección del remitente
+        // Usaremos el senderEmail como destinatario también
+        const recipientEmail = requestData.senderEmail;
+        
+        console.log(`- From: "${requestData.senderName}" <${requestData.senderEmail}>`);
+        console.log(`- To: ${recipientEmail} (modo de prueba - solo se puede enviar al remitente)`);
+        console.log(`- Cc: Ninguno (cliente: ${requestData.clientEmail} recibirá copia cuando se verifique el dominio)`);
         console.log(`- Subject: Cotización de servicios - ${requestData.quotationNumber}`);
         console.log(`- Attachment: Cotizacion-${requestData.quotationNumber}.html (HTML size: ${cleanHtml.length} bytes)`);
 
         try {
-          // Send email with HTML content
-          console.log("Calling Resend API to send email...");
-          
           // Convert HTML content to base64 using TextEncoder (Deno compatible)
           const encoder = new TextEncoder();
           const htmlBytes = encoder.encode(cleanHtml);
           const base64Content = btoa(String.fromCharCode(...htmlBytes));
           
+          // IMPORTANTE: Estamos en modo de prueba de Resend, así que debemos enviar
+          // al mismo correo del remitente
           const emailResponse = await resend.emails.send({
-            // Usar temporalmente el correo de prueba de Resend mientras se verifica el dominio
-            from: `${requestData.senderName} <onboarding@resend.dev>`,
-            to: [requestData.clientEmail],
-            subject: `Cotización de servicios - ${requestData.quotationNumber}`,
-            html: emailContent,
+            from: `${requestData.senderName} <${requestData.senderEmail}>`,
+            to: [recipientEmail],
+            subject: `[PRUEBA] Cotización de servicios - ${requestData.quotationNumber}`,
+            html: `
+              <div style="background-color: #fffaf0; padding: 15px; margin-bottom: 20px; border-left: 4px solid #ffa500; border-radius: 4px;">
+                <p style="margin: 0; font-weight: bold;">MODO DE PRUEBA</p>
+                <p style="margin: 10px 0 0 0;">
+                  Esta es una copia de prueba enviada a ${recipientEmail}.<br/>
+                  El correo real se enviaría a: ${requestData.clientEmail}<br/>
+                  <span style="color: #dc3545;">Para enviar a otros destinatarios, verifica tu dominio en Resend.</span>
+                </p>
+              </div>
+            ` + emailContent,
             attachments: [
               {
                 filename: `Cotizacion-${requestData.quotationNumber}.html`,
@@ -137,9 +150,17 @@ serve(async (req) => {
             ],
           });
 
-          console.log("Email sent successfully:", emailResponse);
+          // Añadir información sobre las limitaciones de prueba en la respuesta
+          const responseData = {
+            success: true,
+            data: emailResponse,
+            testMode: true,
+            testModeInfo: "En modo de prueba de Resend, solo se pueden enviar correos al remitente. El correo se ha enviado a " + recipientEmail + " en lugar de a " + requestData.clientEmail
+          };
+
+          console.log("Email sent successfully:", responseData);
           return new Response(
-            JSON.stringify({ success: true, data: emailResponse }), 
+            JSON.stringify(responseData), 
             {
               status: 200,
               headers: { "Content-Type": "application/json", ...corsHeaders },
@@ -157,7 +178,11 @@ serve(async (req) => {
           }
           
           return new Response(
-            JSON.stringify({ success: false, error: errorMessage }),
+            JSON.stringify({ 
+              success: false, 
+              error: errorMessage,
+              testModeInfo: "En modo de prueba de Resend, solo se pueden enviar correos al remitente (" + requestData.senderEmail + "). Por favor verifica tu dominio en Resend."
+            }),
             {
               status: 500,
               headers: { "Content-Type": "application/json", ...corsHeaders },

@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -16,12 +17,12 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
+  const [formSubmitting, setFormSubmitting] = useState(false);
   const [isSignUp, setIsSignUp] = useState(false);
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
-  const { login, isAuthenticated, isLoading } = useAuth();
+  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
   const { isDevelopmentMode } = useDevMode();
 
   useEffect(() => {
@@ -39,7 +40,7 @@ const Login = () => {
       return;
     }
     
-    setIsLoading(true);
+    setFormSubmitting(true);
     
     try {
       if (isSignUp) {
@@ -71,13 +72,16 @@ const Login = () => {
       console.error("Error de autenticación:", error);
       toast.error(error.message || "Error al procesar la solicitud");
     } finally {
-      setIsLoading(false);
+      setFormSubmitting(false);
     }
   };
 
   const toggleSignUp = () => {
     setIsSignUp(!isSignUp);
   };
+
+  // Determine if any loading is happening
+  const isLoading = formSubmitting || authLoading;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-teal to-sage p-4">

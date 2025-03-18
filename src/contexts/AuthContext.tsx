@@ -125,7 +125,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   // Login function
-  const login = async (email: string, password: string, remember: boolean) => {
+  const login = async (email: string, password: string, remember: boolean): Promise<void> => {
     setIsLoading(true);
     
     try {
@@ -142,7 +142,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       console.log("Login successful:", data);
       // Session and user will be updated via the auth state change listener
-      return data;
     } catch (error) {
       console.error("Error de inicio de sesión:", error);
       throw error;
@@ -152,7 +151,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   // Sign up function
-  const signup = async (email: string, password: string, userData: any) => {
+  const signup = async (email: string, password: string, userData: any): Promise<void> => {
     setIsLoading(true);
     
     try {
@@ -172,7 +171,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       
       console.log("Signup successful:", data);
       // Session and user will be updated via the auth state change listener
-      return data;
     } catch (error) {
       console.error("Error de registro:", error);
       throw error;
@@ -205,7 +203,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   };
 
   // Context values
-  const value = {
+  const value: AuthContextType = {
     user,
     session,
     isAuthenticated: !!session && !!user,

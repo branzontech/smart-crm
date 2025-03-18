@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from "react";
-import { Bell, Clock, LogOut, Settings, UserRound } from "lucide-react";
+import { Bell, Clock, LogOut, Settings, UserRound, Code } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -12,14 +11,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDevMode } from "@/contexts/DevModeContext";
 import { toast } from "sonner";
 
 export const Header = () => {
   const [currentTime, setCurrentTime] = useState(new Date());
   const navigate = useNavigate();
   const { user, logout } = useAuth();
+  const { isDevelopmentMode, toggleDevelopmentMode } = useDevMode();
 
-  // Actualizar la hora cada minuto
   useEffect(() => {
     const timer = setInterval(() => {
       setCurrentTime(new Date());
@@ -80,10 +80,26 @@ export const Header = () => {
         </div>
 
         <div className="flex items-center gap-4">
-          {/* Notificaciones */}
+          <Button
+            variant={isDevelopmentMode ? "default" : "outline"}
+            size="sm"
+            onClick={() => {
+              toggleDevelopmentMode();
+              toast.success(isDevelopmentMode 
+                ? "Modo desarrollo desactivado" 
+                : "Modo desarrollo activado");
+            }}
+            className={isDevelopmentMode 
+              ? "bg-amber-500 hover:bg-amber-600" 
+              : "border-amber-200 text-amber-500 hover:bg-amber-50"}
+          >
+            <Code className="h-4 w-4 mr-2" />
+            {isDevelopmentMode ? "Dev: ON" : "Dev: OFF"}
+          </Button>
+
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="relative">
+              <Button variant="ghost" asChild>
                 <Bell className="h-5 w-5" />
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
               </Button>
@@ -103,7 +119,6 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Usuario */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
@@ -122,7 +137,6 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Logout button */}
           <Button
             variant="outline"
             size="sm"
@@ -133,7 +147,6 @@ export const Header = () => {
             Salir
           </Button>
 
-          {/* Configuraciones */}
           <Button
             variant="ghost"
             size="icon"

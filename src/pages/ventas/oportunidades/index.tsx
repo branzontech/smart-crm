@@ -10,6 +10,14 @@ import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
 import { OportunidadDrawer } from "@/components/oportunidades/OportunidadDrawer";
 import { Layout } from "@/components/layout/Layout";
+import { 
+  Pagination, 
+  PaginationContent, 
+  PaginationItem, 
+  PaginationLink, 
+  PaginationNext, 
+  PaginationPrevious 
+} from "@/components/ui/pagination";
 
 const OportunidadesIndex = () => {
   const navigate = useNavigate();
@@ -18,6 +26,8 @@ const OportunidadesIndex = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [selectedOportunidadId, setSelectedOportunidadId] = useState<string | null>(null);
   const [isDrawerOpen, setIsDrawerOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
   const fetchOportunidades = async () => {
     setIsLoading(true);
@@ -63,6 +73,29 @@ const OportunidadesIndex = () => {
       oportunidad.cliente.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
+  // Pagination logic
+  const totalPages = Math.ceil(filteredOportunidades.length / itemsPerPage);
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = filteredOportunidades.slice(indexOfFirstItem, indexOfLastItem);
+
+  const renderPaginationLinks = () => {
+    const links = [];
+    for (let i = 1; i <= totalPages; i++) {
+      links.push(
+        <PaginationItem key={i}>
+          <PaginationLink 
+            onClick={() => setCurrentPage(i)} 
+            isActive={i === currentPage}
+          >
+            {i}
+          </PaginationLink>
+        </PaginationItem>
+      );
+    }
+    return links;
+  };
+
   return (
     <Layout>
       <div className="container mx-auto py-6">
@@ -97,8 +130,8 @@ const OportunidadesIndex = () => {
             <div className="text-center py-8">
               <p className="text-gray-500">Cargando oportunidades...</p>
             </div>
-          ) : filteredOportunidades.length > 0 ? (
-            filteredOportunidades.map((oportunidad) => (
+          ) : currentItems.length > 0 ? (
+            currentItems.map((oportunidad) => (
               <Card key={oportunidad.id} className="p-4 transition-all hover:shadow-md">
                 <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
                   <div>
@@ -178,6 +211,29 @@ const OportunidadesIndex = () => {
             </div>
           )}
         </div>
+
+        {/* Pagination */}
+        {filteredOportunidades.length > 0 && (
+          <div className="mt-6">
+            <Pagination>
+              <PaginationContent>
+                {currentPage > 1 && (
+                  <PaginationItem>
+                    <PaginationPrevious onClick={() => setCurrentPage(currentPage - 1)} />
+                  </PaginationItem>
+                )}
+                
+                {renderPaginationLinks()}
+                
+                {currentPage < totalPages && (
+                  <PaginationItem>
+                    <PaginationNext onClick={() => setCurrentPage(currentPage + 1)} />
+                  </PaginationItem>
+                )}
+              </PaginationContent>
+            </Pagination>
+          </div>
+        )}
       </div>
 
       {/* Drawer for editing opportunity */}

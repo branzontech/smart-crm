@@ -122,6 +122,17 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
+          {/* Logout button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={handleLogout}
+            className="text-red-500 border-red-200 hover:bg-red-50"
+          >
+            <LogOut className="h-4 w-4 mr-2" />
+            Salir
+          </Button>
+
           {/* Configuraciones */}
           <Button
             variant="ghost"

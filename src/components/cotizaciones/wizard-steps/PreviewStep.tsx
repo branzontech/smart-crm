@@ -1,14 +1,13 @@
-
 import React, { useState, useRef } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Button } from '@/components/ui/button';
-import { Save, Printer, Download, Send } from 'lucide-react';
+import { Save, Printer, Download, Send, AlertCircle } from 'lucide-react';
 import { saveCotizacion } from '@/services/cotizacionService';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { Alert, AlertDescription } from "@/components/ui/alert";
+import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
 import { CotizacionColoredHeader } from '../CotizacionColoredHeader';
 import { CotizacionProductosTable } from '../CotizacionProductosTable';
 import { Separator } from '@/components/ui/separator';
@@ -73,13 +72,16 @@ export const PreviewStep: React.FC = () => {
   };
 
   const handleSendEmail = async () => {
-    // Validate client email
+    console.log("Checking email fields before sending:", {
+      clientEmail: cotizacion.cliente?.email,
+      senderEmail: cotizacion.empresaEmisor?.email,
+    });
+
     if (!cotizacion.cliente.email) {
       toast.error("No se puede enviar el correo: el cliente no tiene dirección de correo electrónico");
       return;
     }
 
-    // Validate sender email
     if (!cotizacion.empresaEmisor.email) {
       toast.error("No se puede enviar el correo: la empresa emisora no tiene dirección de correo electrónico");
       return;
@@ -89,13 +91,11 @@ export const PreviewStep: React.FC = () => {
       setIsSendingEmail(true);
       toast("Preparando el envío de la cotización...");
 
-      // Get the HTML content of the quotation
       const htmlContent = cotizacionRef.current?.outerHTML || "";
       if (!htmlContent) {
         throw new Error("No se pudo obtener el contenido de la cotización");
       }
 
-      // Send the email with the quotation as PDF
       const result = await emailService.sendQuotationEmail(cotizacion, htmlContent);
 
       if (result.success) {
@@ -131,6 +131,17 @@ export const PreviewStep: React.FC = () => {
       <p className="text-gray-500">
         Verifique la información de la cotización antes de guardar.
       </p>
+      
+      {!cotizacion.empresaEmisor.email && (
+        <Alert variant="destructive" className="mb-4">
+          <AlertCircle className="h-4 w-4" />
+          <AlertTitle>Advertencia</AlertTitle>
+          <AlertDescription>
+            La empresa emisora no tiene configurada una dirección de correo electrónico. 
+            El envío por correo no estará disponible hasta que configure un correo en la sección de Configuración.
+          </AlertDescription>
+        </Alert>
+      )}
       
       {isSendingEmail && (
         <div className="mb-4 bg-white p-4 rounded-lg shadow-sm border">
@@ -226,7 +237,9 @@ export const PreviewStep: React.FC = () => {
           <Button
             variant="outline"
             onClick={handleSendEmail}
-            disabled={isSendingEmail || hasErrors || !cotizacion.cliente.email}
+            disabled={isSendingEmail || hasErrors || !cotizacion.cliente.email || !cotizacion.empresaEmisor.email}
+            title={!cotizacion.empresaEmisor.email ? "Falta el correo de la empresa emisora" : 
+                   !cotizacion.cliente.email ? "Falta el correo del cliente" : ""}
           >
             <Send className="mr-2" />
             {isSendingEmail ? "Enviando..." : "Enviar por correo"}

@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
@@ -75,6 +74,12 @@ const CotizacionDetalle = () => {
 
   const handleSendEmail = async () => {
     if (!cotizacion) return;
+
+    // Enhanced logging to debug email issues
+    console.log("Sending email from detail page:", {
+      clientEmail: cotizacion.cliente?.email, 
+      senderEmail: cotizacion.empresaEmisor?.email
+    });
 
     // Validate client email
     if (!cotizacion.cliente.email) {

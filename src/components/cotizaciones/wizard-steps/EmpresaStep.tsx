@@ -25,6 +25,7 @@ export const EmpresaStep: React.FC = () => {
         try {
           const config = await fetchCompanyConfig();
           if (config) {
+            console.log("Loading company config with email:", config.email);
             updateEmpresaEmisor({
               nombre: config.razon_social,
               nit: config.nit,

@@ -24,14 +24,19 @@ export const emailService = {
         senderEmail: quotation.empresaEmisor?.email
       });
 
-      // Validate required fields
+      // Validate required fields with detailed logging
       if (!quotation.id || !quotation.cliente?.email) {
-        throw new Error(
-          "No se puede enviar el correo: falta el ID de cotización o el correo del cliente"
-        );
+        const missingFields = [];
+        if (!quotation.id) missingFields.push("ID de cotización");
+        if (!quotation.cliente?.email) missingFields.push("correo del cliente");
+        
+        const errorMsg = `No se puede enviar el correo: falta ${missingFields.join(" y ")}`;
+        console.error(errorMsg);
+        throw new Error(errorMsg);
       }
 
       if (!quotation.empresaEmisor?.email) {
+        console.error("Missing sender email in empresaEmisor:", quotation.empresaEmisor);
         throw new Error(
           "No se puede enviar el correo: falta el correo del emisor"
         );

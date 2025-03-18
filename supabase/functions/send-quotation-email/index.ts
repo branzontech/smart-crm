@@ -63,54 +63,10 @@ serve(async (req) => {
 
     console.log(`Preparing to send quotation ${requestData.quotationNumber} to ${requestData.clientEmail} from ${requestData.senderEmail}`);
 
+    // Convert HTML to PDF without using Puppeteer
+    // We'll use a simpler approach by sending the HTML directly
+    
     try {
-      // Generate PDF from HTML
-      console.log("Launching browser to generate PDF...");
-      chromium.setGraphicsMode = false;
-      const browser = await puppeteer.launch({
-        args: chromium.args,
-        defaultViewport: chromium.defaultViewport,
-        executablePath: await chromium.executablePath(),
-        headless: true,
-      });
-
-      console.log("Browser launched, creating page...");
-      const page = await browser.newPage();
-      
-      // Set viewport and content
-      await page.setViewport({ width: 1200, height: 1600 });
-      await page.setContent(requestData.quotationHtml, { waitUntil: "networkidle0" });
-      
-      // Add print styles inline to ensure they're applied in the PDF
-      await page.addStyleTag({
-        content: `
-          @page {
-            size: letter portrait;
-            margin: 0.7cm;
-          }
-          body {
-            font-family: "Helvetica", "Arial", sans-serif;
-          }
-          @media print {
-            body { visibility: visible; }
-            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-          }
-        `,
-      });
-
-      console.log("Generating PDF...");
-      const pdfBuffer = await page.pdf({
-        format: "Letter",
-        printBackground: true,
-        margin: { top: "0.7cm", right: "0.7cm", bottom: "0.7cm", left: "0.7cm" },
-      });
-
-      await browser.close();
-      console.log("PDF generation complete");
-
-      // Base64 encode the PDF for attachment
-      const base64Pdf = pdfBuffer.toString("base64");
-
       // Prepare email content
       const emailContent = `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; color: #333;">
@@ -135,10 +91,15 @@ serve(async (req) => {
         </div>
       `;
 
-      // Send email with attachment
+      // Clean up the quotation HTML for attachment
+      const cleanHtml = requestData.quotationHtml
+        .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, "")
+        .replace(/<button\b[^<]*(?:(?!<\/button>)<[^<]*)*<\/button>/gi, "")
+        .replace(/class="print:hidden[^"]*"/gi, 'style="display:none"');
+
+      // Send email with HTML content
       console.log(`Sending email from "${requestData.senderName}" <${requestData.senderEmail}> to ${requestData.clientEmail}`);
       
-      // Try sending the email
       const emailResponse = await resend.emails.send({
         from: `${requestData.senderName} <${requestData.senderEmail}>`,
         to: [requestData.clientEmail],
@@ -146,8 +107,9 @@ serve(async (req) => {
         html: emailContent,
         attachments: [
           {
-            filename: `Cotizacion-${requestData.quotationNumber}.pdf`,
-            content: base64Pdf,
+            filename: `Cotizacion-${requestData.quotationNumber}.html`,
+            content: Buffer.from(cleanHtml).toString('base64'),
+            content_type: "text/html",
           },
         ],
       });
@@ -157,9 +119,9 @@ serve(async (req) => {
         status: 200,
         headers: { "Content-Type": "application/json", ...corsHeaders },
       });
-    } catch (pdfError) {
-      console.error("PDF generation error:", pdfError);
-      throw new Error(`Error al generar el PDF: ${pdfError.message}`);
+    } catch (emailError) {
+      console.error("Email sending error:", emailError);
+      throw new Error(`Error al enviar el correo: ${emailError.message}`);
     }
   } catch (error) {
     console.error("Error sending quotation email:", error);

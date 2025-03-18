@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Card, CardContent } from '@/components/ui/card';
@@ -119,7 +118,6 @@ export const CotizacionWizard: React.FC = () => {
     }
   };
 
-  // Calculate progress percentage
   const getProgressPercentage = () => {
     switch (currentStep) {
       case 'empresa': return 25;
@@ -130,7 +128,6 @@ export const CotizacionWizard: React.FC = () => {
     }
   };
 
-  // Get step status: completed, current, or upcoming
   const getStepStatus = (step: string) => {
     const steps = ['empresa', 'cliente', 'productos', 'preview'];
     const currentIndex = steps.indexOf(currentStep);
@@ -200,12 +197,10 @@ export const CotizacionWizard: React.FC = () => {
                     </div>
                     <span className="text-xs sm:text-sm font-medium">{step.label}</span>
                     
-                    {/* Connecting line */}
                     {step.id !== 'preview' && (
                       <div className="hidden md:block absolute left-full top-1/2 w-8 h-0.5 -translate-y-1/2 -ml-1 -mr-1" style={{ background: status === 'completed' ? '#10b981' : '#e5e7eb' }}></div>
                     )}
                     
-                    {/* Tooltip for small screens */}
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                       {step.label}
                     </div>

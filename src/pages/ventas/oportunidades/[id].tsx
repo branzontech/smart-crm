@@ -168,7 +168,7 @@ export default function OportunidadDetalle() {
         )}
       </div>
       
-      {/* Drawer para editar la oportunidad */}
+      {/* Sheet para editar la oportunidad */}
       {oportunidad && id && (
         <OportunidadDrawer
           isOpen={isDrawerOpen}

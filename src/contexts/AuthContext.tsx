@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 // Define user types
 type User = {
@@ -53,15 +54,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Check for active session on component mount
     const checkSession = async () => {
       try {
+        console.log("Checking for active session...");
         const { data: { session: activeSession } } = await supabase.auth.getSession();
         setSession(activeSession);
         
         if (activeSession) {
+          console.log("Session found, fetching user profile...");
           await fetchUserProfile(activeSession.user.id);
+        } else {
+          console.log("No active session found");
+          setIsLoading(false);
         }
       } catch (error) {
         console.error("Error checking session:", error);
-      } finally {
         setIsLoading(false);
       }
     };
@@ -75,9 +80,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(newSession);
         
         if (event === "SIGNED_IN" && newSession) {
+          console.log("User signed in, fetching profile...");
           await fetchUserProfile(newSession.user.id);
         } else if (event === "SIGNED_OUT") {
+          console.log("User signed out, clearing user data");
           setUser(null);
+          setIsLoading(false);
         }
       }
     );
@@ -91,6 +99,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Fetch user profile
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for ID:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -98,14 +107,20 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) {
+        console.error("Error fetching profile:", error);
         throw error;
       }
 
       if (data) {
+        console.log("User profile found:", data);
         setUser(data as User);
+      } else {
+        console.log("No user profile found for ID:", userId);
       }
     } catch (error) {
       console.error("Error fetching user profile:", error);
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -114,19 +129,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting login for:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Login error:", error);
+        throw error;
+      }
       
+      console.log("Login successful:", data);
       // Session and user will be updated via the auth state change listener
+      return data;
     } catch (error) {
       console.error("Error de inicio de sesión:", error);
       throw error;
     } finally {
-      setIsLoading(false);
+      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 
@@ -135,6 +156,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting signup for:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -143,14 +165,19 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Signup error:", error);
+        throw error;
+      }
       
+      console.log("Signup successful:", data);
       // Session and user will be updated via the auth state change listener
+      return data;
     } catch (error) {
       console.error("Error de registro:", error);
       throw error;
     } finally {
-      setIsLoading(false);
+      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 
@@ -159,15 +186,21 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Logging out...");
       const { error } = await supabase.auth.signOut();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Logout error:", error);
+        throw error;
+      }
       
+      console.log("Logout successful");
       // Session and user will be updated via the auth state change listener
     } catch (error) {
       console.error("Error al cerrar sesión:", error);
+      toast.error("Error al cerrar sesión");
     } finally {
-      setIsLoading(false);
+      // Don't set isLoading to false here, it will be set by the auth state change handler
     }
   };
 
@@ -175,7 +208,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value = {
     user,
     session,
-    isAuthenticated: !!session,
+    isAuthenticated: !!session && !!user,
     isLoading,
     login,
     logout,

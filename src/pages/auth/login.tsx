@@ -1,5 +1,4 @@
-
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
@@ -10,6 +9,7 @@ import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/contexts/AuthContext";
+import { useDevMode } from "@/contexts/DevModeContext";
 
 const Login = () => {
   const [email, setEmail] = useState("");
@@ -21,7 +21,15 @@ const Login = () => {
   const [nombre, setNombre] = useState("");
   const [apellido, setApellido] = useState("");
   const navigate = useNavigate();
-  const { login } = useAuth();
+  const { login, isAuthenticated, isLoading } = useAuth();
+  const { isDevelopmentMode } = useDevMode();
+
+  useEffect(() => {
+    if (isAuthenticated || isDevelopmentMode) {
+      console.log("User already authenticated or in dev mode, redirecting to dashboard");
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, isDevelopmentMode, navigate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,6 +63,7 @@ const Login = () => {
       } else {
         // Handle login
         await login(email, password, rememberMe);
+        console.log("Login successful, redirecting to dashboard");
         toast.success("¡Bienvenido al sistema!");
         navigate("/dashboard");
       }

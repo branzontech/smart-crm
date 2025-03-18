@@ -131,6 +131,11 @@ serve(async (req) => {
           // Send email with HTML content
           console.log("Calling Resend API to send email...");
           
+          // Convert HTML content to base64 using TextEncoder (Deno compatible)
+          const encoder = new TextEncoder();
+          const htmlBytes = encoder.encode(cleanHtml);
+          const base64Content = btoa(String.fromCharCode(...htmlBytes));
+          
           const emailResponse = await resend.emails.send({
             from: `${requestData.senderName} <${requestData.senderEmail}>`,
             to: [requestData.clientEmail],
@@ -139,7 +144,7 @@ serve(async (req) => {
             attachments: [
               {
                 filename: `Cotizacion-${requestData.quotationNumber}.html`,
-                content: Buffer.from(cleanHtml).toString('base64'),
+                content: base64Content,
                 content_type: "text/html",
               },
             ],

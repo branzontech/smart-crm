@@ -20,6 +20,8 @@ export const emailService = {
       console.log("Preparing to send quotation email", {
         quotationId: quotation.id,
         quotationNumber: quotation.numero,
+        clientEmail: quotation.cliente?.email,
+        senderEmail: quotation.empresaEmisor?.email
       });
 
       // Validate required fields
@@ -53,7 +55,11 @@ export const emailService = {
         quotationHtml: cleanHtml,
       };
 
-      console.log("Calling send-quotation-email function");
+      console.log("Calling send-quotation-email function with:", {
+        quotationNumber: requestData.quotationNumber,
+        clientEmail: requestData.clientEmail, 
+        senderEmail: requestData.senderEmail
+      });
       
       // Call the Supabase Edge Function to send the email with PDF attachment
       const { data, error } = await supabase.functions.invoke(

@@ -36,7 +36,11 @@ serve(async (req) => {
       throw new Error("Missing required fields for email sending");
     }
 
-    console.log(`Preparing to send quotation ${requestData.quotationNumber} to ${requestData.clientEmail}`);
+    if (!requestData.senderEmail) {
+      throw new Error("Missing sender email address");
+    }
+
+    console.log(`Preparing to send quotation ${requestData.quotationNumber} to ${requestData.clientEmail} from ${requestData.senderEmail}`);
 
     // Generate PDF from HTML
     console.log("Launching browser to generate PDF...");
@@ -110,11 +114,11 @@ serve(async (req) => {
     `;
 
     // Send email with attachment
-    console.log("Sending email...");
+    console.log(`Sending email from "${requestData.senderName}" <${requestData.senderEmail}> to ${requestData.clientEmail}`);
     const emailResponse = await resend.emails.send({
       from: `${requestData.senderName} <${requestData.senderEmail}>`,
       to: [requestData.clientEmail],
-      subject: "Nueva cotización de servicios de Branzontech",
+      subject: `Cotización de servicios - ${requestData.quotationNumber}`,
       html: emailContent,
       attachments: [
         {
@@ -124,7 +128,7 @@ serve(async (req) => {
       ],
     });
 
-    console.log("Email sent successfully");
+    console.log("Email sent successfully:", emailResponse);
     return new Response(JSON.stringify({ success: true, data: emailResponse }), {
       status: 200,
       headers: { "Content-Type": "application/json", ...corsHeaders },

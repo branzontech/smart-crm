@@ -57,6 +57,7 @@ import Comunicaciones from "./pages/comunicaciones";
 
 // Configuración
 import Configuracion from "./pages/configuracion";
+import ConfiguracionUsuarios from "./pages/configuracion/usuarios";
 
 // Cuentas de Cobro (nuevo módulo)
 import CuentasCobro from "./pages/cuentasCobro";
@@ -253,6 +254,13 @@ export default function App() {
             <Route path="/configuracion" element={
               <ProtectedRoute>
                 <Configuracion />
+              </ProtectedRoute>
+            } />
+            
+            {/* Nueva ruta para Configuración de Usuarios */}
+            <Route path="/configuracion/usuarios" element={
+              <ProtectedRoute>
+                <ConfiguracionUsuarios />
               </ProtectedRoute>
             } />
             

@@ -6,8 +6,8 @@ export interface EmpresaEmisor {
   nit: string;
   telefono: string;
   direccion: string;
-  email: string; // Added email field that was missing
-  firmaNombre?: string; // Added for signature name in preview
+  email: string;
+  firmaNombre?: string;
 }
 
 export interface Cliente {
@@ -17,7 +17,7 @@ export interface Cliente {
   telefono: string;
   contacto: string;
   direccion: string;
-  email?: string; // Added email field
+  email?: string;
   // Added these fields to support the form functionality
   pais_id?: string;
   ciudad_id?: string;

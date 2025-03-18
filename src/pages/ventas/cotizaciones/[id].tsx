@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams } from "react-router-dom";
 import { Layout } from "@/components/layout/Layout";
 import { getCotizacionById } from "@/services/cotizacionService";
@@ -16,11 +16,15 @@ import { CotizacionFooter } from "@/components/cotizaciones/CotizacionFooter";
 import { CotizacionSkeleton } from "@/components/cotizaciones/CotizacionSkeleton";
 import { CotizacionEmpty } from "@/components/cotizaciones/CotizacionEmpty";
 import { formatCurrency, formatDate, getEstadoClass } from "@/components/cotizaciones/cotizacionUtils";
+import { emailService } from "@/services/emailService";
+import { Progress } from "@/components/ui/progress";
 
 const CotizacionDetalle = () => {
   const { id } = useParams<{ id: string }>();
   const [cotizacion, setCotizacion] = useState<Cotizacion | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
+  const cotizacionRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchCotizacion = async () => {
@@ -69,6 +73,47 @@ const CotizacionDetalle = () => {
     }, 100);
   };
 
+  const handleSendEmail = async () => {
+    if (!cotizacion) return;
+
+    // Validate client email
+    if (!cotizacion.cliente.email) {
+      toast.error("No se puede enviar el correo: el cliente no tiene dirección de correo electrónico");
+      return;
+    }
+
+    // Validate sender email
+    if (!cotizacion.empresaEmisor.email) {
+      toast.error("No se puede enviar el correo: la empresa emisora no tiene dirección de correo electrónico");
+      return;
+    }
+
+    try {
+      setIsSendingEmail(true);
+      toast("Preparando el envío de la cotización...");
+
+      // Get the HTML content of the quotation
+      const htmlContent = cotizacionRef.current?.outerHTML || "";
+      if (!htmlContent) {
+        throw new Error("No se pudo obtener el contenido de la cotización");
+      }
+
+      // Send the email with the quotation as PDF
+      const result = await emailService.sendQuotationEmail(cotizacion, htmlContent);
+
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast.error(`Error al enviar el correo: ${error.message || "Error desconocido"}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   if (isLoading) {
     return <CotizacionSkeleton />;
   }
@@ -80,15 +125,25 @@ const CotizacionDetalle = () => {
   return (
     <Layout>
       <div className="max-w-5xl mx-auto cotizacion-container">
+        {/* Email sending progress indicator */}
+        {isSendingEmail && (
+          <div className="mb-4 bg-white p-4 rounded-lg shadow-sm border">
+            <p className="text-sm text-gray-600 mb-2">Enviando cotización por correo electrónico...</p>
+            <Progress value={100} className="h-2" />
+          </div>
+        )}
+        
         {/* Header with actions */}
         <CotizacionHeader 
           cotizacion={cotizacion} 
-          handlePrint={handlePrint} 
+          handlePrint={handlePrint}
+          handleSendEmail={handleSendEmail}
+          isSendingEmail={isSendingEmail}
           getEstadoClass={getEstadoClass} 
         />
         
         {/* Main content - optimized for printing */}
-        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none print:rounded-none">
+        <div id="cotizacion-preview" className="bg-white shadow-md rounded-lg overflow-hidden print:shadow-none print:rounded-none" ref={cotizacionRef}>
           {/* Colored header with logo */}
           <CotizacionColoredHeader 
             empresaEmisor={cotizacion.empresaEmisor} 

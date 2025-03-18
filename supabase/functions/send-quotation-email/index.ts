@@ -73,21 +73,7 @@ serve(async (req) => {
         );
       }
 
-      if (!requestData.senderEmail) {
-        console.error("Missing sender email address");
-        return new Response(
-          JSON.stringify({
-            success: false,
-            error: "Missing sender email address"
-          }),
-          {
-            status: 400,
-            headers: { "Content-Type": "application/json", ...corsHeaders },
-          }
-        );
-      }
-
-      console.log(`Preparing to send quotation ${requestData.quotationNumber} to ${requestData.clientEmail} from ${requestData.senderEmail}`);
+      console.log(`Preparing to send quotation ${requestData.quotationNumber} to ${requestData.clientEmail}`);
       
       try {
         // Prepare email content
@@ -122,7 +108,7 @@ serve(async (req) => {
 
         // Log debugging information
         console.log("Preparing email with the following parameters:");
-        console.log(`- From: "${requestData.senderName}" <${requestData.senderEmail}>`);
+        console.log(`- From: TEMP "onboarding@resend.dev" (usando correo temporal de Resend)`);
         console.log(`- To: ${requestData.clientEmail}`);
         console.log(`- Subject: Cotización de servicios - ${requestData.quotationNumber}`);
         console.log(`- Attachment: Cotizacion-${requestData.quotationNumber}.html (HTML size: ${cleanHtml.length} bytes)`);
@@ -137,7 +123,8 @@ serve(async (req) => {
           const base64Content = btoa(String.fromCharCode(...htmlBytes));
           
           const emailResponse = await resend.emails.send({
-            from: `${requestData.senderName} <${requestData.senderEmail}>`,
+            // Usar temporalmente el correo de prueba de Resend mientras se verifica el dominio
+            from: `${requestData.senderName} <onboarding@resend.dev>`,
             to: [requestData.clientEmail],
             subject: `Cotización de servicios - ${requestData.quotationNumber}`,
             html: emailContent,

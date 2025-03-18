@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -7,7 +8,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Upload, X } from "lucide-react";
+import { Loader2, Upload, X, AtSign } from "lucide-react";
 import { toast } from "sonner";
 
 const companyConfigSchema = z.object({
@@ -18,7 +19,8 @@ const companyConfigSchema = z.object({
   telefono: z.string().min(1, "El teléfono es requerido"),
   contacto_principal: z.string().min(1, "El nombre del contacto principal es requerido"),
   telefono_secundario: z.string().optional(),
-  logo_path: z.string().optional()
+  logo_path: z.string().optional(),
+  email: z.string().email("Ingrese un correo electrónico válido").optional().or(z.string().length(0))
 });
 
 interface CompanyConfigFormProps {
@@ -43,7 +45,8 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
       telefono: initialData?.telefono || "",
       contacto_principal: initialData?.contacto_principal || "",
       telefono_secundario: initialData?.telefono_secundario || "",
-      logo_path: initialData?.logo_path || ""
+      logo_path: initialData?.logo_path || "",
+      email: initialData?.email || ""
     }
   });
 
@@ -57,7 +60,8 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
         telefono: initialData.telefono,
         contacto_principal: initialData.contacto_principal,
         telefono_secundario: initialData.telefono_secundario || "",
-        logo_path: initialData.logo_path || ""
+        logo_path: initialData.logo_path || "",
+        email: initialData.email || ""
       });
       setLogoPreview(initialData.logo_path || null);
     }
@@ -176,6 +180,23 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
                     <Input placeholder="Dirección" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="email"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Correo Electrónico</FormLabel>
+                  <FormControl>
+                    <div className="relative">
+                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
+                      <Input className="pl-10" placeholder="correo@empresa.com" {...field} />
+                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

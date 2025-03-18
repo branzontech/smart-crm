@@ -249,6 +249,7 @@ export type Database = {
           contacto_principal: string
           created_at: string
           direccion: string
+          email: string | null
           id: string
           logo_path: string | null
           nit: string
@@ -261,6 +262,7 @@ export type Database = {
           contacto_principal: string
           created_at?: string
           direccion: string
+          email?: string | null
           id?: string
           logo_path?: string | null
           nit: string
@@ -273,6 +275,7 @@ export type Database = {
           contacto_principal?: string
           created_at?: string
           direccion?: string
+          email?: string | null
           id?: string
           logo_path?: string | null
           nit?: string

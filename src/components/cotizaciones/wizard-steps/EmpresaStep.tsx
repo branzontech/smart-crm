@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -14,7 +15,7 @@ export const EmpresaStep: React.FC = () => {
   const { cotizacion, updateEmpresaEmisor, updateFechaVencimiento } = useCotizacion();
   const { empresaEmisor, fechaEmision, fechaVencimiento } = cotizacion;
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedData, setHasLoadedData] = useState(false); // Flag para controlar la carga única
+  const [hasLoadedData, setHasLoadedData] = useState(false);
 
   useEffect(() => {
     // Solo cargar los datos si no se han cargado previamente
@@ -30,14 +31,14 @@ export const EmpresaStep: React.FC = () => {
               telefono: config.telefono,
               direccion: config.direccion,
               logo: config.logo_path,
-              email: ''  // Added missing email field
+              email: config.email || ''
             });
           }
         } catch (error) {
           console.error('Error loading company config:', error);
         } finally {
           setIsLoading(false);
-          setHasLoadedData(true); // Marcar que los datos ya se cargaron
+          setHasLoadedData(true);
         }
       };
 
@@ -104,6 +105,18 @@ export const EmpresaStep: React.FC = () => {
               id="direccion"
               name="direccion"
               value={empresaEmisor.direccion}
+              readOnly
+              disabled
+              className="bg-gray-100"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email">Correo Electrónico</Label>
+            <Input
+              id="email"
+              name="email"
+              value={empresaEmisor.email}
               readOnly
               disabled
               className="bg-gray-100"

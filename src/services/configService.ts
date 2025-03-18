@@ -12,6 +12,7 @@ export interface CompanyConfig {
   contacto_principal: string;
   telefono_secundario?: string;
   logo_path?: string;
+  email?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -57,7 +58,8 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
           telefono: config.telefono,
           contacto_principal: config.contacto_principal,
           telefono_secundario: config.telefono_secundario,
-          logo_path: config.logo_path
+          logo_path: config.logo_path,
+          email: config.email
         })
         .eq("id", config.id)
         .select()
@@ -76,7 +78,8 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
           telefono: config.telefono,
           contacto_principal: config.contacto_principal,
           telefono_secundario: config.telefono_secundario,
-          logo_path: config.logo_path
+          logo_path: config.logo_path,
+          email: config.email
         })
         .select()
         .single();

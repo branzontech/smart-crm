@@ -208,6 +208,13 @@ const OportunidadesIndex = () => {
           ) : (
             <div className="text-center py-8">
               <p className="text-gray-500">No se encontraron oportunidades con ese criterio</p>
+              <Button 
+                onClick={() => navigate("/ventas/oportunidades/nueva")} 
+                className="bg-teal-500 hover:bg-teal-600 text-white mt-4"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                Crear Nueva Oportunidad
+              </Button>
             </div>
           )}
         </div>

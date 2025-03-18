@@ -3,8 +3,8 @@ import { supabase } from "@/integrations/supabase/client";
 import { handleSupabaseError } from "@/utils/supabaseHelpers";
 import { toast } from "sonner";
 
-interface Oportunidad {
-  id?: string;
+export interface Oportunidad {
+  id: string;
   cliente: string;
   valor: number;
   etapa: string;
@@ -15,7 +15,7 @@ interface Oportunidad {
   updated_at?: string;
 }
 
-export const createOportunidad = async (oportunidad: Oportunidad): Promise<string | null> => {
+export const createOportunidad = async (oportunidad: Omit<Oportunidad, 'id' | 'created_at' | 'updated_at'>): Promise<string | null> => {
   try {
     const { data, error } = await supabase
       .from('oportunidades')

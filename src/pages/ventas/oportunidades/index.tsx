@@ -6,19 +6,9 @@ import { useNavigate } from "react-router-dom";
 import { ClipboardList, Plus, Search, Trash2 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { getOportunidades, deleteOportunidad } from "@/services/oportunidadesService";
+import { getOportunidades, deleteOportunidad, Oportunidad } from "@/services/oportunidadesService";
 import { toast } from "sonner";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from "@/components/ui/alert-dialog";
-
-interface Oportunidad {
-  id: string;
-  cliente: string;
-  valor: number;
-  etapa: string;
-  probabilidad: number;
-  fecha_cierre: string;
-  descripcion?: string;
-}
 
 const OportunidadesIndex = () => {
   const navigate = useNavigate();

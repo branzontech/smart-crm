@@ -1,7 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
-import { Navbar } from "@/components/layout/Navbar";
-import { Header } from "@/components/layout/Header";
 import { useNavigate } from "react-router-dom";
 import { FileText, Plus, Wand2, Filter, SortAsc, SortDesc, MoreHorizontal, Loader2, Eye, CheckCircle, XCircle, Clock, Send } from "lucide-react";
 import {
@@ -33,6 +31,7 @@ import { getAllCotizaciones } from "@/services/cotizacionService";
 import { Cotizacion } from "@/types/cotizacion";
 import { toast } from "sonner";
 import { Badge } from "@/components/ui/badge";
+import { Layout } from "@/components/layout/Layout";
 
 const CotizacionesIndex = () => {
   const navigate = useNavigate();
@@ -195,328 +194,269 @@ const CotizacionesIndex = () => {
   const hasSelection = selectedCotizaciones.length > 0;
 
   return (
-    <div className="flex h-screen bg-gray-50">
-      <Navbar />
-      <div className="flex-1 flex flex-col overflow-hidden main-container">
-        <Header />
-        <main className="flex-1 overflow-auto p-6 pt-[calc(var(--header-height)+1.5rem)]">
-          <div className="max-w-6xl mx-auto w-full">
-            <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
-              <div className="flex items-center gap-2">
-                <FileText className="h-6 w-6 text-teal" />
-                <h1 className="text-2xl font-semibold text-gray-900">Cotizaciones</h1>
-              </div>
-              <div className="flex flex-wrap gap-2 w-full md:w-auto">
-                <Button
-                  onClick={() => navigate("/ventas/cotizaciones/nueva")}
-                  variant="outline"
-                  className="text-teal hover:text-sage border-teal hover:border-sage transition-colors duration-200"
-                  size="sm"
-                >
-                  <Plus className="mr-2 h-4 w-4" />
-                  Formulario Básico
-                </Button>
-                <Button
-                  onClick={() => navigate("/ventas/cotizaciones/nueva-wizard")}
-                  className="bg-teal hover:bg-sage text-white transition-colors duration-200"
-                  size="sm"
-                >
-                  <Wand2 className="mr-2 h-4 w-4" />
-                  Asistente Avanzado
-                </Button>
-              </div>
-            </div>
+    <Layout>
+      <div className="container mx-auto py-6">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
+          <div className="flex items-center gap-2">
+            <FileText className="h-6 w-6 text-teal" />
+            <h1 className="text-2xl font-semibold text-gray-900">Cotizaciones</h1>
+          </div>
+          <div className="flex flex-wrap gap-2 w-full md:w-auto">
+            <Button
+              onClick={() => navigate("/ventas/cotizaciones/nueva")}
+              variant="outline"
+              className="text-teal hover:text-sage border-teal hover:border-sage transition-colors duration-200"
+              size="sm"
+            >
+              <Plus className="mr-2 h-4 w-4" />
+              Formulario Básico
+            </Button>
+            <Button
+              onClick={() => navigate("/ventas/cotizaciones/nueva-wizard")}
+              className="bg-teal hover:bg-sage text-white transition-colors duration-200"
+              size="sm"
+            >
+              <Wand2 className="mr-2 h-4 w-4" />
+              Asistente Avanzado
+            </Button>
+          </div>
+        </div>
 
-            <div className="bg-white p-4 rounded-lg shadow-sm mb-4 animate-in fade-in-50 slide-in-from-top-5 duration-300">
-              <div className="flex flex-col md:flex-row gap-4 items-end">
-                <div className="w-full md:w-1/3">
-                  <Label htmlFor="search" className="mb-2 block">Buscar</Label>
-                  <Input
-                    id="search"
-                    placeholder="Buscar por cliente o número..."
-                    value={searchTerm}
-                    onChange={(e) => setSearchTerm(e.target.value)}
-                    className="w-full"
-                  />
-                </div>
-                <div className="w-full md:w-1/3">
-                  <Label htmlFor="estado" className="mb-2 block">Estado</Label>
-                  <Select 
-                    value={filtroEstado || ""} 
-                    onValueChange={(value) => setFiltroEstado(value === "" ? null : value)}
+        <div className="bg-white p-4 rounded-lg shadow-sm mb-4 animate-in fade-in-50 slide-in-from-top-5 duration-300">
+          <div className="flex flex-col md:flex-row gap-4 items-end">
+            <div className="w-full md:w-1/3">
+              <Label htmlFor="search" className="mb-2 block">Buscar</Label>
+              <Input
+                id="search"
+                placeholder="Buscar por cliente o número..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+              />
+            </div>
+            <div className="w-full md:w-1/3">
+              <Label htmlFor="estado" className="mb-2 block">Estado</Label>
+              <Select 
+                value={filtroEstado || ""} 
+                onValueChange={(value) => setFiltroEstado(value === "" ? null : value)}
+              >
+                <SelectTrigger id="estado" className="w-full">
+                  <SelectValue placeholder="Todos los estados" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="borrador">Borrador</SelectItem>
+                  <SelectItem value="enviada">Enviada</SelectItem>
+                  <SelectItem value="aprobada">Aprobada</SelectItem>
+                  <SelectItem value="rechazada">Rechazada</SelectItem>
+                  <SelectItem value="vencida">Vencida</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="w-full md:w-auto flex items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="ml-auto">
+                    <Filter className="mr-2 h-4 w-4" />
+                    Columnas
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.cliente}
+                    onCheckedChange={() => toggleColumnVisibility('cliente')}
                   >
-                    <SelectTrigger id="estado" className="w-full">
-                      <SelectValue placeholder="Todos los estados" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="all">Todos los estados</SelectItem>
-                      <SelectItem value="borrador">Borrador</SelectItem>
-                      <SelectItem value="enviada">Enviada</SelectItem>
-                      <SelectItem value="aprobada">Aprobada</SelectItem>
-                      <SelectItem value="rechazada">Rechazada</SelectItem>
-                      <SelectItem value="vencida">Vencida</SelectItem>
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="w-full md:w-auto flex items-center">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="outline" size="sm" className="ml-auto">
-                        <Filter className="mr-2 h-4 w-4" />
-                        Columnas
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-56">
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.cliente}
-                        onCheckedChange={() => toggleColumnVisibility('cliente')}
-                      >
-                        Cliente
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.numero}
-                        onCheckedChange={() => toggleColumnVisibility('numero')}
-                      >
-                        Número
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.monto}
-                        onCheckedChange={() => toggleColumnVisibility('monto')}
-                      >
-                        Monto
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.estado}
-                        onCheckedChange={() => toggleColumnVisibility('estado')}
-                      >
-                        Estado
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.fechaEmision}
-                        onCheckedChange={() => toggleColumnVisibility('fechaEmision')}
-                      >
-                        Fecha Emisión
-                      </DropdownMenuCheckboxItem>
-                      <DropdownMenuCheckboxItem
-                        checked={visibleColumns.validezHasta}
-                        onCheckedChange={() => toggleColumnVisibility('validezHasta')}
-                      >
-                        Válido Hasta
-                      </DropdownMenuCheckboxItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-              </div>
+                    Cliente
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.numero}
+                    onCheckedChange={() => toggleColumnVisibility('numero')}
+                  >
+                    Número
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.monto}
+                    onCheckedChange={() => toggleColumnVisibility('monto')}
+                  >
+                    Monto
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.estado}
+                    onCheckedChange={() => toggleColumnVisibility('estado')}
+                  >
+                    Estado
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.fechaEmision}
+                    onCheckedChange={() => toggleColumnVisibility('fechaEmision')}
+                  >
+                    Fecha Emisión
+                  </DropdownMenuCheckboxItem>
+                  <DropdownMenuCheckboxItem
+                    checked={visibleColumns.validezHasta}
+                    onCheckedChange={() => toggleColumnVisibility('validezHasta')}
+                  >
+                    Válido Hasta
+                  </DropdownMenuCheckboxItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
+          </div>
+        </div>
 
-            <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-in fade-in-50 duration-500">
-              {isLoading ? (
-                <div className="flex justify-center items-center h-64">
-                  <Loader2 className="h-8 w-8 animate-spin text-primary" />
-                </div>
-              ) : (
-                <div className="overflow-x-auto">
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead className="w-[50px]">
+        <div className="bg-white rounded-lg shadow-sm overflow-hidden animate-in fade-in-50 duration-500">
+          {isLoading ? (
+            <div className="flex justify-center items-center h-64">
+              <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead className="w-[50px]">
+                      <div className="flex items-center justify-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedCotizaciones.length === filteredCotizaciones.length && filteredCotizaciones.length > 0}
+                          onChange={toggleAllSelection}
+                          className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                        />
+                      </div>
+                    </TableHead>
+                    
+                    {visibleColumns.cliente && (
+                      <TableHead className="cursor-pointer" onClick={() => requestSort('cliente')}>
+                        <div className="flex items-center">
+                          Cliente
+                          {sortConfig.key === 'cliente' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    {visibleColumns.numero && (
+                      <TableHead className="cursor-pointer" onClick={() => requestSort('numero')}>
+                        <div className="flex items-center">
+                          Número
+                          {sortConfig.key === 'numero' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    {visibleColumns.monto && (
+                      <TableHead className="cursor-pointer text-right" onClick={() => requestSort('total')}>
+                        <div className="flex items-center justify-end">
+                          Monto
+                          {sortConfig.key === 'total' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    {visibleColumns.estado && (
+                      <TableHead className="cursor-pointer" onClick={() => requestSort('estado')}>
+                        <div className="flex items-center">
+                          Estado
+                          {sortConfig.key === 'estado' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    {visibleColumns.fechaEmision && (
+                      <TableHead className="cursor-pointer" onClick={() => requestSort('fechaEmision')}>
+                        <div className="flex items-center">
+                          Emisión
+                          {sortConfig.key === 'fechaEmision' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    {visibleColumns.validezHasta && (
+                      <TableHead className="cursor-pointer" onClick={() => requestSort('fechaVencimiento')}>
+                        <div className="flex items-center">
+                          Válido hasta
+                          {sortConfig.key === 'fechaVencimiento' && (
+                            sortConfig.direction === 'asc' 
+                              ? <SortAsc className="ml-1 h-4 w-4" /> 
+                              : <SortDesc className="ml-1 h-4 w-4" />
+                          )}
+                        </div>
+                      </TableHead>
+                    )}
+                    
+                    <TableHead className="w-[80px]">Acciones</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredCotizaciones.length > 0 ? (
+                    filteredCotizaciones.map((cotizacion) => (
+                      <TableRow 
+                        key={cotizacion.id} 
+                        className={selectedCotizaciones.includes(cotizacion.id || '') ? "bg-mint/10" : ""}
+                      >
+                        <TableCell>
                           <div className="flex items-center justify-center">
                             <input
                               type="checkbox"
-                              checked={selectedCotizaciones.length === filteredCotizaciones.length && filteredCotizaciones.length > 0}
-                              onChange={toggleAllSelection}
+                              checked={selectedCotizaciones.includes(cotizacion.id || '')}
+                              onChange={() => cotizacion.id && toggleSelection(cotizacion.id)}
                               className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
                             />
                           </div>
-                        </TableHead>
+                        </TableCell>
                         
                         {visibleColumns.cliente && (
-                          <TableHead className="cursor-pointer" onClick={() => requestSort('cliente')}>
-                            <div className="flex items-center">
-                              Cliente
-                              {sortConfig.key === 'cliente' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
-                            </div>
-                          </TableHead>
+                          <TableCell className="font-medium">{cotizacion.cliente.nombre}</TableCell>
                         )}
                         
                         {visibleColumns.numero && (
-                          <TableHead className="cursor-pointer" onClick={() => requestSort('numero')}>
-                            <div className="flex items-center">
-                              Número
-                              {sortConfig.key === 'numero' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
-                            </div>
-                          </TableHead>
+                          <TableCell>{cotizacion.numero}</TableCell>
                         )}
                         
                         {visibleColumns.monto && (
-                          <TableHead className="cursor-pointer text-right" onClick={() => requestSort('total')}>
-                            <div className="flex items-center justify-end">
-                              Monto
-                              {sortConfig.key === 'total' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
-                            </div>
-                          </TableHead>
+                          <TableCell className="text-right">{formatCurrency(cotizacion.total)}</TableCell>
                         )}
                         
                         {visibleColumns.estado && (
-                          <TableHead className="cursor-pointer" onClick={() => requestSort('estado')}>
-                            <div className="flex items-center">
-                              Estado
-                              {sortConfig.key === 'estado' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
+                          <TableCell>
+                            <div className="flex items-center gap-1.5">
+                              {getEstadoIcon(cotizacion.estado)}
+                              <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
+                                {getEstadoDisplayName(cotizacion.estado)}
+                              </span>
                             </div>
-                          </TableHead>
+                          </TableCell>
                         )}
                         
                         {visibleColumns.fechaEmision && (
-                          <TableHead className="cursor-pointer" onClick={() => requestSort('fechaEmision')}>
-                            <div className="flex items-center">
-                              Emisión
-                              {sortConfig.key === 'fechaEmision' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
-                            </div>
-                          </TableHead>
+                          <TableCell>{formatDate(cotizacion.fechaEmision)}</TableCell>
                         )}
                         
                         {visibleColumns.validezHasta && (
-                          <TableHead className="cursor-pointer" onClick={() => requestSort('fechaVencimiento')}>
-                            <div className="flex items-center">
-                              Válido hasta
-                              {sortConfig.key === 'fechaVencimiento' && (
-                                sortConfig.direction === 'asc' 
-                                  ? <SortAsc className="ml-1 h-4 w-4" /> 
-                                  : <SortDesc className="ml-1 h-4 w-4" />
-                              )}
-                            </div>
-                          </TableHead>
+                          <TableCell>{formatDate(cotizacion.fechaVencimiento)}</TableCell>
                         )}
                         
-                        <TableHead className="w-[80px]">Acciones</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {filteredCotizaciones.length > 0 ? (
-                        filteredCotizaciones.map((cotizacion) => (
-                          <TableRow 
-                            key={cotizacion.id} 
-                            className={selectedCotizaciones.includes(cotizacion.id || '') ? "bg-mint/10" : ""}
-                          >
-                            <TableCell>
-                              <div className="flex items-center justify-center">
-                                <input
-                                  type="checkbox"
-                                  checked={selectedCotizaciones.includes(cotizacion.id || '')}
-                                  onChange={() => cotizacion.id && toggleSelection(cotizacion.id)}
-                                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
-                                />
-                              </div>
-                            </TableCell>
-                            
-                            {visibleColumns.cliente && (
-                              <TableCell className="font-medium">{cotizacion.cliente.nombre}</TableCell>
-                            )}
-                            
-                            {visibleColumns.numero && (
-                              <TableCell>{cotizacion.numero}</TableCell>
-                            )}
-                            
-                            {visibleColumns.monto && (
-                              <TableCell className="text-right">{formatCurrency(cotizacion.total)}</TableCell>
-                            )}
-                            
-                            {visibleColumns.estado && (
-                              <TableCell>
-                                <div className="flex items-center gap-1.5">
-                                  {getEstadoIcon(cotizacion.estado)}
-                                  <span className={`px-2 py-1 rounded-full text-xs ${getEstadoClass(cotizacion.estado)}`}>
-                                    {getEstadoDisplayName(cotizacion.estado)}
-                                  </span>
-                                </div>
-                              </TableCell>
-                            )}
-                            
-                            {visibleColumns.fechaEmision && (
-                              <TableCell>{formatDate(cotizacion.fechaEmision)}</TableCell>
-                            )}
-                            
-                            {visibleColumns.validezHasta && (
-                              <TableCell>{formatDate(cotizacion.fechaVencimiento)}</TableCell>
-                            )}
-                            
-                            <TableCell>
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button variant="ghost" className="h-8 w-8 p-0">
-                                    <span className="sr-only">Abrir menú</span>
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end">
-                                  <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
-                                    <Eye className="h-4 w-4 mr-2" />
-                                    Ver
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem onClick={() => cotizacion.id && navigate(`/ventas/cotizaciones/${cotizacion.id}/editar`)}>
-                                    Editar
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem className="text-red-600">
-                                    Eliminar
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </TableCell>
-                          </TableRow>
-                        ))
-                      ) : (
-                        <TableRow>
-                          <TableCell colSpan={
-                            1 + // Checkbox column
-                            Object.values(visibleColumns).filter(Boolean).length + // Visible data columns
-                            1 // Action column
-                          } className="h-24 text-center">
-                            No se encontraron cotizaciones con los filtros seleccionados
-                          </TableCell>
-                        </TableRow>
-                      )}
-                    </TableBody>
-                  </Table>
-                </div>
-              )}
-            </div>
+                        <TableCell>
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                             
 
-            {hasSelection && (
-              <div className="mt-4 flex justify-end gap-2 animate-in fade-in-50 slide-in-from-bottom-5 duration-300">
-                <Button variant="outline" size="sm" onClick={() => setSelectedCotizaciones([])}>
-                  Cancelar selección
-                </Button>
-                <Button variant="default" size="sm" className="bg-teal hover:bg-sage">
-                  Acciones ({selectedCotizaciones.length})
-                </Button>
-              </div>
-            )}
-          </div>
-        </main>
-      </div>
-    </div>
-  );
-};
-
-export default CotizacionesIndex;

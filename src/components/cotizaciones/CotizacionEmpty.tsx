@@ -8,7 +8,7 @@ export const CotizacionEmpty = () => {
   
   return (
     <Layout>
-      <div className="text-center py-16">
+      <div className="container mx-auto text-center py-16">
         <h2 className="text-2xl font-bold mb-4">No se encontró la cotización</h2>
         <Button onClick={() => navigate("/ventas/cotizaciones")}>
           Volver a cotizaciones

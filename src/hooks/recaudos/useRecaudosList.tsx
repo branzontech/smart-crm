@@ -25,15 +25,15 @@ export const useRecaudosList = () => {
             Math.floor((hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0;
           
           // Formatear el nombre del cliente
-          const nombreCompleto = recaudo.cliente.tipo_persona === 'juridica' ? 
-            recaudo.cliente.empresa : 
-            `${recaudo.cliente.nombre} ${recaudo.cliente.apellidos || ''}`;
+          const nombreCliente = recaudo.cliente ? 
+            (recaudo.cliente.nombre || "Cliente no especificado") : 
+            "Cliente no especificado";
           
           return {
             id: recaudo.id,
-            cliente: nombreCompleto,
+            cliente: nombreCliente,
             cliente_id: recaudo.cliente_id,
-            factura: recaudo.factura,
+            factura: recaudo.numero,
             numero: recaudo.numero,
             monto: recaudo.monto,
             fechaVencimiento: recaudo.fecha_vencimiento,

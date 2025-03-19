@@ -47,12 +47,19 @@ export const RecaudoTable = ({
   
   // Format date
   const formatDate = (dateString: string) => {
-    const options: Intl.DateTimeFormatOptions = { 
-      year: 'numeric', 
-      month: 'short', 
-      day: 'numeric' 
-    };
-    return new Date(dateString).toLocaleDateString('es-ES', options);
+    if (!dateString) return "N/A";
+    
+    try {
+      const options: Intl.DateTimeFormatOptions = { 
+        year: 'numeric', 
+        month: 'short', 
+        day: 'numeric' 
+      };
+      return new Date(dateString).toLocaleDateString('es-ES', options);
+    } catch (error) {
+      console.error("Error formatting date:", error);
+      return "Fecha inválida";
+    }
   };
   
   // Handle click on row to view details
@@ -90,8 +97,8 @@ export const RecaudoTable = ({
                   className="hover:bg-gray-50 cursor-pointer"
                   onClick={(e) => handleViewDetails(recaudo, e)}
                 >
-                  <TableCell className="font-medium">{recaudo.factura || recaudo.numero || "N/A"}</TableCell>
-                  <TableCell>{recaudo.cliente}</TableCell>
+                  <TableCell className="font-medium">{recaudo.numero || "N/A"}</TableCell>
+                  <TableCell>{recaudo.cliente || "Cliente no especificado"}</TableCell>
                   <TableCell className="text-right">{formatCurrency(recaudo.monto)}</TableCell>
                   <TableCell className="text-center">
                     <div className="flex flex-col">
@@ -117,7 +124,7 @@ export const RecaudoTable = ({
                       {recaudo.estado === "En proceso" && <Clock className="mr-1 h-3 w-3" />}
                       {recaudo.estado === "Vencido" && <AlertCircle className="mr-1 h-3 w-3" />}
                       {recaudo.estado === "Pagado" && <CheckCircle className="mr-1 h-3 w-3" />}
-                      {recaudo.estado}
+                      {recaudo.estado || "No especificado"}
                     </Badge>
                   </TableCell>
                   <TableCell>

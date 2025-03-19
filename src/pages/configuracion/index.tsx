@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Settings, Save, Palette } from "lucide-react";
+import { Settings, Save, Palette, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
@@ -10,6 +10,8 @@ import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { CompanyConfigForm } from "@/components/configuracion/CompanyConfigForm";
 import { CompanyConfig, fetchCompanyConfig, saveCompanyConfig } from "@/services/configService";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/ui/button";
 
 const ConfiguracionIndex = () => {
   const { currentTheme } = useTheme();
@@ -52,9 +54,17 @@ const ConfiguracionIndex = () => {
         <Header />
         <main className="flex-1 p-8 pt-[var(--header-height)]">
           <div className="max-w-4xl mx-auto">
-            <div className="flex items-center gap-2 mb-6">
-              <Settings className="h-6 w-6 text-primary" />
-              <h1 className="text-2xl font-semibold text-foreground">Configuración</h1>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2">
+                <Settings className="h-6 w-6 text-primary" />
+                <h1 className="text-2xl font-semibold text-foreground">Configuración</h1>
+              </div>
+              <Button asChild variant="outline" className="gap-2">
+                <Link to="/configuracion/usuarios">
+                  <Users className="h-4 w-4" />
+                  Gestionar Usuarios
+                </Link>
+              </Button>
             </div>
 
             <Tabs defaultValue="general" className="space-y-6">

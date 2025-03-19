@@ -17,7 +17,7 @@ import { NavItem } from "./types/navbar.types";
 
 // Lista de enlaces de navegación
 export const navigationLinks: NavItem[] = [
-  { label: "Dashboard", icon: LayoutDashboard, path: "/" },
+  { label: "Dashboard", icon: LayoutDashboard, path: "/dashboard" },
   { label: "Clientes", icon: Users, path: "/clientes" },
   { label: "Empresas", icon: Building2, path: "/empresas" },
   { label: "Proveedores", icon: Store, path: "/proveedores" },

@@ -1,3 +1,4 @@
+
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -458,5 +459,45 @@ const CotizacionesIndex = () => {
                         <TableCell>
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
-                             
+                              <Button variant="ghost" size="icon">
+                                <MoreHorizontal className="h-5 w-5" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              <DropdownMenuItem onClick={() => navigate(`/ventas/cotizaciones/${cotizacion.id}`)}>
+                                <Eye className="mr-2 h-4 w-4" />
+                                Ver detalle
+                              </DropdownMenuItem>
+                              <DropdownMenuSeparator />
+                              <DropdownMenuItem 
+                                className="text-red-600"
+                                onClick={() => {
+                                  // Aquí iría la lógica para eliminar
+                                  toast.error("Función no implementada");
+                                }}
+                              >
+                                Eliminar
+                              </DropdownMenuItem>
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </TableCell>
+                      </TableRow>
+                    ))
+                  ) : (
+                    <TableRow>
+                      <TableCell colSpan={7} className="text-center py-10 text-gray-500">
+                        No se encontraron cotizaciones
+                      </TableCell>
+                    </TableRow>
+                  )}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </div>
+      </div>
+    </Layout>
+  );
+};
 
+export default CotizacionesIndex;

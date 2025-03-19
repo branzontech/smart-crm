@@ -1,7 +1,7 @@
 
 import { Button } from "@/components/ui/button";
-import { Layout } from "@/components/layout/Layout";
 import { useNavigate } from "react-router-dom";
+import { Layout } from "@/components/layout/Layout";
 
 export const CotizacionEmpty = () => {
   const navigate = useNavigate();

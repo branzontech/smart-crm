@@ -245,7 +245,7 @@ const CotizacionesIndex = () => {
                   <SelectValue placeholder="Todos los estados" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all">Todos los estados</SelectItem>
+                  <SelectItem value="">Todos los estados</SelectItem>
                   <SelectItem value="borrador">Borrador</SelectItem>
                   <SelectItem value="enviada">Enviada</SelectItem>
                   <SelectItem value="aprobada">Aprobada</SelectItem>

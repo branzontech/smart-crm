@@ -12,6 +12,7 @@ import {
   Store,
   FileText,
   Database,
+  UserCog,
 } from "lucide-react";
 import { NavItem } from "./types/navbar.types";
 
@@ -64,13 +65,6 @@ export const navigationLinks: NavItem[] = [
   { label: "Reportes", icon: BarChart3, path: "/reportes" },
   { label: "Calendario", icon: Calendar, path: "/calendario" },
   { label: "Comunicaciones", icon: Mail, path: "/comunicaciones" },
-  { 
-    label: "Configuración", 
-    icon: Settings, 
-    path: "/configuracion",
-    subItems: [
-      { label: "General", path: "/configuracion" },
-      { label: "Usuarios", path: "/configuracion/usuarios" },
-    ],
-  },
+  { label: "Configuración", icon: Settings, path: "/configuracion" },
+  { label: "Usuarios", icon: UserCog, path: "/configuracion/usuarios" },
 ];

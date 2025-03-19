@@ -5,6 +5,8 @@ import { toast } from "sonner";
 // Get complete recaudo details
 export const getRecaudoDetails = async (id: string) => {
   try {
+    console.log("Fetching recaudo details for ID:", id);
+    
     // Get recaudo data
     const { data: recaudo, error: recaudoError } = await supabase
       .from('recaudos')
@@ -15,7 +17,10 @@ export const getRecaudoDetails = async (id: string) => {
       .eq('id', id)
       .single();
 
-    if (recaudoError) throw recaudoError;
+    if (recaudoError) {
+      console.error("Error fetching recaudo:", recaudoError);
+      throw recaudoError;
+    }
 
     // Get articulos
     const { data: articulos, error: articulosError } = await supabase
@@ -26,7 +31,12 @@ export const getRecaudoDetails = async (id: string) => {
       `)
       .eq('recaudo_id', id);
 
-    if (articulosError) throw articulosError;
+    if (articulosError) {
+      console.error("Error fetching articulos:", articulosError);
+      throw articulosError;
+    }
+
+    console.log("Articulos encontrados:", articulos);
 
     // Get archivos
     const { data: archivos, error: archivosError } = await supabase
@@ -34,7 +44,10 @@ export const getRecaudoDetails = async (id: string) => {
       .select('*')
       .eq('recaudo_id', id);
 
-    if (archivosError) throw archivosError;
+    if (archivosError) {
+      console.error("Error fetching archivos:", archivosError);
+      throw archivosError;
+    }
     
     // Get file URLs if there are any archivos
     const archivosWithUrls = [];
@@ -54,7 +67,7 @@ export const getRecaudoDetails = async (id: string) => {
       }
     }
 
-    return { 
+    const result = { 
       data: {
         ...recaudo,
         articulos: articulos || [],
@@ -62,6 +75,9 @@ export const getRecaudoDetails = async (id: string) => {
       }, 
       error: null 
     };
+    
+    console.log("Recaudo details result:", result);
+    return result;
   } catch (error: any) {
     console.error(`Error fetching recaudo ${id}:`, error);
     return { data: null, error };

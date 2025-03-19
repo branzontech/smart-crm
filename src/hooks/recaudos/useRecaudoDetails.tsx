@@ -20,6 +20,8 @@ export const useRecaudoDetails = (onRecaudoUpdate: () => void) => {
       if (error) throw error;
       
       if (data) {
+        console.log("Datos recibidos del servicio:", data);
+        
         // Calcular días vencido
         const hoy = new Date();
         const fechaVencimiento = new Date(data.fecha_vencimiento);
@@ -27,54 +29,61 @@ export const useRecaudoDetails = (onRecaudoUpdate: () => void) => {
           Math.floor((hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0;
         
         // Formatear el nombre del cliente
-        const nombreCompleto = data.cliente.tipo_persona === 'juridica' ? 
-          data.cliente.empresa : 
-          `${data.cliente.nombre} ${data.cliente.apellidos || ''}`;
+        let nombreCompleto = "Cliente no especificado";
+        if (data.cliente) {
+          if (data.cliente.tipo_persona === 'juridica') {
+            nombreCompleto = data.cliente.empresa || "Cliente no especificado";
+          } else {
+            nombreCompleto = `${data.cliente.nombre || ""} ${data.cliente.apellidos || ""}`.trim();
+            if (!nombreCompleto) nombreCompleto = "Cliente no especificado";
+          }
+        }
         
         // Mapeamos los datos desde la API a nuestro formato de recaudo
         const recaudoConDetalle: Recaudo = {
           id: data.id,
-          numero: data.numero,
+          numero: data.numero || "",
           cliente: nombreCompleto,
           cliente_id: data.cliente_id,
-          factura: data.factura || data.numero,
-          monto: data.monto,
+          factura: data.factura || data.numero || "",
+          monto: data.monto || 0,
           fechaVencimiento: data.fecha_vencimiento,
-          estado: data.estado.charAt(0).toUpperCase() + data.estado.slice(1), // Capitalizar el estado
+          estado: data.estado ? (data.estado.charAt(0).toUpperCase() + data.estado.slice(1)) : "Pendiente", // Capitalizar el estado
           diasVencido: diasVencido,
-          subtotal: data.subtotal,
-          iva: data.iva,
-          total: data.total,
+          subtotal: data.subtotal || 0,
+          iva: data.iva || 0,
+          total: data.total || 0,
           fecha_pago: data.fecha_pago,
-          metodo_pago: data.metodo_pago,
-          notas: data.notas,
+          metodo_pago: data.metodo_pago || "",
+          notas: data.notas || "",
           detalles: {
             direccion: data.cliente?.direccion || '',
             telefono: data.cliente?.telefono || '',
             fechaEmision: data.created_at,
             fechaPago: data.fecha_pago,
-            metodoPago: data.metodo_pago,
+            metodoPago: data.metodo_pago || "",
             notas: data.notas || '',
-            subtotal: data.subtotal,
-            totalIva: data.iva,
+            subtotal: data.subtotal || 0,
+            totalIva: data.iva || 0,
             articulos: data.articulos?.map((art: any) => ({
-              nombre: art.descripcion,
-              cantidad: art.cantidad,
-              precio: art.valor_unitario,
-              iva: art.valor_iva,
+              nombre: art.descripcion || "Sin descripción",
+              cantidad: art.cantidad || 0,
+              precio: art.valor_unitario || 0,
+              iva: art.valor_iva || 0,
               proveedor: art.proveedor?.nombre || 'No especificado'
             })) || [],
             archivosAdjuntos: data.archivos?.map((archivo: any) => ({
               id: archivo.id,
-              nombre: archivo.nombre,
-              tipo: archivo.tipo,
-              url: archivo.url,
-              tamaño: archivo.tamano,
+              nombre: archivo.nombre || "Archivo sin nombre",
+              tipo: archivo.tipo || "application/octet-stream",
+              url: archivo.url || "",
+              tamaño: archivo.tamano || 0,
               fechaSubida: archivo.created_at
             })) || []
           }
         };
         
+        console.log("Recaudo procesado:", recaudoConDetalle);
         setRecaudoSeleccionado(recaudoConDetalle);
       }
     } catch (error) {

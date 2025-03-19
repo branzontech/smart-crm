@@ -54,6 +54,7 @@ export const createRecaudo = async (recaudoData: RecaudoForm): Promise<{ data: a
 // Get all recaudos
 export const getRecaudos = async (): Promise<{ data: any[] | null; error: Error | null }> => {
   try {
+    console.log("Fetching all recaudos");
     const { data, error } = await supabase
       .from('recaudos')
       .select(`
@@ -66,14 +67,18 @@ export const getRecaudos = async (): Promise<{ data: any[] | null; error: Error 
     
     // Process data to ensure cliente names are properly formatted
     if (data) {
+      console.log("Recaudos encontrados:", data.length);
       data.forEach(recaudo => {
         if (recaudo.cliente) {
           // Format client name based on tipo_persona
           if (recaudo.cliente.tipo_persona === 'juridica') {
-            recaudo.cliente.nombre = recaudo.cliente.empresa;
+            recaudo.cliente.nombre = recaudo.cliente.empresa || "Empresa sin nombre";
           } else {
-            recaudo.cliente.nombre = `${recaudo.cliente.nombre} ${recaudo.cliente.apellidos || ''}`;
+            recaudo.cliente.nombre = `${recaudo.cliente.nombre || ""} ${recaudo.cliente.apellidos || ""}`.trim();
+            if (!recaudo.cliente.nombre) recaudo.cliente.nombre = "Cliente sin nombre";
           }
+        } else {
+          console.log("Cliente no encontrado para recaudo:", recaudo.id);
         }
       });
     }
@@ -102,9 +107,10 @@ export const getRecaudoById = async (id: string): Promise<{ data: any | null; er
     // Format client name based on tipo_persona
     if (recaudo && recaudo.cliente) {
       if (recaudo.cliente.tipo_persona === 'juridica') {
-        recaudo.cliente.nombre = recaudo.cliente.empresa;
+        recaudo.cliente.nombre = recaudo.cliente.empresa || "Empresa sin nombre";
       } else {
-        recaudo.cliente.nombre = `${recaudo.cliente.nombre} ${recaudo.cliente.apellidos || ''}`;
+        recaudo.cliente.nombre = `${recaudo.cliente.nombre || ""} ${recaudo.cliente.apellidos || ""}`.trim();
+        if (!recaudo.cliente.nombre) recaudo.cliente.nombre = "Cliente sin nombre";
       }
     }
 

@@ -22,6 +22,8 @@ export const getRecaudoDetails = async (id: string) => {
       throw recaudoError;
     }
 
+    console.log("Recaudo base data:", recaudo);
+
     // Get articulos
     const { data: articulos, error: articulosError } = await supabase
       .from('articulos_recaudo')
@@ -76,7 +78,7 @@ export const getRecaudoDetails = async (id: string) => {
       error: null 
     };
     
-    console.log("Recaudo details result:", result);
+    console.log("Recaudo details complete result:", result);
     return result;
   } catch (error: any) {
     console.error(`Error fetching recaudo ${id}:`, error);

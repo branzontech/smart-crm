@@ -1,3 +1,4 @@
+
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -57,6 +58,7 @@ import Comunicaciones from "./pages/comunicaciones";
 
 // Configuración
 import Configuracion from "./pages/configuracion";
+import ConfiguracionUsuarios from "./pages/configuracion/usuarios";
 
 // Cuentas de Cobro (nuevo módulo)
 import CuentasCobro from "./pages/cuentasCobro";
@@ -253,6 +255,13 @@ export default function App() {
             <Route path="/configuracion" element={
               <ProtectedRoute>
                 <Configuracion />
+              </ProtectedRoute>
+            } />
+            
+            {/* Ruta de Configuración de Usuarios - Protegida */}
+            <Route path="/configuracion/usuarios" element={
+              <ProtectedRoute>
+                <ConfiguracionUsuarios />
               </ProtectedRoute>
             } />
             

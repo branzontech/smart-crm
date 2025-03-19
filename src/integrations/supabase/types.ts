@@ -249,7 +249,6 @@ export type Database = {
           contacto_principal: string
           created_at: string
           direccion: string
-          email: string | null
           id: string
           logo_path: string | null
           nit: string
@@ -262,7 +261,6 @@ export type Database = {
           contacto_principal: string
           created_at?: string
           direccion: string
-          email?: string | null
           id?: string
           logo_path?: string | null
           nit: string
@@ -275,7 +273,6 @@ export type Database = {
           contacto_principal?: string
           created_at?: string
           direccion?: string
-          email?: string | null
           id?: string
           logo_path?: string | null
           nit?: string
@@ -521,7 +518,6 @@ export type Database = {
           id: string
           nombre: string | null
           rol: string
-          rol_usuario: Database["public"]["Enums"]["user_role"]
           updated_at: string
           username: string | null
         }
@@ -532,7 +528,6 @@ export type Database = {
           id: string
           nombre?: string | null
           rol?: string
-          rol_usuario?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
         }
@@ -543,7 +538,6 @@ export type Database = {
           id?: string
           nombre?: string | null
           rol?: string
-          rol_usuario?: Database["public"]["Enums"]["user_role"]
           updated_at?: string
           username?: string | null
         }
@@ -757,12 +751,7 @@ export type Database = {
       }
     }
     Enums: {
-      user_role:
-        | "Administrador"
-        | "Agente"
-        | "Contratista"
-        | "Pagador"
-        | "Financiero"
+      [_ in never]: never
     }
     CompositeTypes: {
       [_ in never]: never

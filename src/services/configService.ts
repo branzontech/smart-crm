@@ -12,7 +12,6 @@ export interface CompanyConfig {
   contacto_principal: string;
   telefono_secundario?: string;
   logo_path?: string;
-  email?: string;
   created_at?: string;
   updated_at?: string;
 }
@@ -20,25 +19,22 @@ export interface CompanyConfig {
 // Fetch company configuration
 export const fetchCompanyConfig = async (): Promise<CompanyConfig | null> => {
   try {
-    // Query without single() to handle empty result properly
     const { data, error } = await supabase
       .from("config_empresas")
       .select("*")
       .order("created_at", { ascending: false })
-      .limit(1);
+      .limit(1)
+      .single();
     
     if (error) {
+      // If no configuration exists yet, don't throw an error
+      if (error.code === 'PGRST116') {
+        return null;
+      }
       throw error;
     }
     
-    // Check if we got any results
-    if (!data || data.length === 0) {
-      console.log("No company configuration found");
-      return null;
-    }
-    
-    console.log("Fetched company config with email:", data[0]?.email || 'No email configured');
-    return data[0] as CompanyConfig;
+    return data as CompanyConfig;
   } catch (error) {
     handleSupabaseError(error, "Error al obtener la configuración de la empresa");
     return null;
@@ -48,8 +44,6 @@ export const fetchCompanyConfig = async (): Promise<CompanyConfig | null> => {
 // Save or update company configuration
 export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyConfig | null> => {
   try {
-    console.log("Saving company config with email:", config.email || 'No email provided');
-    
     let result;
     
     if (config.id) {
@@ -63,8 +57,7 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
           telefono: config.telefono,
           contacto_principal: config.contacto_principal,
           telefono_secundario: config.telefono_secundario,
-          logo_path: config.logo_path,
-          email: config.email
+          logo_path: config.logo_path
         })
         .eq("id", config.id)
         .select()
@@ -83,8 +76,7 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
           telefono: config.telefono,
           contacto_principal: config.contacto_principal,
           telefono_secundario: config.telefono_secundario,
-          logo_path: config.logo_path,
-          email: config.email
+          logo_path: config.logo_path
         })
         .select()
         .single();
@@ -93,7 +85,6 @@ export const saveCompanyConfig = async (config: CompanyConfig): Promise<CompanyC
       result = data;
     }
     
-    console.log("Company config saved successfully with email:", result?.email || 'No email saved');
     toast.success("Configuración guardada correctamente");
     return result as CompanyConfig;
   } catch (error) {

@@ -7,18 +7,10 @@ import { Cotizacion } from "@/types/cotizacion";
 interface CotizacionHeaderProps {
   cotizacion: Cotizacion;
   handlePrint: () => void;
-  handleSendEmail: () => void;
-  isSendingEmail: boolean;
   getEstadoClass: (estado: string) => string;
 }
 
-export const CotizacionHeader = ({ 
-  cotizacion, 
-  handlePrint, 
-  handleSendEmail,
-  isSendingEmail,
-  getEstadoClass 
-}: CotizacionHeaderProps) => {
+export const CotizacionHeader = ({ cotizacion, handlePrint, getEstadoClass }: CotizacionHeaderProps) => {
   const navigate = useNavigate();
   
   return (
@@ -56,13 +48,11 @@ export const CotizacionHeader = ({
           Imprimir
         </Button>
         <Button 
-          variant="default"
+          variant="default" 
           className="bg-[#f15025] hover:bg-[#d43d16] text-white"
-          onClick={handleSendEmail}
-          disabled={isSendingEmail}
         >
           <Send className="h-4 w-4 mr-2" />
-          {isSendingEmail ? "Enviando..." : "Enviar por correo"}
+          Enviar
         </Button>
       </div>
     </div>

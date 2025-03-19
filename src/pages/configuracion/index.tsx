@@ -1,7 +1,8 @@
+
 import { useState, useEffect } from "react";
 import { Navbar } from "@/components/layout/Navbar";
 import { Header } from "@/components/layout/Header";
-import { Settings, Palette } from "lucide-react";
+import { Settings, Save, Palette } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ThemeCustomizer } from "@/components/theme/ThemeCustomizer";
@@ -9,8 +10,6 @@ import { toast } from "sonner";
 import { useTheme } from "@/contexts/ThemeContext";
 import { CompanyConfigForm } from "@/components/configuracion/CompanyConfigForm";
 import { CompanyConfig, fetchCompanyConfig, saveCompanyConfig } from "@/services/configService";
-import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
 
 const ConfiguracionIndex = () => {
   const { currentTheme } = useTheme();

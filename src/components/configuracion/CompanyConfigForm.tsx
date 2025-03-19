@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -8,9 +7,8 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Loader2, Upload, X, AtSign, Info } from "lucide-react";
+import { Loader2, Upload, X } from "lucide-react";
 import { toast } from "sonner";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const companyConfigSchema = z.object({
   id: z.string().optional(),
@@ -20,8 +18,7 @@ const companyConfigSchema = z.object({
   telefono: z.string().min(1, "El teléfono es requerido"),
   contacto_principal: z.string().min(1, "El nombre del contacto principal es requerido"),
   telefono_secundario: z.string().optional(),
-  logo_path: z.string().optional(),
-  email: z.string().email("Ingrese un correo electrónico válido").optional().or(z.string().length(0))
+  logo_path: z.string().optional()
 });
 
 interface CompanyConfigFormProps {
@@ -46,15 +43,9 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
       telefono: initialData?.telefono || "",
       contacto_principal: initialData?.contacto_principal || "",
       telefono_secundario: initialData?.telefono_secundario || "",
-      logo_path: initialData?.logo_path || "",
-      email: initialData?.email || ""
+      logo_path: initialData?.logo_path || ""
     }
   });
-
-  // Log initial email value
-  useEffect(() => {
-    console.log("Company config form initialized with email:", initialData?.email || "No email present");
-  }, [initialData]);
 
   useEffect(() => {
     if (initialData) {
@@ -66,8 +57,7 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
         telefono: initialData.telefono,
         contacto_principal: initialData.contacto_principal,
         telefono_secundario: initialData.telefono_secundario || "",
-        logo_path: initialData.logo_path || "",
-        email: initialData.email || ""
+        logo_path: initialData.logo_path || ""
       });
       setLogoPreview(initialData.logo_path || null);
     }
@@ -116,8 +106,6 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
   const processSubmit = async (values: z.infer<typeof companyConfigSchema>) => {
     setIsSubmitting(true);
     try {
-      console.log("Submitting form with email:", values.email || "No email provided");
-      
       // Upload logo if a new one was selected
       if (logoFile) {
         setIsUploading(true);
@@ -188,43 +176,6 @@ export function CompanyConfigForm({ initialData, onSubmit, onCancel }: CompanyCo
                   <FormLabel>Dirección</FormLabel>
                   <FormControl>
                     <Input placeholder="Dirección" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <FormField
-              control={form.control}
-              name="email"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel className="flex items-center gap-1">
-                    Correo Electrónico
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Info className="h-4 w-4 text-primary cursor-help" />
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p className="max-w-xs">Este correo es necesario para enviar cotizaciones por email</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </FormLabel>
-                  <FormControl>
-                    <div className="relative">
-                      <AtSign className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 h-4 w-4" />
-                      <Input 
-                        className="pl-10" 
-                        placeholder="correo@empresa.com" 
-                        {...field} 
-                        onChange={(e) => {
-                          console.log("Email input changing to:", e.target.value);
-                          field.onChange(e);
-                        }}
-                      />
-                    </div>
                   </FormControl>
                   <FormMessage />
                 </FormItem>

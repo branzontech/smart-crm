@@ -5,7 +5,6 @@ import { RecaudoForm } from "./types";
 import { insertArticulosRecaudo, getArticulosRecaudo } from "./articulosService";
 import { insertArchivosRecaudo, getArchivosRecaudo, getArchivosPaths } from "./archivosService";
 import { deleteRecaudoFiles } from "./fileService";
-import { getCurrentRecaudoNumber } from "./numeroService";
 
 // Create a new recaudo with transaction support
 export const createRecaudo = async (recaudoData: RecaudoForm): Promise<{ data: any | null; error: Error | null }> => {
@@ -30,9 +29,6 @@ export const createRecaudo = async (recaudoData: RecaudoForm): Promise<{ data: a
       throw new Error("Failed to create recaudo record");
     }
 
-    // Get the current recaudo number that was just assigned
-    const currentRecaudoNumber = await getCurrentRecaudoNumber();
-
     // Insert articulos
     const { error: articulosError } = await insertArticulosRecaudo(recaudoId, recaudoData.articulos);
     if (articulosError) throw articulosError;
@@ -43,7 +39,7 @@ export const createRecaudo = async (recaudoData: RecaudoForm): Promise<{ data: a
       if (archivosError) throw archivosError;
     }
 
-    return { data: { id: recaudoId, numero: currentRecaudoNumber }, error: null };
+    return { data: recaudoId, error: null };
   } catch (error: any) {
     console.error("Error creating recaudo:", error);
     toast.error(`Error al crear recaudo: ${error.message}`);
@@ -54,35 +50,15 @@ export const createRecaudo = async (recaudoData: RecaudoForm): Promise<{ data: a
 // Get all recaudos
 export const getRecaudos = async (): Promise<{ data: any[] | null; error: Error | null }> => {
   try {
-    console.log("Fetching all recaudos");
     const { data, error } = await supabase
       .from('recaudos')
       .select(`
         *,
-        cliente:cliente_id(id, nombre, apellidos, empresa, tipo_persona)
+        cliente:cliente_id(id, nombre, apellidos, empresa)
       `)
       .order('created_at', { ascending: false });
 
     if (error) throw error;
-    
-    // Process data to ensure cliente names are properly formatted
-    if (data) {
-      console.log("Recaudos encontrados:", data.length);
-      data.forEach(recaudo => {
-        if (recaudo.cliente) {
-          // Format client name based on tipo_persona
-          if (recaudo.cliente.tipo_persona === 'juridica') {
-            recaudo.cliente.nombre = recaudo.cliente.empresa || "Empresa sin nombre";
-          } else {
-            recaudo.cliente.nombre = `${recaudo.cliente.nombre || ""} ${recaudo.cliente.apellidos || ""}`.trim();
-            if (!recaudo.cliente.nombre) recaudo.cliente.nombre = "Cliente sin nombre";
-          }
-        } else {
-          console.log("Cliente no encontrado para recaudo:", recaudo.id);
-        }
-      });
-    }
-    
     return { data, error: null };
   } catch (error: any) {
     console.error("Error fetching recaudos:", error);
@@ -97,22 +73,12 @@ export const getRecaudoById = async (id: string): Promise<{ data: any | null; er
       .from('recaudos')
       .select(`
         *,
-        cliente:cliente_id(id, nombre, apellidos, empresa, tipo_persona)
+        cliente:cliente_id(id, nombre, apellidos, empresa)
       `)
       .eq('id', id)
       .single();
 
     if (recaudoError) throw recaudoError;
-
-    // Format client name based on tipo_persona
-    if (recaudo && recaudo.cliente) {
-      if (recaudo.cliente.tipo_persona === 'juridica') {
-        recaudo.cliente.nombre = recaudo.cliente.empresa || "Empresa sin nombre";
-      } else {
-        recaudo.cliente.nombre = `${recaudo.cliente.nombre || ""} ${recaudo.cliente.apellidos || ""}`.trim();
-        if (!recaudo.cliente.nombre) recaudo.cliente.nombre = "Cliente sin nombre";
-      }
-    }
 
     // Get articulos
     const { data: articulos, error: articulosError } = await getArticulosRecaudo(id);

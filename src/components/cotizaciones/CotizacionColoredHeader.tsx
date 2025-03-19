@@ -27,7 +27,7 @@ export const CotizacionColoredHeader = ({ empresaEmisor, numero, fechaFormateada
           </div>
         </div>
         <div className="text-right">
-          <h3 className="text-xl font-semibold print:text-lg">COTIZACION DE SERVICIOS BRANZON TECH</h3>
+          <h3 className="text-xl font-semibold print:text-lg">COTIZACIÓN</h3>
           <p className="print:text-sm">No. {numero}</p>
           <p className="print:text-sm">Fecha: {fechaFormateada}</p>
         </div>

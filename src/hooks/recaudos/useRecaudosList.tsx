@@ -25,32 +25,26 @@ export const useRecaudosList = () => {
             Math.floor((hoy.getTime() - fechaVencimiento.getTime()) / (1000 * 60 * 60 * 24)) : 0;
           
           // Formatear el nombre del cliente
-          let nombreCliente = "Cliente no especificado";
-          if (recaudo.cliente) {
-            if (recaudo.cliente.tipo_persona === 'juridica') {
-              nombreCliente = recaudo.cliente.empresa || "Cliente no especificado";
-            } else {
-              nombreCliente = `${recaudo.cliente.nombre || ""} ${recaudo.cliente.apellidos || ""}`.trim();
-              if (!nombreCliente) nombreCliente = "Cliente no especificado";
-            }
-          }
+          const nombreCompleto = recaudo.cliente.tipo_persona === 'juridica' ? 
+            recaudo.cliente.empresa : 
+            `${recaudo.cliente.nombre} ${recaudo.cliente.apellidos || ''}`;
           
           return {
             id: recaudo.id,
-            cliente: nombreCliente,
+            cliente: nombreCompleto,
             cliente_id: recaudo.cliente_id,
-            factura: recaudo.numero || "",
-            numero: recaudo.numero || "",
-            monto: recaudo.monto || 0,
+            factura: recaudo.factura,
+            numero: recaudo.numero,
+            monto: recaudo.monto,
             fechaVencimiento: recaudo.fecha_vencimiento,
-            estado: recaudo.estado ? (recaudo.estado.charAt(0).toUpperCase() + recaudo.estado.slice(1)) : "Pendiente", // Capitalizar el estado
+            estado: recaudo.estado.charAt(0).toUpperCase() + recaudo.estado.slice(1), // Capitalizar el estado
             diasVencido: diasVencido,
-            subtotal: recaudo.subtotal || 0,
-            iva: recaudo.iva || 0,
-            total: recaudo.total || 0,
+            subtotal: recaudo.subtotal,
+            iva: recaudo.iva,
+            total: recaudo.total,
             fecha_pago: recaudo.fecha_pago,
-            metodo_pago: recaudo.metodo_pago || "",
-            notas: recaudo.notas || ""
+            metodo_pago: recaudo.metodo_pago,
+            notas: recaudo.notas
           };
         });
         

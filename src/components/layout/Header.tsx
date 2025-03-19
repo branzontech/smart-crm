@@ -60,11 +60,11 @@ export const Header = () => {
   ];
 
   return (
-    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-4 sm:px-6 py-3 z-10 h-[var(--header-height)]">
+    <header className="fixed top-0 left-0 right-0 bg-white border-b border-gray-200 px-6 py-3 z-10 h-[var(--header-height)]">
       <div className="flex items-center justify-between ml-[var(--sidebar-width, 5rem)] transition-all duration-300">
-        <div className="flex items-center gap-2 text-gray-600 text-sm sm:text-base">
-          <Clock className="h-4 w-4 sm:h-5 sm:w-5" />
-          <span className="hidden sm:inline">
+        <div className="flex items-center gap-2 text-gray-600">
+          <Clock className="h-5 w-5" />
+          <span>
             {currentTime.toLocaleDateString('es-ES', {
               weekday: 'long',
               year: 'numeric',
@@ -72,8 +72,6 @@ export const Header = () => {
               day: 'numeric',
             })}
             {' - '}
-          </span>
-          <span>
             {currentTime.toLocaleTimeString('es-ES', {
               hour: '2-digit',
               minute: '2-digit'
@@ -81,7 +79,7 @@ export const Header = () => {
           </span>
         </div>
 
-        <div className="flex items-center gap-2 sm:gap-4">
+        <div className="flex items-center gap-4">
           {/* Notificaciones */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -90,7 +88,7 @@ export const Header = () => {
                 <span className="absolute top-0 right-0 h-2 w-2 bg-red-500 rounded-full" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[280px] sm:w-80">
+            <DropdownMenuContent align="end" className="w-80">
               <DropdownMenuLabel>Notificaciones</DropdownMenuLabel>
               <DropdownMenuSeparator />
               {notifications.map((notification) => (
@@ -110,7 +108,7 @@ export const Header = () => {
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center gap-2">
                 <UserRound className="h-5 w-5" />
-                <span className="hidden sm:inline">{user ? `${user.nombre} ${user.apellido}` : 'Usuario'}</span>
+                <span>{user ? `${user.nombre} ${user.apellido}` : 'Usuario'}</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
@@ -124,15 +122,15 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Logout button on larger screens */}
+          {/* Logout button */}
           <Button
             variant="outline"
             size="sm"
             onClick={handleLogout}
-            className="hidden sm:flex text-teal-700 border-teal-200 hover:bg-teal-50 hover:text-teal-800"
+            className="text-red-500 border-red-200 hover:bg-red-50"
           >
-            <LogOut className="h-4 w-4 mr-1" />
-            <span className="text-xs font-medium">Salir</span>
+            <LogOut className="h-4 w-4 mr-2" />
+            Salir
           </Button>
 
           {/* Configuraciones */}

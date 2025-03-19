@@ -1,4 +1,3 @@
-
 import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/contexts/ThemeContext";
@@ -16,7 +15,6 @@ import Login from "./pages/auth/login";
 import Clientes from "./pages/clientes";
 import DetalleCliente from "./pages/clientes/[id]";
 import NuevoCliente from "./pages/clientes/nuevo";
-import EditarCliente from "./pages/clientes/[id]/editar"; // New import
 
 // Empresas
 import Empresas from "./pages/empresas";
@@ -38,7 +36,6 @@ import SeguimientoRecaudos from "./pages/recaudos/seguimiento";
 // Ventas
 import Ventas from "./pages/ventas";
 import Oportunidades from "./pages/ventas/oportunidades";
-import DetalleOportunidad from "./pages/ventas/oportunidades/[id]"; // New import
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import Cotizaciones from "./pages/ventas/cotizaciones";
 import CotizacionDetalle from "./pages/ventas/cotizaciones/[id]";
@@ -58,7 +55,6 @@ import Comunicaciones from "./pages/comunicaciones";
 
 // Configuración
 import Configuracion from "./pages/configuracion";
-import ConfiguracionUsuarios from "./pages/configuracion/usuarios";
 
 // Cuentas de Cobro (nuevo módulo)
 import CuentasCobro from "./pages/cuentasCobro";
@@ -106,12 +102,6 @@ export default function App() {
             <Route path="/clientes/:id" element={
               <ProtectedRoute>
                 <DetalleCliente />
-              </ProtectedRoute>
-            } />
-            {/* Nueva ruta para editar cliente */}
-            <Route path="/clientes/:id/editar" element={
-              <ProtectedRoute>
-                <EditarCliente />
               </ProtectedRoute>
             } />
             
@@ -188,12 +178,6 @@ export default function App() {
                 <Oportunidades />
               </ProtectedRoute>
             } />
-            {/* Nueva ruta para vista detalle de oportunidad */}
-            <Route path="/ventas/oportunidades/:id" element={
-              <ProtectedRoute>
-                <DetalleOportunidad />
-              </ProtectedRoute>
-            } />
             <Route path="/ventas/oportunidades/nueva" element={
               <ProtectedRoute>
                 <NuevaOportunidad />
@@ -255,13 +239,6 @@ export default function App() {
             <Route path="/configuracion" element={
               <ProtectedRoute>
                 <Configuracion />
-              </ProtectedRoute>
-            } />
-            
-            {/* Ruta de Configuración de Usuarios - Protegida */}
-            <Route path="/configuracion/usuarios" element={
-              <ProtectedRoute>
-                <ConfiguracionUsuarios />
               </ProtectedRoute>
             } />
             

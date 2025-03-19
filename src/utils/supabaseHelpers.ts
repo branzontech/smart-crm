@@ -1,3 +1,4 @@
+
 import { PostgrestError } from "@supabase/supabase-js";
 import { toast } from "sonner";
 
@@ -58,46 +59,5 @@ export function handleSupabaseError(error: unknown, customMessage?: string): voi
   } else {
     console.error("Unknown error:", error);
     toast.error(message);
-  }
-}
-
-/**
- * Test the Supabase connection and provide detailed error information
- * @returns A promise that resolves to a boolean indicating if the connection was successful
- */
-export async function testConnection() {
-  try {
-    console.log("Testing Supabase connection...");
-    
-    // Check if supabase client is defined
-    const { supabase } = await import("@/integrations/supabase/client");
-    if (!supabase) {
-      console.error("Supabase client is not defined");
-      return false;
-    }
-    
-    // Try to get the current auth session
-    const { data: authData, error: authError } = await supabase.auth.getSession();
-    console.log("Auth session check:", authError ? "Error" : "Success", 
-      authError ? authError : "Session: " + (authData.session ? "Active" : "None"));
-    
-    // Try a simple query to check database access
-    const { data: queryData, error: queryError } = await supabase
-      .from("profiles")
-      .select("count", { count: "exact", head: true });
-      
-    console.log("Database query check:", queryError ? "Error" : "Success", 
-      queryError ? queryError : "Query worked");
-    
-    if (authError || queryError) {
-      console.error("Connection test failed with errors:", { authError, queryError });
-      return false;
-    }
-    
-    console.log("Supabase connection test successful");
-    return true;
-  } catch (error) {
-    console.error("Unhandled error testing Supabase connection:", error);
-    return false;
   }
 }

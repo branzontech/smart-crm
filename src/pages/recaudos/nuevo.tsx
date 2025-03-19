@@ -134,7 +134,7 @@ const NuevoRecaudo = () => {
       }));
       
       // Create recaudo with all required fields
-      const { data: recaudoData, error } = await createRecaudo({
+      const { data: recaudoId, error } = await createRecaudo({
         cliente_id: data.cliente_id,
         monto: data.monto,
         subtotal: data.subtotal,
@@ -151,10 +151,7 @@ const NuevoRecaudo = () => {
       
       if (error) throw error;
       
-      // Use the returned recaudo number instead of the predicted one
-      const actualRecaudoNumber = recaudoData?.numero || nextRecaudoNumber;
-      
-      toast.success(`Recaudo ${actualRecaudoNumber} creado exitosamente`);
+      toast.success(`Recaudo ${nextRecaudoNumber} creado exitosamente`);
       
       setTimeout(() => {
         navigate("/recaudos");

@@ -1,4 +1,3 @@
-
 import { useState, useMemo, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
@@ -472,7 +471,6 @@ const CotizacionesIndex = () => {
                               <DropdownMenuItem 
                                 className="text-red-600"
                                 onClick={() => {
-                                  // Aquí iría la lógica para eliminar
                                   toast.error("Función no implementada");
                                 }}
                               >

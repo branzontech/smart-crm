@@ -40,12 +40,13 @@ export const useRecaudoDetails = (onRecaudoUpdate: () => void) => {
         }
         
         // Mapeamos los datos desde la API a nuestro formato de recaudo
+        // Usando número como factura si factura no existe
         const recaudoConDetalle: Recaudo = {
           id: data.id,
           numero: data.numero || "",
           cliente: nombreCompleto,
           cliente_id: data.cliente_id,
-          factura: data.factura || data.numero || "",
+          factura: data.numero || "", // Usar numero como factura si factura no existe
           monto: data.monto || 0,
           fechaVencimiento: data.fecha_vencimiento,
           estado: data.estado ? (data.estado.charAt(0).toUpperCase() + data.estado.slice(1)) : "Pendiente", // Capitalizar el estado

@@ -47,6 +47,7 @@ export const navigationLinks: NavItem[] = [
     subItems: [
       { label: "Oportunidades", path: "/ventas/oportunidades" },
       { label: "Cotizaciones", path: "/ventas/cotizaciones" },
+      { label: "Nueva Cotización", path: "/ventas/cotizaciones/nueva" },
       { label: "Contratos", path: "/ventas/contratos" },
     ],
   },

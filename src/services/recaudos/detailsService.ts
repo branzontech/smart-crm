@@ -38,7 +38,7 @@ export const getRecaudoDetails = async (id: string) => {
       throw articulosError;
     }
 
-    console.log("Articulos encontrados:", articulos);
+    console.log("Articulos encontrados:", articulos?.length || 0, articulos);
 
     // Get archivos
     const { data: archivos, error: archivosError } = await supabase
@@ -50,6 +50,8 @@ export const getRecaudoDetails = async (id: string) => {
       console.error("Error fetching archivos:", archivosError);
       throw archivosError;
     }
+    
+    console.log("Archivos encontrados:", archivos?.length || 0);
     
     // Get file URLs if there are any archivos
     const archivosWithUrls = [];

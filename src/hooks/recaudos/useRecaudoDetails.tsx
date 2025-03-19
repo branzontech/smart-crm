@@ -59,7 +59,7 @@ export const useRecaudoDetails = (onRecaudoUpdate: () => void) => {
           detalles: {
             direccion: data.cliente?.direccion || '',
             telefono: data.cliente?.telefono || '',
-            fechaEmision: data.created_at,
+            fechaEmision: data.created_at, // Usar created_at como fechaEmision
             fechaPago: data.fecha_pago,
             metodoPago: data.metodo_pago || "",
             notas: data.notas || '',

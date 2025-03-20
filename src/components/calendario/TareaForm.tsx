@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -24,7 +25,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { format } from "date-fns";
-import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { SubtareasList } from "./SubtareasList";
 import { SubtareaForm } from "./SubtareaForm";
 import { CheckCircle2, ListTodo } from "lucide-react";
@@ -55,7 +55,6 @@ interface TareaFormProps {
 
 export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaFormProps) => {
   const [subtareas, setSubtareas] = useState<CalendarioSubtarea[]>([]);
-  const [activeTab, setActiveTab] = useState("detalles");
 
   // Preparar valores iniciales del formulario
   const getValoresIniciales = (): TareaFormValues => {
@@ -165,272 +164,261 @@ export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaF
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid grid-cols-2 mb-4">
-            <TabsTrigger value="detalles" className="flex items-center gap-2">
-              <CheckCircle2 className="h-4 w-4" />
-              Detalles de tarea
-            </TabsTrigger>
-            <TabsTrigger value="subtareas" className="flex items-center gap-2">
-              <ListTodo className="h-4 w-4" />
-              Subtareas ({subtareas.length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="detalles" className="space-y-4">
+        <div className="grid grid-cols-1 gap-4">
+          <FormField
+            control={form.control}
+            name="titulo"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Título</FormLabel>
+                <FormControl>
+                  <Input placeholder="Título de la tarea" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="descripcion"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Descripción</FormLabel>
+                <FormControl>
+                  <Textarea placeholder="Descripción de la tarea" {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="titulo"
+              name="fechaInicio"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Título</FormLabel>
+                  <FormLabel>Fecha de inicio</FormLabel>
                   <FormControl>
-                    <Input placeholder="Título de la tarea" {...field} />
+                    <Input type="date" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
+            {!form.watch("todoElDia") && (
+              <FormField
+                control={form.control}
+                name="horaInicio"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Hora de inicio</FormLabel>
+                    <FormControl>
+                      <Input type="time" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            )}
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="descripcion"
+              name="fechaFin"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Descripción</FormLabel>
+                  <FormLabel>Fecha de fin (opcional)</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Descripción de la tarea" {...field} />
+                    <Input type="date" {...field} value={field.value || ""} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {!form.watch("todoElDia") && (
               <FormField
                 control={form.control}
-                name="fechaInicio"
+                name="horaFin"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Fecha de inicio</FormLabel>
+                    <FormLabel>Hora de fin (opcional)</FormLabel>
                     <FormControl>
-                      <Input type="date" {...field} />
+                      <Input type="time" {...field} value={field.value || ""} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+            )}
+          </div>
 
-              {!form.watch("todoElDia") && (
-                <FormField
-                  control={form.control}
-                  name="horaInicio"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hora de inicio</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="fechaFin"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Fecha de fin (opcional)</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} value={field.value || ""} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              {!form.watch("todoElDia") && (
-                <FormField
-                  control={form.control}
-                  name="horaFin"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Hora de fin (opcional)</FormLabel>
-                      <FormControl>
-                        <Input type="time" {...field} value={field.value || ""} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="todoElDia"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Todo el día</FormLabel>
-                      <FormDescription>
-                        Marcar si la tarea ocupa todo el día
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="completada"
-                render={({ field }) => (
-                  <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
-                    <FormControl>
-                      <Checkbox
-                        checked={field.value}
-                        onCheckedChange={field.onChange}
-                      />
-                    </FormControl>
-                    <div className="space-y-1 leading-none">
-                      <FormLabel>Completada</FormLabel>
-                      <FormDescription>
-                        Marcar si la tarea ya fue completada
-                      </FormDescription>
-                    </div>
-                  </FormItem>
-                )}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="prioridad"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Prioridad</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona prioridad" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="alta">Alta</SelectItem>
-                        <SelectItem value="media">Media</SelectItem>
-                        <SelectItem value="baja">Baja</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="categoria"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Categoría</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Selecciona categoría" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="reunion">Reunión</SelectItem>
-                        <SelectItem value="entrega">Entrega</SelectItem>
-                        <SelectItem value="seguimiento">Seguimiento</SelectItem>
-                        <SelectItem value="otro">Otro</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
-
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <FormField
               control={form.control}
-              name="agentes"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Usuarios asignados</FormLabel>
-                  <div className="grid grid-cols-2 gap-2">
-                    {usuarios.map((usuario) => (
-                      <FormField
-                        key={usuario.id}
-                        control={form.control}
-                        name="agentes"
-                        render={({ field }) => {
-                          return (
-                            <FormItem
-                              key={usuario.id}
-                              className="flex flex-row items-start space-x-3 space-y-0"
-                            >
-                              <FormControl>
-                                <Checkbox
-                                  checked={field.value?.includes(usuario.id)}
-                                  onCheckedChange={(checked) => {
-                                    return checked
-                                      ? field.onChange([...field.value, usuario.id])
-                                      : field.onChange(
-                                          field.value?.filter(
-                                            (value) => value !== usuario.id
-                                          )
-                                        );
-                                  }}
-                                />
-                              </FormControl>
-                              <FormLabel className="font-normal flex items-center">
-                                <div 
-                                  className="w-3 h-3 rounded-full mr-2"
-                                  style={{ backgroundColor: usuario.color }}
-                                ></div>
-                                {usuario.nombre} {usuario.apellido}
-                              </FormLabel>
-                            </FormItem>
-                          );
-                        }}
-                      />
-                    ))}
+              name="todoElDia"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Todo el día</FormLabel>
+                    <FormDescription>
+                      Marcar si la tarea ocupa todo el día
+                    </FormDescription>
                   </div>
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="completada"
+              render={({ field }) => (
+                <FormItem className="flex flex-row items-start space-x-3 space-y-0 rounded-md border p-4">
+                  <FormControl>
+                    <Checkbox
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                    />
+                  </FormControl>
+                  <div className="space-y-1 leading-none">
+                    <FormLabel>Completada</FormLabel>
+                    <FormDescription>
+                      Marcar si la tarea ya fue completada
+                    </FormDescription>
+                  </div>
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <FormField
+              control={form.control}
+              name="prioridad"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Prioridad</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona prioridad" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="alta">Alta</SelectItem>
+                      <SelectItem value="media">Media</SelectItem>
+                      <SelectItem value="baja">Baja</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
             />
-          </TabsContent>
-          
-          <TabsContent value="subtareas" className="space-y-4">
-            <div className="bg-gray-50 p-4 rounded-lg">
-              <h3 className="font-medium mb-2">Subtareas</h3>
-              <p className="text-sm text-gray-600 mb-4">
-                Agrega subtareas para dividir esta tarea en partes más pequeñas y gestionables
-              </p>
-              
-              <SubtareasList 
-                subtareas={subtareas}
-                onToggleCompletada={handleToggleSubtarea}
-                onEliminar={handleEliminarSubtarea}
-              />
-              
-              <SubtareaForm onAgregar={handleAgregarSubtarea} />
+
+            <FormField
+              control={form.control}
+              name="categoria"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Categoría</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecciona categoría" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="reunion">Reunión</SelectItem>
+                      <SelectItem value="entrega">Entrega</SelectItem>
+                      <SelectItem value="seguimiento">Seguimiento</SelectItem>
+                      <SelectItem value="otro">Otro</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
+
+          <FormField
+            control={form.control}
+            name="agentes"
+            render={() => (
+              <FormItem>
+                <FormLabel>Usuarios asignados</FormLabel>
+                <div className="grid grid-cols-2 gap-2">
+                  {usuarios.map((usuario) => (
+                    <FormField
+                      key={usuario.id}
+                      control={form.control}
+                      name="agentes"
+                      render={({ field }) => {
+                        return (
+                          <FormItem
+                            key={usuario.id}
+                            className="flex flex-row items-start space-x-3 space-y-0"
+                          >
+                            <FormControl>
+                              <Checkbox
+                                checked={field.value?.includes(usuario.id)}
+                                onCheckedChange={(checked) => {
+                                  return checked
+                                    ? field.onChange([...field.value, usuario.id])
+                                    : field.onChange(
+                                        field.value?.filter(
+                                          (value) => value !== usuario.id
+                                        )
+                                      );
+                                }}
+                              />
+                            </FormControl>
+                            <FormLabel className="font-normal flex items-center">
+                              <div 
+                                className="w-3 h-3 rounded-full mr-2"
+                                style={{ backgroundColor: usuario.color }}
+                              ></div>
+                              {usuario.nombre} {usuario.apellido}
+                            </FormLabel>
+                          </FormItem>
+                        );
+                      }}
+                    />
+                  ))}
+                </div>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          {/* Sección de Subtareas - ahora directamente en la misma vista */}
+          <div className="bg-gray-50 p-4 rounded-lg mt-4">
+            <div className="flex items-center mb-2">
+              <ListTodo className="h-5 w-5 mr-2 text-primary" />
+              <h3 className="font-medium">Subtareas</h3>
             </div>
-          </TabsContent>
-        </Tabs>
+            <p className="text-sm text-gray-600 mb-4">
+              Agrega subtareas para dividir esta tarea en partes más pequeñas y gestionables
+            </p>
+            
+            <SubtareasList 
+              subtareas={subtareas}
+              onToggleCompletada={handleToggleSubtarea}
+              onEliminar={handleEliminarSubtarea}
+            />
+            
+            <SubtareaForm onAgregar={handleAgregarSubtarea} />
+          </div>
+        </div>
 
         <div className="flex justify-end space-x-2 pt-4">
           <Button variant="outline" type="button" onClick={onCancel}>

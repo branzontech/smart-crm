@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { CalendarioSubtarea } from "@/types/calendario";
 import { Button } from "@/components/ui/button";
@@ -60,7 +61,7 @@ export const SubtareaForm = ({ onAgregar }: SubtareaFormProps) => {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-3 p-3 border rounded-md mt-2 bg-gray-50">
+    <div className="space-y-3 p-3 border rounded-md mt-2 bg-gray-50">
       <div>
         <Label htmlFor="titulo-subtarea">Título</Label>
         <Input
@@ -122,8 +123,8 @@ export const SubtareaForm = ({ onAgregar }: SubtareaFormProps) => {
         >
           Cancelar
         </Button>
-        <Button type="submit">Agregar</Button>
+        <Button type="button" onClick={handleSubmit}>Agregar</Button>
       </div>
-    </form>
+    </div>
   );
 };

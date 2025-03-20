@@ -18,6 +18,7 @@ const UsuariosPage = () => {
   const fetchUsers = async () => {
     try {
       setLoading(true);
+      console.log("Obteniendo lista de usuarios...");
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -27,9 +28,10 @@ const UsuariosPage = () => {
         throw error;
       }
 
+      console.log("Usuarios obtenidos:", data?.length || 0);
       setUsers(data || []);
     } catch (error: any) {
-      console.error("Error fetching users:", error.message);
+      console.error("Error al obtener usuarios:", error.message);
       toast({
         variant: "destructive",
         title: "Error",
@@ -41,6 +43,7 @@ const UsuariosPage = () => {
   };
 
   const handleUserCreated = () => {
+    console.log("Usuario creado, actualizando lista...");
     fetchUsers();
     // This toast is now handled in the CreateUserDialog component
   };

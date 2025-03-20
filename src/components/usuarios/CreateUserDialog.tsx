@@ -55,23 +55,30 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     try {
       setIsLoading(true);
+      console.log("Iniciando creación de usuario con datos:", { 
+        email: values.email, 
+        nombre: values.nombre, 
+        apellido: values.apellido 
+      });
       
-      // Sign up the user
+      // First, create the user in auth system without metadata
+      // This avoids triggering problematic database triggers
       const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
-        options: {
-          data: {
-            nombre: values.nombre,
-            apellido: values.apellido,
-          },
-        },
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        console.error("Error en autenticación:", authError);
+        throw authError;
+      }
+
+      console.log("Usuario creado en sistema de autenticación:", authData);
 
       // Check if we have user data to confirm success
       if (authData && authData.user) {
+        console.log("Insertando en tabla profiles para ID:", authData.user.id);
+        
         // Manually insert the user into the profiles table
         const { error: profileError } = await supabase
           .from('profiles')
@@ -85,8 +92,10 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
           });
 
         if (profileError) {
-          console.error("Error inserting profile:", profileError);
+          console.error("Error insertando perfil:", profileError);
           // Continue anyway as the user was created in auth
+        } else {
+          console.log("Perfil creado exitosamente");
         }
 
         setOpen(false);
@@ -98,6 +107,7 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
         onUserCreated();
       } else {
         // Sometimes Supabase returns success but without user data
+        console.log("Supabase devolvió éxito pero sin datos de usuario");
         toast({
           title: "Usuario pendiente de confirmación",
           description: "Se ha enviado un correo de confirmación al usuario.",
@@ -107,11 +117,32 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
         onUserCreated();
       }
     } catch (error: any) {
-      console.error("Error creating user:", error.message);
+      console.error("Error detallado al crear usuario:", error);
+      if (error.message) {
+        console.error("Mensaje de error:", error.message);
+      }
+      if (error.details) {
+        console.error("Detalles del error:", error.details);
+      }
+      if (error.code) {
+        console.error("Código de error:", error.code);
+      }
+      
+      let errorMessage = "No fue posible crear el usuario.";
+      
+      // Provide more specific error messages based on the error
+      if (error.message.includes("duplicate key")) {
+        errorMessage = "Ya existe un usuario con este email.";
+      } else if (error.message.includes("invalid email")) {
+        errorMessage = "El formato del email es inválido.";
+      } else {
+        errorMessage += " " + error.message;
+      }
+      
       toast({
         variant: "destructive",
         title: "Error",
-        description: "No fue posible crear el usuario. " + error.message,
+        description: errorMessage,
       });
     } finally {
       setIsLoading(false);

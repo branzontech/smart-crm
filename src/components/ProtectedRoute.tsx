@@ -9,8 +9,8 @@ interface ProtectedRouteProps {
   children: ReactNode;
 }
 
-// Set this to true to bypass authentication during development
-const DEVELOPMENT_MODE = true;
+// Set this to false for production environment
+const DEVELOPMENT_MODE = false;
 
 const ProtectedRoute = ({ children }: ProtectedRouteProps) => {
   const { isAuthenticated, isLoading } = useAuth();

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -55,7 +54,7 @@ interface TareaFormProps {
 }
 
 export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaFormProps) => {
-  const [subtareas, setSubtareas] = useState<Omit<CalendarioSubtarea, "tareaId">[]>([]);
+  const [subtareas, setSubtareas] = useState<CalendarioSubtarea[]>([]);
   const [activeTab, setActiveTab] = useState("detalles");
 
   // Preparar valores iniciales del formulario
@@ -100,13 +99,7 @@ export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaF
   useEffect(() => {
     if (tareaInicial) {
       form.reset(getValoresIniciales());
-      setSubtareas(tareaInicial.subtareas?.map(s => ({
-        id: s.id,
-        titulo: s.titulo,
-        descripcion: s.descripcion,
-        fechaCumplimiento: s.fechaCumplimiento,
-        completada: s.completada
-      })) || []);
+      setSubtareas(tareaInicial.subtareas || []);
     } else {
       setSubtareas([]);
     }
@@ -144,10 +137,7 @@ export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaF
       prioridad: values.prioridad,
       agentes: values.agentes,
       categoria: values.categoria,
-      subtareas: subtareas.map(s => ({
-        ...s,
-        tareaId: tareaInicial?.id || ''
-      }))
+      subtareas: subtareas
     };
 
     onSubmit(tareaDatos);
@@ -158,6 +148,7 @@ export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaF
       ...prev,
       {
         id: `temp-${Date.now()}`, // ID temporal, se reemplazará en el servidor
+        tareaId: tareaInicial?.id || '', // Provide the tareaId, empty string for new tasks
         ...nuevaSubtarea
       }
     ]);

@@ -3,7 +3,7 @@ import React, { useState, useEffect } from "react";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { Card, CardContent } from "@/components/ui/card";
 import { CalendarioTarea } from "@/types/calendario";
-import { calendarioService } from "@/services/calendarioService";
+import { calendarioServiceDB } from "@/services/calendarioServiceDB";
 import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 
@@ -41,7 +41,7 @@ export const CalendarioMensual = ({
           <div 
             key={idx} 
             className="h-1.5 w-1.5 rounded-full"
-            style={{ backgroundColor: calendarioService.getColorCategoria(cat as any) }}
+            style={{ backgroundColor: calendarioServiceDB.getColorCategoria(cat as any) }}
           />
         ))}
         {categorias.size > 3 && (

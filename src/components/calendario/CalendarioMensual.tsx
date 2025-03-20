@@ -3,7 +3,11 @@ import React from "react";
 import { Calendar as CalendarUI } from "@/components/ui/calendar";
 import { CalendarioTarea } from "@/types/calendario";
 import { calendarioServiceDB } from "@/services/calendarioServiceDB";
-import { format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, isToday, addDays, differenceInDays } from "date-fns";
+import { 
+  format, isSameDay, startOfWeek, endOfWeek, eachDayOfInterval, isToday, 
+  addDays, differenceInDays, startOfMonth, endOfMonth, isSameMonth,
+  addMonths, subMonths, getMonth, getYear
+} from "date-fns";
 import { es } from "date-fns/locale";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Badge } from "@/components/ui/badge";
@@ -263,24 +267,37 @@ export const CalendarioMensual = ({
     }
     
     // Determinar el rango de fechas para el diagrama
-    const fechaInicial = new Date(Math.min(...tareasOrdenadas.map(t => new Date(t.fechaInicio).getTime())));
-    const fechaFinal = new Date(Math.max(...tareasOrdenadas.map(t => 
+    let fechaInicial = new Date(Math.min(...tareasOrdenadas.map(t => new Date(t.fechaInicio).getTime())));
+    let fechaFinal = new Date(Math.max(...tareasOrdenadas.map(t => 
       t.fechaFin ? new Date(t.fechaFin).getTime() : new Date(t.fechaInicio).getTime()
     )));
     
     // Asegurar que el rango cubra al menos 14 días
     const rangoMinimo = 14;
     if (differenceInDays(fechaFinal, fechaInicial) < rangoMinimo) {
-      fechaFinal.setDate(fechaInicial.getDate() + rangoMinimo);
+      fechaFinal = addDays(fechaInicial, rangoMinimo);
     }
     
-    // Crear array de días para el encabezado
+    // Ajustar el rango para cubrir meses completos
+    fechaInicial = startOfMonth(fechaInicial);
+    fechaFinal = endOfMonth(fechaFinal);
+    
+    // Crear array de meses para el encabezado
+    const mesesGantt = [];
+    let mesActual = new Date(fechaInicial);
+    
+    while (mesActual <= fechaFinal) {
+      mesesGantt.push(new Date(mesActual));
+      mesActual = addMonths(mesActual, 1);
+    }
+    
+    // Crear array de días para la visualización detallada
     const diasGantt = [];
     let diaActual = new Date(fechaInicial);
     
     while (diaActual <= fechaFinal) {
       diasGantt.push(new Date(diaActual));
-      diaActual.setDate(diaActual.getDate() + 1);
+      diaActual = addDays(diaActual, 1);
     }
     
     const anchoColumna = 40; // Ancho en píxeles de cada columna del día
@@ -294,13 +311,36 @@ export const CalendarioMensual = ({
         
         <div className="overflow-x-auto">
           <div style={{ minWidth: `${diasGantt.length * anchoColumna + 300}px` }}>
-            {/* Encabezado de días */}
+            {/* Encabezado de meses */}
             <div className="flex border-b">
               <div className="w-[300px] shrink-0 p-2 font-medium border-r">Tarea</div>
               <div className="flex">
+                {mesesGantt.map((mes, idx) => {
+                  // Calcular el número de días en este mes que están dentro del rango
+                  const diasEnMes = diasGantt.filter(dia => 
+                    isSameMonth(dia, mes)
+                  ).length;
+                  
+                  return (
+                    <div 
+                      key={`mes-${idx}`} 
+                      className="flex-none text-center text-sm border-r py-1 font-medium bg-gray-100"
+                      style={{ width: `${diasEnMes * anchoColumna}px` }}
+                    >
+                      {format(mes, "MMMM yyyy", { locale: es })}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+            
+            {/* Encabezado de días */}
+            <div className="flex border-b">
+              <div className="w-[300px] shrink-0 p-2 font-medium border-r"></div>
+              <div className="flex">
                 {diasGantt.map((dia, idx) => (
                   <div 
-                    key={idx} 
+                    key={`dia-${idx}`} 
                     className={`flex-none w-[${anchoColumna}px] text-center text-xs border-r p-1 ${
                       isToday(dia) ? 'bg-primary/10 font-bold' : idx % 2 === 0 ? 'bg-gray-50' : ''
                     }`}
@@ -411,7 +451,7 @@ export const CalendarioMensual = ({
             selected={fecha}
             onSelect={(date) => date && onFechaSeleccionada(date)}
             locale={es}
-            className="mx-auto max-w-lg"
+            className="mx-auto w-full max-w-3xl"
             classNames={{
               day_today: cn(
                 buttonVariants({variant: "outline"}),
@@ -423,14 +463,14 @@ export const CalendarioMensual = ({
               ),
               day: cn(
                 buttonVariants({variant: "ghost"}),
-                "h-9 w-9 p-0 font-normal aria-selected:opacity-100 relative",
+                "h-12 w-12 p-0 font-normal aria-selected:opacity-100 relative",
                 "hover:bg-gray-100 hover:text-gray-900 focus:bg-gray-100 focus:text-gray-900",
                 "disabled:opacity-50"
               ),
-              head_cell: "text-muted-foreground rounded-md font-normal text-[0.8rem] w-9",
+              head_cell: "text-muted-foreground rounded-md font-normal text-[0.9rem] w-12",
               table: "w-full border-collapse space-y-1",
               caption: "flex justify-center pt-2 pb-4 relative items-center",
-              caption_label: "text-base font-medium text-primary",
+              caption_label: "text-lg font-medium text-primary",
               nav: "space-x-1 flex items-center",
               nav_button: cn(
                 buttonVariants({ variant: "outline" }),

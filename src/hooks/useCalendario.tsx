@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { CalendarioTarea, CalendarioSubtarea, UsuarioCalendario } from '@/types/calendario';
 import { calendarioServiceDB } from '@/services/calendarioServiceDB';
@@ -20,11 +21,23 @@ export function useCalendario() {
         calendarioServiceDB.getUsuarios()
       ]);
       
+      // Normalizar fechas para asegurar que son objetos Date
+      const tareasConFechasNormalizadas = tareasData.map(tarea => ({
+        ...tarea,
+        fechaInicio: new Date(tarea.fechaInicio),
+        fechaFin: tarea.fechaFin ? new Date(tarea.fechaFin) : undefined
+      }));
+      
       // Cargar subtareas para cada tarea
       const tareasConSubtareas = await Promise.all(
-        tareasData.map(async (tarea) => {
+        tareasConFechasNormalizadas.map(async (tarea) => {
           const subtareas = await calendarioServiceDB.getSubtareasByTareaId(tarea.id);
-          return { ...tarea, subtareas };
+          // Normalizar fechas de las subtareas también
+          const subtareasNormalizadas = subtareas.map(subtarea => ({
+            ...subtarea,
+            fechaCumplimiento: subtarea.fechaCumplimiento ? new Date(subtarea.fechaCumplimiento) : undefined
+          }));
+          return { ...tarea, subtareas: subtareasNormalizadas };
         })
       );
       
@@ -52,7 +65,15 @@ export function useCalendario() {
     if (tareaSeleccionada) {
       const cargarSubtareas = async () => {
         const subtareas = await calendarioServiceDB.getSubtareasByTareaId(tareaSeleccionada.id);
-        setTareaSeleccionada(prev => prev ? { ...prev, subtareas } : null);
+        // Normalizar fechas de las subtareas
+        const subtareasNormalizadas = subtareas.map(subtarea => ({
+          ...subtarea,
+          fechaCumplimiento: subtarea.fechaCumplimiento ? new Date(subtarea.fechaCumplimiento) : undefined
+        }));
+        setTareaSeleccionada(prev => prev ? { 
+          ...prev, 
+          subtareas: subtareasNormalizadas 
+        } : null);
       };
       
       cargarSubtareas();
@@ -62,11 +83,30 @@ export function useCalendario() {
   // Operaciones CRUD para tareas
   const crearTarea = async (tarea: Omit<CalendarioTarea, 'id'>) => {
     try {
-      const nuevaTarea = await calendarioServiceDB.crearTarea(tarea);
+      // Asegurar que las fechas son objetos Date antes de guardar
+      const tareaParaGuardar = {
+        ...tarea,
+        fechaInicio: tarea.fechaInicio instanceof Date ? tarea.fechaInicio : new Date(tarea.fechaInicio),
+        fechaFin: tarea.fechaFin instanceof Date ? tarea.fechaFin : (tarea.fechaFin ? new Date(tarea.fechaFin) : undefined)
+      };
+      
+      const nuevaTarea = await calendarioServiceDB.crearTarea(tareaParaGuardar);
       if (nuevaTarea) {
+        // Normalizar las fechas de la tarea creada
+        const tareaConFechasNormalizadas = {
+          ...nuevaTarea,
+          fechaInicio: new Date(nuevaTarea.fechaInicio),
+          fechaFin: nuevaTarea.fechaFin ? new Date(nuevaTarea.fechaFin) : undefined
+        };
+        
         // Asegurarse de incluir las subtareas en la tarea creada
         const subtareas = tarea.subtareas || [];
-        const tareaConSubtareas = { ...nuevaTarea, subtareas };
+        const subtareasNormalizadas = subtareas.map(subtarea => ({
+          ...subtarea,
+          fechaCumplimiento: subtarea.fechaCumplimiento ? new Date(subtarea.fechaCumplimiento) : undefined
+        }));
+        
+        const tareaConSubtareas = { ...tareaConFechasNormalizadas, subtareas: subtareasNormalizadas };
         
         setTareas(prev => [...prev, tareaConSubtareas]);
         toast({
@@ -89,12 +129,34 @@ export function useCalendario() {
 
   const actualizarTarea = async (id: string, datos: Partial<CalendarioTarea>) => {
     try {
-      const tareaActualizada = await calendarioServiceDB.actualizarTarea(id, datos);
+      // Normalizar fechas en los datos para actualizar
+      const datosNormalizados = {
+        ...datos,
+        fechaInicio: datos.fechaInicio instanceof Date ? datos.fechaInicio : 
+          (datos.fechaInicio ? new Date(datos.fechaInicio) : undefined),
+        fechaFin: datos.fechaFin instanceof Date ? datos.fechaFin : 
+          (datos.fechaFin ? new Date(datos.fechaFin) : undefined)
+      };
+      
+      const tareaActualizada = await calendarioServiceDB.actualizarTarea(id, datosNormalizados);
       if (tareaActualizada) {
+        // Normalizar fechas en la tarea actualizada
+        const tareaConFechasNormalizadas = {
+          ...tareaActualizada,
+          fechaInicio: new Date(tareaActualizada.fechaInicio),
+          fechaFin: tareaActualizada.fechaFin ? new Date(tareaActualizada.fechaFin) : undefined
+        };
+        
         // Asegurarse de preservar las subtareas en la tarea actualizada
         const subtareas = datos.subtareas || 
                          (tareaSeleccionada?.id === id ? tareaSeleccionada.subtareas : []);
-        const tareaConSubtareas = { ...tareaActualizada, subtareas };
+        
+        const subtareasNormalizadas = subtareas?.map(subtarea => ({
+          ...subtarea,
+          fechaCumplimiento: subtarea.fechaCumplimiento ? new Date(subtarea.fechaCumplimiento) : undefined
+        })) || [];
+        
+        const tareaConSubtareas = { ...tareaConFechasNormalizadas, subtareas: subtareasNormalizadas };
         
         setTareas(prev => prev.map(t => t.id === id ? tareaConSubtareas : t));
         if (tareaSeleccionada && tareaSeleccionada.id === id) {
@@ -122,11 +184,19 @@ export function useCalendario() {
     try {
       const tareaActualizada = await calendarioServiceDB.cambiarEstadoTarea(tarea.id, completada);
       if (tareaActualizada) {
-        setTareas(prev => prev.map(t => t.id === tarea.id ? tareaActualizada : t));
+        // Normalizar fechas en la tarea actualizada
+        const tareaConFechasNormalizadas = {
+          ...tareaActualizada,
+          fechaInicio: new Date(tareaActualizada.fechaInicio),
+          fechaFin: tareaActualizada.fechaFin ? new Date(tareaActualizada.fechaFin) : undefined,
+          subtareas: tarea.subtareas // Preservar las subtareas
+        };
+        
+        setTareas(prev => prev.map(t => t.id === tarea.id ? tareaConFechasNormalizadas : t));
         if (tareaSeleccionada && tareaSeleccionada.id === tarea.id) {
-          setTareaSeleccionada(tareaActualizada);
+          setTareaSeleccionada(tareaConFechasNormalizadas);
         }
-        return tareaActualizada;
+        return tareaConFechasNormalizadas;
       }
       throw new Error('No se pudo cambiar el estado de la tarea');
     } catch (error) {
@@ -171,9 +241,16 @@ export function useCalendario() {
     try {
       const subtareaActualizada = await calendarioServiceDB.cambiarEstadoSubtarea(subtareaId, completada);
       if (subtareaActualizada && tareaSeleccionada) {
+        // Normalizar la fecha de cumplimiento si existe
+        const subtareaConFechaNormalizada = {
+          ...subtareaActualizada,
+          fechaCumplimiento: subtareaActualizada.fechaCumplimiento ? 
+            new Date(subtareaActualizada.fechaCumplimiento) : undefined
+        };
+        
         // Actualizar la subtarea en la tarea seleccionada
         const subtareasActualizadas = tareaSeleccionada.subtareas?.map(st => 
-          st.id === subtareaId ? subtareaActualizada : st
+          st.id === subtareaId ? subtareaConFechaNormalizada : st
         ) || [];
         
         // Actualizar la tarea seleccionada
@@ -185,7 +262,7 @@ export function useCalendario() {
           t.id === tareaSeleccionada.id ? tareaActualizada : t
         ));
         
-        return subtareaActualizada;
+        return subtareaConFechaNormalizada;
       }
       throw new Error('No se pudo cambiar el estado de la subtarea');
     } catch (error) {

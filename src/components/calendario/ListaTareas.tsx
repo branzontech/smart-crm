@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { calendarioServiceDB } from "@/services/calendarioServiceDB";
-import { format } from "date-fns";
+import { format, isSameDay } from "date-fns";
 import { es } from "date-fns/locale";
 import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
@@ -32,10 +32,13 @@ export const ListaTareas = ({
 }: ListaTareasProps) => {
   // Si se proporciona una fecha, filtrar tareas para esa fecha
   const tareasFiltradas = fecha
-    ? tareas.filter((tarea) =>
-        format(new Date(tarea.fechaInicio), "yyyy-MM-dd") ===
-        format(fecha, "yyyy-MM-dd")
-      )
+    ? tareas.filter((tarea) => {
+        // Asegurarse de que las fechas sean objetos Date
+        const fechaInicio = tarea.fechaInicio instanceof Date 
+          ? tarea.fechaInicio 
+          : new Date(tarea.fechaInicio);
+        return isSameDay(fechaInicio, fecha);
+      })
     : tareas;
 
   // Ordenar tareas: primero las no completadas, luego por fecha y prioridad
@@ -44,8 +47,12 @@ export const ListaTareas = ({
       return a.completada ? 1 : -1;
     }
     
-    if (a.fechaInicio.getTime() !== b.fechaInicio.getTime()) {
-      return a.fechaInicio.getTime() - b.fechaInicio.getTime();
+    // Asegurarse de que las fechas sean objetos Date
+    const fechaInicioA = a.fechaInicio instanceof Date ? a.fechaInicio : new Date(a.fechaInicio);
+    const fechaInicioB = b.fechaInicio instanceof Date ? b.fechaInicio : new Date(b.fechaInicio);
+    
+    if (fechaInicioA.getTime() !== fechaInicioB.getTime()) {
+      return fechaInicioA.getTime() - fechaInicioB.getTime();
     }
     
     const prioridadValor = { alta: 0, media: 1, baja: 2 };
@@ -53,11 +60,11 @@ export const ListaTareas = ({
   });
 
   const formatoHora = (date: Date) => {
-    return format(date, "HH:mm");
+    return format(new Date(date), "HH:mm");
   };
 
   const formatoFecha = (date: Date) => {
-    return format(date, "EEEE d", { locale: es });
+    return format(new Date(date), "EEEE d 'de' MMMM", { locale: es });
   };
 
   return (
@@ -67,7 +74,7 @@ export const ListaTareas = ({
           {fecha ? (
             <div className="flex items-center">
               <CalendarIcon className="h-5 w-5 mr-2 text-primary" />
-              {format(fecha, "d MMM", { locale: es })}
+              {format(fecha, "d MMM, yyyy", { locale: es })}
             </div>
           ) : (
             "Todas las Tareas"
@@ -151,6 +158,10 @@ const TareaItem = ({
   getColorUsuario,
   formatoHora
 }: TareaItemProps) => {
+  // Asegurar que las fechas son objetos Date
+  const fechaInicio = tarea.fechaInicio instanceof Date ? tarea.fechaInicio : new Date(tarea.fechaInicio);
+  const fechaFin = tarea.fechaFin instanceof Date ? tarea.fechaFin : (tarea.fechaFin ? new Date(tarea.fechaFin) : undefined);
+
   return (
     <div
       className="flex items-start p-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-gray-100 shadow-sm bg-white cursor-pointer"
@@ -194,8 +205,8 @@ const TareaItem = ({
           {!tarea.todoElDia ? (
             <div className="flex items-center mr-1">
               <Clock className="h-3 w-3 mr-1" />
-              {formatoHora(tarea.fechaInicio)}
-              {tarea.fechaFin && ` - ${formatoHora(tarea.fechaFin)}`}
+              {formatoHora(fechaInicio)}
+              {fechaFin && ` - ${formatoHora(fechaFin)}`}
             </div>
           ) : (
             <div className="flex items-center mr-1">
@@ -216,6 +227,13 @@ const TareaItem = ({
             {tarea.categoria}
           </Badge>
         </div>
+
+        {/* Mostrar fecha completa para tareas que no son del día seleccionado */}
+        {!fecha && (
+          <div className="text-xs text-gray-500 mt-1">
+            {format(fechaInicio, "d MMM yyyy", { locale: es })}
+          </div>
+        )}
         
         {/* Mostrar los agentes asignados solo si hay alguno */}
         {tarea.agentes.length > 0 && (

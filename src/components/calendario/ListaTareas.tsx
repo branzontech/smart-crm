@@ -153,7 +153,7 @@ const TareaItem = ({
 }: TareaItemProps) => {
   return (
     <div
-      className="flex items-start p-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-gray-100 shadow-sm bg-white"
+      className="flex items-start p-3 rounded-lg transition-all duration-200 hover:bg-gray-50 border border-gray-100 shadow-sm bg-white cursor-pointer"
       onClick={() => onSeleccionarTarea(tarea)}
     >
       <div className="mr-3 mt-1">

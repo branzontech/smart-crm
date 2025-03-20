@@ -143,6 +143,7 @@ const CalendarioPage = () => {
                   fecha={fechaSeleccionada}
                   tareas={tareas}
                   onFechaSeleccionada={setFechaSeleccionada}
+                  onTareaSeleccionada={handleSeleccionarTarea}
                 />
               )}
             </div>

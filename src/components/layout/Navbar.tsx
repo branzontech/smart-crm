@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { cn } from "@/lib/utils";
@@ -18,7 +17,8 @@ import {
   ChevronDown,
   Store,
   FileText,
-  Database
+  Database,
+  UserCog,
 } from "lucide-react";
 import {
   Tooltip,
@@ -81,6 +81,7 @@ const navItems: NavItem[] = [
   },
   { label: "Reportes", icon: BarChart3, path: "/reportes" },
   { label: "Calendario", icon: Calendar, path: "/calendario" },
+  { label: "Gestión de Usuarios", icon: UserCog, path: "/usuarios" },
   { label: "Comunicaciones", icon: Mail, path: "/comunicaciones" },
   { label: "Configuración", icon: Settings, path: "/configuracion" },
 ];
@@ -133,7 +134,6 @@ export const Navbar = () => {
   }, []);
 
   useEffect(() => {
-    // Update CSS variable for sidebar width
     document.documentElement.style.setProperty(
       '--sidebar-width', 
       isExpanded ? '16rem' : '5rem'
@@ -143,7 +143,6 @@ export const Navbar = () => {
       setIsExpanded(false);
     }
     
-    // Properly handle main container class
     const mainContainer = document.querySelector('.main-container');
     if (mainContainer) {
       if (isExpanded) {
@@ -153,7 +152,6 @@ export const Navbar = () => {
       }
     }
     
-    // Update header position
     const header = document.querySelector('header > div');
     if (header) {
       header.classList.remove('ml-20', 'ml-64');

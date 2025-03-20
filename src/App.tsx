@@ -71,6 +71,9 @@ import Ciudades from "./pages/maestros/ciudades";
 import OrigenesCliente from "./pages/maestros/origenesCliente";
 import TiposProductos from "./pages/maestros/tiposProductos";
 
+// Add the new import for Usuarios page
+import Usuarios from "./pages/usuarios";
+
 export default function App() {
   return (
     <ThemeProvider>
@@ -305,6 +308,13 @@ export default function App() {
               </ProtectedRoute>
             } />
             
+            {/* Add the new route for user management */}
+            <Route path="/usuarios" element={
+              <ProtectedRoute>
+                <Usuarios />
+              </ProtectedRoute>
+            } />
+            
             {/* Ruta para página no encontrada */}
             <Route path="*" element={<NotFound />} />
           </Routes>
@@ -314,3 +324,4 @@ export default function App() {
     </ThemeProvider>
   );
 }
+

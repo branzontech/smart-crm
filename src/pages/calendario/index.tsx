@@ -97,8 +97,8 @@ const CalendarioPage = () => {
   };
 
   const TareaFormDrawer = () => (
-    <SheetContent className="sm:max-w-xl w-[95vw]" side="right">
-      <SheetHeader className="mb-4">
+    <SheetContent className="sm:max-w-xl w-[95vw] p-4 overflow-hidden" side="right">
+      <SheetHeader className="z-10 sticky top-0 bg-background pb-2">
         <SheetTitle className="text-xl font-semibold">
           {modoEdicion ? "Editar Tarea" : "Crear Nueva Tarea"}
         </SheetTitle>

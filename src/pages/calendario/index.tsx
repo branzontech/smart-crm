@@ -124,7 +124,7 @@ const CalendarioPage = () => {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
             <h1 className="text-3xl font-bold flex items-center">
-              <CalendarIcon className="mr-3 h-8 w-8 text-purple-600" />
+              <CalendarIcon className="mr-3 h-8 w-8 text-primary" />
               Calendario de Tareas
             </h1>
             <p className="text-gray-500 mt-1">
@@ -133,7 +133,7 @@ const CalendarioPage = () => {
           </div>
           <Button 
             onClick={handleAgregarTarea} 
-            className="bg-purple-600 hover:bg-purple-700 shadow-md transition-all rounded-md px-5 py-2 h-auto"
+            className="bg-primary hover:bg-primary/90 shadow-md transition-all rounded-full px-5 py-2 h-auto"
           >
             <Plus className="mr-2 h-4 w-4" /> Nueva Tarea
           </Button>
@@ -142,7 +142,7 @@ const CalendarioPage = () => {
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           {/* Calendario de Tareas */}
           <div className="lg:col-span-5 order-2 lg:order-1">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden border border-gray-100">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
               {isLoading ? (
                 <Skeleton className="h-[600px] w-full rounded-lg" />
               ) : (
@@ -158,7 +158,7 @@ const CalendarioPage = () => {
 
           {/* Lista de Tareas */}
           <div className="lg:col-span-2 order-1 lg:order-2">
-            <div className="bg-white rounded-xl shadow-sm overflow-hidden h-full border border-gray-100">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden h-full">
               {isLoading ? (
                 <Skeleton className="h-[500px] w-full" />
               ) : (

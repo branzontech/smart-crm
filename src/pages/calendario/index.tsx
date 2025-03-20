@@ -10,35 +10,18 @@ import { useCalendario } from "@/hooks/useCalendario";
 import {
   Dialog,
   DialogContent,
-  DialogHeader,
-  DialogTitle,
 } from "@/components/ui/dialog";
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerClose,
-  DrawerTrigger,
-} from "@/components/ui/drawer";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetTrigger,
   SheetClose,
 } from "@/components/ui/sheet";
-import {
-  Tabs,
-  TabsContent,
-  TabsList,
-  TabsTrigger,
-} from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useMediaQuery } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Plus, X } from "lucide-react";
+import { Plus, X, Calendar as CalendarIcon } from "lucide-react";
 
 const CalendarioPage = () => {
   const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
@@ -108,16 +91,16 @@ const CalendarioPage = () => {
 
   const TareaFormDrawer = () => (
     <SheetContent className="sm:max-w-xl w-[95vw]" side="right">
-      <SheetHeader>
-        <SheetTitle>
+      <SheetHeader className="mb-4">
+        <SheetTitle className="text-xl font-semibold">
           {modoEdicion ? "Editar Tarea" : "Crear Nueva Tarea"}
         </SheetTitle>
-        <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+        <SheetClose className="absolute right-4 top-4 rounded-full p-2 hover:bg-gray-100 transition-colors">
           <X className="h-4 w-4" />
           <span className="sr-only">Cerrar</span>
         </SheetClose>
       </SheetHeader>
-      <div className="mt-6">
+      <div>
         <TareaForm
           tareaInicial={modoEdicion ? tareaSeleccionada || undefined : undefined}
           onSubmit={handleGuardarTarea}
@@ -130,62 +113,58 @@ const CalendarioPage = () => {
 
   return (
     <Layout>
-      <div className="container mx-auto py-8 px-4">
-        <div className="mb-6 flex justify-between items-center">
+      <div className="container mx-auto py-6 px-4">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6 gap-4">
           <div>
-            <h1 className="text-3xl font-bold">Calendario de Tareas</h1>
-            <p className="text-gray-500">
+            <h1 className="text-3xl font-bold flex items-center">
+              <CalendarIcon className="mr-3 h-8 w-8 text-primary" />
+              Calendario de Tareas
+            </h1>
+            <p className="text-gray-500 mt-1">
               Gestiona y programa tus tareas y actividades
             </p>
           </div>
-          <Button onClick={handleAgregarTarea} className="bg-blue-600">
-            <Plus className="mr-1 h-4 w-4" /> Nueva Tarea
+          <Button 
+            onClick={handleAgregarTarea} 
+            className="bg-primary hover:bg-primary/90 shadow-md transition-all rounded-full px-5 py-2 h-auto"
+          >
+            <Plus className="mr-2 h-4 w-4" /> Nueva Tarea
           </Button>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
           {/* Calendario de Tareas */}
-          <div className="lg:col-span-5">
-            {isLoading ? (
-              <Skeleton className="h-[600px] w-full rounded-lg" />
-            ) : (
-              <CalendarioMensual
-                fecha={fechaSeleccionada}
-                tareas={tareas}
-                onFechaSeleccionada={setFechaSeleccionada}
-              />
-            )}
+          <div className="lg:col-span-5 order-2 lg:order-1">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden">
+              {isLoading ? (
+                <Skeleton className="h-[600px] w-full rounded-lg" />
+              ) : (
+                <CalendarioMensual
+                  fecha={fechaSeleccionada}
+                  tareas={tareas}
+                  onFechaSeleccionada={setFechaSeleccionada}
+                />
+              )}
+            </div>
           </div>
 
           {/* Lista de Tareas */}
-          <div className="lg:col-span-2">
-            {isLoading ? (
-              <Skeleton className="h-[500px] w-full rounded-lg" />
-            ) : (
-              <Tabs defaultValue="dia" className="h-full">
-                <TabsList className="w-full grid grid-cols-2">
-                  <TabsTrigger value="dia">Día Seleccionado</TabsTrigger>
-                  <TabsTrigger value="todas">Todas las Tareas</TabsTrigger>
-                </TabsList>
-                <TabsContent value="dia" className="h-full">
-                  <ListaTareas
-                    tareas={tareas}
-                    fecha={fechaSeleccionada}
-                    onAgregarTarea={handleAgregarTarea}
-                    onSeleccionarTarea={handleSeleccionarTarea}
-                    onCambiarEstado={handleCambiarEstado}
-                  />
-                </TabsContent>
-                <TabsContent value="todas" className="h-full">
-                  <ListaTareas
-                    tareas={tareas}
-                    onAgregarTarea={handleAgregarTarea}
-                    onSeleccionarTarea={handleSeleccionarTarea}
-                    onCambiarEstado={handleCambiarEstado}
-                  />
-                </TabsContent>
-              </Tabs>
-            )}
+          <div className="lg:col-span-2 order-1 lg:order-2">
+            <div className="bg-white rounded-xl shadow-md overflow-hidden h-full">
+              {isLoading ? (
+                <Skeleton className="h-[500px] w-full" />
+              ) : (
+                <ListaTareas
+                  tareas={tareas}
+                  fecha={fechaSeleccionada}
+                  onAgregarTarea={handleAgregarTarea}
+                  onSeleccionarTarea={handleSeleccionarTarea}
+                  onCambiarEstado={handleCambiarEstado}
+                  getNombreUsuario={getNombreUsuario}
+                  getColorUsuario={getColorUsuario}
+                />
+              )}
+            </div>
           </div>
         </div>
 
@@ -196,7 +175,7 @@ const CalendarioPage = () => {
 
         {/* Modal para ver detalle de tarea */}
         <Dialog open={modalDetalleAbierto} onOpenChange={setModalDetalleAbierto}>
-          <DialogContent className="sm:max-w-[600px]">
+          <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-xl">
             {tareaSeleccionada && (
               <TareaDetalle
                 tarea={tareaSeleccionada}

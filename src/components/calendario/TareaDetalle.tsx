@@ -1,6 +1,6 @@
 
 import { CalendarioTarea } from "@/types/calendario";
-import { calendarioService } from "@/services/calendarioService";
+import { calendarioServiceDB } from "@/services/calendarioServiceDB";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { es } from "date-fns/locale";
@@ -22,18 +22,18 @@ interface TareaDetalleProps {
   onEdit: () => void;
   onDelete: () => void;
   onToggleCompletada: () => void;
+  getNombreUsuario: (id: string) => string;
+  getColorUsuario: (id: string) => string;
 }
 
 export const TareaDetalle = ({ 
   tarea, 
   onEdit, 
   onDelete, 
-  onToggleCompletada 
+  onToggleCompletada,
+  getNombreUsuario,
+  getColorUsuario
 }: TareaDetalleProps) => {
-  const agentes = calendarioService.getAgentes().filter(a => 
-    tarea.agentes.includes(a.id)
-  );
-
   const formatoFecha = (fecha: Date) => {
     return format(fecha, "EEEE d 'de' MMMM, yyyy", { locale: es });
   };
@@ -110,9 +110,9 @@ export const TareaDetalle = ({
               variant="outline" 
               className="mr-2"
               style={{ 
-                color: calendarioService.getColorCategoria(tarea.categoria),
-                borderColor: calendarioService.getColorCategoria(tarea.categoria),
-                backgroundColor: `${calendarioService.getColorCategoria(tarea.categoria)}10`
+                color: calendarioServiceDB.getColorCategoria(tarea.categoria),
+                borderColor: calendarioServiceDB.getColorCategoria(tarea.categoria),
+                backgroundColor: `${calendarioServiceDB.getColorCategoria(tarea.categoria)}10`
               }}
             >
               <span className="capitalize">{tarea.categoria}</span>
@@ -121,9 +121,9 @@ export const TareaDetalle = ({
             <Badge 
               variant="outline"
               style={{ 
-                color: calendarioService.getColorPrioridad(tarea.prioridad),
-                borderColor: calendarioService.getColorPrioridad(tarea.prioridad),
-                backgroundColor: `${calendarioService.getColorPrioridad(tarea.prioridad)}10`
+                color: calendarioServiceDB.getColorPrioridad(tarea.prioridad),
+                borderColor: calendarioServiceDB.getColorPrioridad(tarea.prioridad),
+                backgroundColor: `${calendarioServiceDB.getColorPrioridad(tarea.prioridad)}10`
               }}
             >
               {tarea.prioridad === 'alta' && <AlertTriangle className="mr-1 h-3 w-3" />}
@@ -135,26 +135,26 @@ export const TareaDetalle = ({
         <div className="space-y-2">
           <div className="flex items-center text-sm">
             <Users className="h-4 w-4 mr-2 text-gray-500" />
-            <span>Agentes asignados ({agentes.length})</span>
+            <span>Usuarios asignados ({tarea.agentes.length})</span>
           </div>
           
           <div className="flex flex-wrap gap-2 pl-6">
-            {agentes.map(agente => (
+            {tarea.agentes.map(agenteId => (
               <div 
-                key={agente.id}
+                key={agenteId}
                 className="flex items-center px-3 py-2 rounded-md"
                 style={{ 
-                  backgroundColor: `${agente.color}15`,
-                  color: agente.color,
+                  backgroundColor: `${getColorUsuario(agenteId)}15`,
+                  color: getColorUsuario(agenteId),
                 }}
               >
                 <div 
                   className="w-5 h-5 rounded-full mr-2 flex items-center justify-center text-[10px] text-white"
-                  style={{ backgroundColor: agente.color }}
+                  style={{ backgroundColor: getColorUsuario(agenteId) }}
                 >
-                  {agente.nombre.split(" ").map(n => n[0]).join("").substring(0, 2)}
+                  {getNombreUsuario(agenteId).split(" ").map(n => n[0]).join("").substring(0, 2)}
                 </div>
-                {agente.nombre}
+                {getNombreUsuario(agenteId)}
               </div>
             ))}
           </div>

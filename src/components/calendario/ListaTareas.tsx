@@ -5,7 +5,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { calendarioService } from "@/services/calendarioService";
+import { calendarioServiceDB } from "@/services/calendarioServiceDB";
 import { format } from "date-fns";
 import { Plus, Calendar as CalendarIcon, CheckCircle2, Clock } from "lucide-react";
 
@@ -15,6 +15,8 @@ interface ListaTareasProps {
   onAgregarTarea: () => void;
   onSeleccionarTarea: (tarea: CalendarioTarea) => void;
   onCambiarEstado: (tarea: CalendarioTarea, completada: boolean) => void;
+  getNombreUsuario?: (id: string) => string;
+  getColorUsuario?: (id: string) => string;
 }
 
 export const ListaTareas = ({
@@ -23,6 +25,8 @@ export const ListaTareas = ({
   onAgregarTarea,
   onSeleccionarTarea,
   onCambiarEstado,
+  getNombreUsuario,
+  getColorUsuario,
 }: ListaTareasProps) => {
   // Si se proporciona una fecha, filtrar tareas para esa fecha
   const tareasFiltradas = fecha
@@ -85,7 +89,7 @@ export const ListaTareas = ({
                   style={{ 
                     backgroundColor: tarea.completada 
                       ? "#A0AEC0" 
-                      : calendarioService.getColorPrioridad(tarea.prioridad) 
+                      : calendarioServiceDB.getColorPrioridad(tarea.prioridad) 
                   }}
                 ></div>
                 <Checkbox
@@ -121,9 +125,9 @@ export const ListaTareas = ({
                       variant="outline" 
                       className="text-xs mr-2"
                       style={{ 
-                        color: calendarioService.getColorCategoria(tarea.categoria),
-                        borderColor: calendarioService.getColorCategoria(tarea.categoria),
-                        backgroundColor: `${calendarioService.getColorCategoria(tarea.categoria)}10`
+                        color: calendarioServiceDB.getColorCategoria(tarea.categoria),
+                        borderColor: calendarioServiceDB.getColorCategoria(tarea.categoria),
+                        backgroundColor: `${calendarioServiceDB.getColorCategoria(tarea.categoria)}10`
                       }}
                     >
                       {tarea.categoria}
@@ -133,10 +137,10 @@ export const ListaTareas = ({
                     {tarea.agentes.length > 0 && (
                       <div className="flex -space-x-1 overflow-hidden ml-auto">
                         {tarea.agentes.slice(0, 2).map((agenteId) => {
-                          const agente = calendarioService.getAgenteById(agenteId);
-                          if (!agente) return null;
+                          const color = getColorUsuario ? getColorUsuario(agenteId) : '#4A90E2';
+                          const nombre = getNombreUsuario ? getNombreUsuario(agenteId) : '';
                           
-                          const iniciales = agente.nombre
+                          const iniciales = nombre
                             .split(" ")
                             .map((n) => n[0])
                             .join("")
@@ -146,8 +150,8 @@ export const ListaTareas = ({
                             <div
                               key={agenteId}
                               className="inline-flex items-center justify-center w-5 h-5 rounded-full text-[8px] text-white overflow-hidden"
-                              style={{ backgroundColor: agente.color }}
-                              title={agente.nombre}
+                              style={{ backgroundColor: color }}
+                              title={nombre}
                             >
                               {iniciales}
                             </div>
@@ -156,7 +160,7 @@ export const ListaTareas = ({
                         {tarea.agentes.length > 2 && (
                           <div
                             className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-gray-200 text-[8px] text-gray-600"
-                            title="Más agentes"
+                            title="Más usuarios"
                           >
                             +{tarea.agentes.length - 2}
                           </div>

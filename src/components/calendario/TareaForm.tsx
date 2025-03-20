@@ -3,8 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { CalendarioTarea, Agente } from "@/types/calendario";
-import { calendarioService } from "@/services/calendarioService";
+import { CalendarioTarea, UsuarioCalendario } from "@/types/calendario";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -38,7 +37,7 @@ const tareaSchema = z.object({
   todoElDia: z.boolean().default(false),
   completada: z.boolean().default(false),
   prioridad: z.enum(["alta", "media", "baja"]).default("media"),
-  agentes: z.array(z.string()).min(1, "Debe seleccionar al menos un agente"),
+  agentes: z.array(z.string()).min(1, "Debe seleccionar al menos un usuario"),
   categoria: z.enum(["reunion", "entrega", "seguimiento", "otro"]).default("otro"),
 });
 
@@ -48,16 +47,10 @@ interface TareaFormProps {
   tareaInicial?: CalendarioTarea;
   onSubmit: (tarea: Partial<CalendarioTarea>) => void;
   onCancel: () => void;
+  usuarios: UsuarioCalendario[];
 }
 
-export const TareaForm = ({ tareaInicial, onSubmit, onCancel }: TareaFormProps) => {
-  const [agentes, setAgentes] = useState<Agente[]>([]);
-
-  // Cargar agentes
-  useEffect(() => {
-    setAgentes(calendarioService.getAgentes());
-  }, []);
-
+export const TareaForm = ({ tareaInicial, onSubmit, onCancel, usuarios }: TareaFormProps) => {
   // Preparar valores iniciales del formulario
   const getValoresIniciales = (): TareaFormValues => {
     if (tareaInicial) {
@@ -333,35 +326,39 @@ export const TareaForm = ({ tareaInicial, onSubmit, onCancel }: TareaFormProps) 
           name="agentes"
           render={() => (
             <FormItem>
-              <FormLabel>Agentes asignados</FormLabel>
+              <FormLabel>Usuarios asignados</FormLabel>
               <div className="grid grid-cols-2 gap-2">
-                {agentes.map((agente) => (
+                {usuarios.map((usuario) => (
                   <FormField
-                    key={agente.id}
+                    key={usuario.id}
                     control={form.control}
                     name="agentes"
                     render={({ field }) => {
                       return (
                         <FormItem
-                          key={agente.id}
+                          key={usuario.id}
                           className="flex flex-row items-start space-x-3 space-y-0"
                         >
                           <FormControl>
                             <Checkbox
-                              checked={field.value?.includes(agente.id)}
+                              checked={field.value?.includes(usuario.id)}
                               onCheckedChange={(checked) => {
                                 return checked
-                                  ? field.onChange([...field.value, agente.id])
+                                  ? field.onChange([...field.value, usuario.id])
                                   : field.onChange(
                                       field.value?.filter(
-                                        (value) => value !== agente.id
+                                        (value) => value !== usuario.id
                                       )
                                     );
                               }}
                             />
                           </FormControl>
-                          <FormLabel className="font-normal">
-                            {agente.nombre}
+                          <FormLabel className="font-normal flex items-center">
+                            <div 
+                              className="w-3 h-3 rounded-full mr-2"
+                              style={{ backgroundColor: usuario.color }}
+                            ></div>
+                            {usuario.nombre} {usuario.apellido}
                           </FormLabel>
                         </FormItem>
                       );

@@ -104,6 +104,92 @@ export type Database = {
           },
         ]
       }
+      calendario_tareas: {
+        Row: {
+          categoria: Database["public"]["Enums"]["task_category"]
+          completada: boolean
+          creado_por: string | null
+          created_at: string
+          descripcion: string | null
+          fecha_fin: string | null
+          fecha_inicio: string
+          id: string
+          prioridad: Database["public"]["Enums"]["task_priority"]
+          titulo: string
+          todo_el_dia: boolean
+          updated_at: string
+        }
+        Insert: {
+          categoria?: Database["public"]["Enums"]["task_category"]
+          completada?: boolean
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio: string
+          id?: string
+          prioridad?: Database["public"]["Enums"]["task_priority"]
+          titulo: string
+          todo_el_dia?: boolean
+          updated_at?: string
+        }
+        Update: {
+          categoria?: Database["public"]["Enums"]["task_category"]
+          completada?: boolean
+          creado_por?: string | null
+          created_at?: string
+          descripcion?: string | null
+          fecha_fin?: string | null
+          fecha_inicio?: string
+          id?: string
+          prioridad?: Database["public"]["Enums"]["task_priority"]
+          titulo?: string
+          todo_el_dia?: boolean
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendario_tareas_creado_por_fkey"
+            columns: ["creado_por"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      calendario_tareas_usuarios: {
+        Row: {
+          created_at: string
+          tarea_id: string
+          usuario_id: string
+        }
+        Insert: {
+          created_at?: string
+          tarea_id: string
+          usuario_id: string
+        }
+        Update: {
+          created_at?: string
+          tarea_id?: string
+          usuario_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendario_tareas_usuarios_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "calendario_tareas"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "calendario_tareas_usuarios_usuario_id_fkey"
+            columns: ["usuario_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       ciudades: {
         Row: {
           created_at: string
@@ -757,6 +843,8 @@ export type Database = {
       }
     }
     Enums: {
+      task_category: "reunion" | "entrega" | "seguimiento" | "otro"
+      task_priority: "alta" | "media" | "baja"
       user_role:
         | "Administrador"
         | "Agente"

@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Layout } from "@/components/layout/Layout";
 import { CalendarioMensual } from "@/components/calendario/CalendarioMensual";
@@ -46,7 +45,6 @@ const CalendarioPage = () => {
     getColorUsuario
   } = useCalendario();
 
-  // Handlers para la gestión de tareas
   const handleAgregarTarea = () => {
     setTareaSeleccionada(null);
     setModoEdicion(false);
@@ -140,7 +138,6 @@ const CalendarioPage = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
-          {/* Calendario de Tareas */}
           <div className="lg:col-span-5 order-2 lg:order-1">
             <div className="bg-white rounded-xl shadow-md overflow-hidden">
               {isLoading ? (
@@ -156,7 +153,6 @@ const CalendarioPage = () => {
             </div>
           </div>
 
-          {/* Lista de Tareas */}
           <div className="lg:col-span-2 order-1 lg:order-2">
             <div className="bg-white rounded-xl shadow-md overflow-hidden h-full">
               {isLoading ? (
@@ -176,12 +172,10 @@ const CalendarioPage = () => {
           </div>
         </div>
 
-        {/* Sheet for creating/editing tasks */}
         <Sheet open={sheetAbierto} onOpenChange={setSheetAbierto}>
           {TareaFormDrawer()}
         </Sheet>
 
-        {/* Modal para ver detalle de tarea */}
         <Dialog open={modalDetalleAbierto} onOpenChange={setModalDetalleAbierto}>
           <DialogContent className="sm:max-w-[600px] p-0 overflow-hidden rounded-xl">
             {tareaSeleccionada && (

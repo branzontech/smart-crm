@@ -14,17 +14,37 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import {
+  Drawer,
+  DrawerContent,
+  DrawerHeader,
+  DrawerTitle,
+  DrawerClose,
+  DrawerTrigger,
+} from "@/components/ui/drawer";
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+  SheetClose,
+} from "@/components/ui/sheet";
+import {
   Tabs,
   TabsContent,
   TabsList,
   TabsTrigger,
 } from "@/components/ui/tabs";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useMediaQuery } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { Plus, X } from "lucide-react";
 
 const CalendarioPage = () => {
-  const [modalFormAbierto, setModalFormAbierto] = useState(false);
   const [modalDetalleAbierto, setModalDetalleAbierto] = useState(false);
+  const [sheetAbierto, setSheetAbierto] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
+  const isMobile = useMediaQuery("(max-width: 768px)");
 
   const {
     tareas,
@@ -46,13 +66,13 @@ const CalendarioPage = () => {
   const handleAgregarTarea = () => {
     setTareaSeleccionada(null);
     setModoEdicion(false);
-    setModalFormAbierto(true);
+    setSheetAbierto(true);
   };
 
   const handleEditarTarea = () => {
     setModoEdicion(true);
     setModalDetalleAbierto(false);
-    setModalFormAbierto(true);
+    setSheetAbierto(true);
   };
 
   const handleGuardarTarea = async (tarea: Partial<CalendarioTarea>) => {
@@ -61,11 +81,11 @@ const CalendarioPage = () => {
     } else {
       await crearTarea(tarea as Omit<CalendarioTarea, 'id'>);
     }
-    setModalFormAbierto(false);
+    setSheetAbierto(false);
   };
 
   const handleCancelarForm = () => {
-    setModalFormAbierto(false);
+    setSheetAbierto(false);
   };
 
   const handleSeleccionarTarea = (tarea: CalendarioTarea) => {
@@ -86,21 +106,48 @@ const CalendarioPage = () => {
     }
   };
 
+  const TareaFormDrawer = () => (
+    <SheetContent className="sm:max-w-xl w-[95vw]" side="right">
+      <SheetHeader>
+        <SheetTitle>
+          {modoEdicion ? "Editar Tarea" : "Crear Nueva Tarea"}
+        </SheetTitle>
+        <SheetClose className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-secondary">
+          <X className="h-4 w-4" />
+          <span className="sr-only">Cerrar</span>
+        </SheetClose>
+      </SheetHeader>
+      <div className="mt-6">
+        <TareaForm
+          tareaInicial={modoEdicion ? tareaSeleccionada || undefined : undefined}
+          onSubmit={handleGuardarTarea}
+          onCancel={handleCancelarForm}
+          usuarios={usuarios}
+        />
+      </div>
+    </SheetContent>
+  );
+
   return (
     <Layout>
       <div className="container mx-auto py-8 px-4">
-        <div className="mb-6">
-          <h1 className="text-3xl font-bold">Calendario de Tareas</h1>
-          <p className="text-gray-500">
-            Gestiona y programa tus tareas y actividades
-          </p>
+        <div className="mb-6 flex justify-between items-center">
+          <div>
+            <h1 className="text-3xl font-bold">Calendario de Tareas</h1>
+            <p className="text-gray-500">
+              Gestiona y programa tus tareas y actividades
+            </p>
+          </div>
+          <Button onClick={handleAgregarTarea} className="bg-blue-600">
+            <Plus className="mr-1 h-4 w-4" /> Nueva Tarea
+          </Button>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {/* Calendario del Mes */}
-          <div className="md:col-span-1">
+        <div className="grid grid-cols-1 lg:grid-cols-7 gap-6">
+          {/* Calendario de Tareas */}
+          <div className="lg:col-span-5">
             {isLoading ? (
-              <Skeleton className="h-[300px] w-full rounded-lg" />
+              <Skeleton className="h-[600px] w-full rounded-lg" />
             ) : (
               <CalendarioMensual
                 fecha={fechaSeleccionada}
@@ -111,12 +158,12 @@ const CalendarioPage = () => {
           </div>
 
           {/* Lista de Tareas */}
-          <div className="md:col-span-2">
+          <div className="lg:col-span-2">
             {isLoading ? (
               <Skeleton className="h-[500px] w-full rounded-lg" />
             ) : (
               <Tabs defaultValue="dia" className="h-full">
-                <TabsList>
+                <TabsList className="w-full grid grid-cols-2">
                   <TabsTrigger value="dia">Día Seleccionado</TabsTrigger>
                   <TabsTrigger value="todas">Todas las Tareas</TabsTrigger>
                 </TabsList>
@@ -142,22 +189,10 @@ const CalendarioPage = () => {
           </div>
         </div>
 
-        {/* Modal para crear/editar tareas */}
-        <Dialog open={modalFormAbierto} onOpenChange={setModalFormAbierto}>
-          <DialogContent className="sm:max-w-[700px]">
-            <DialogHeader>
-              <DialogTitle>
-                {modoEdicion ? "Editar Tarea" : "Crear Nueva Tarea"}
-              </DialogTitle>
-            </DialogHeader>
-            <TareaForm
-              tareaInicial={modoEdicion ? tareaSeleccionada || undefined : undefined}
-              onSubmit={handleGuardarTarea}
-              onCancel={handleCancelarForm}
-              usuarios={usuarios}
-            />
-          </DialogContent>
-        </Dialog>
+        {/* Sheet for creating/editing tasks */}
+        <Sheet open={sheetAbierto} onOpenChange={setSheetAbierto}>
+          {TareaFormDrawer()}
+        </Sheet>
 
         {/* Modal para ver detalle de tarea */}
         <Dialog open={modalDetalleAbierto} onOpenChange={setModalDetalleAbierto}>

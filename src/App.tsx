@@ -15,6 +15,7 @@ import Login from "./pages/auth/login";
 import Clientes from "./pages/clientes";
 import DetalleCliente from "./pages/clientes/[id]";
 import NuevoCliente from "./pages/clientes/nuevo";
+import EditarCliente from "./pages/clientes/[id]/editar"; // New import
 
 // Empresas
 import Empresas from "./pages/empresas";
@@ -36,6 +37,7 @@ import SeguimientoRecaudos from "./pages/recaudos/seguimiento";
 // Ventas
 import Ventas from "./pages/ventas";
 import Oportunidades from "./pages/ventas/oportunidades";
+import DetalleOportunidad from "./pages/ventas/oportunidades/[id]"; // New import
 import NuevaOportunidad from "./pages/ventas/oportunidades/nueva";
 import Cotizaciones from "./pages/ventas/cotizaciones";
 import CotizacionDetalle from "./pages/ventas/cotizaciones/[id]";
@@ -102,6 +104,12 @@ export default function App() {
             <Route path="/clientes/:id" element={
               <ProtectedRoute>
                 <DetalleCliente />
+              </ProtectedRoute>
+            } />
+            {/* Nueva ruta para editar cliente */}
+            <Route path="/clientes/:id/editar" element={
+              <ProtectedRoute>
+                <EditarCliente />
               </ProtectedRoute>
             } />
             
@@ -176,6 +184,12 @@ export default function App() {
             <Route path="/ventas/oportunidades" element={
               <ProtectedRoute>
                 <Oportunidades />
+              </ProtectedRoute>
+            } />
+            {/* Nueva ruta para vista detalle de oportunidad */}
+            <Route path="/ventas/oportunidades/:id" element={
+              <ProtectedRoute>
+                <DetalleOportunidad />
               </ProtectedRoute>
             } />
             <Route path="/ventas/oportunidades/nueva" element={

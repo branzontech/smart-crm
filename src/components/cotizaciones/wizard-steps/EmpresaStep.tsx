@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from 'react';
 import { useCotizacion } from '@/contexts/CotizacionContext';
 import { Input } from '@/components/ui/input';
@@ -6,23 +7,29 @@ import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { CalendarIcon, Loader2 } from 'lucide-react';
+import { CalendarIcon, Loader2, Info } from 'lucide-react';
 import { es } from 'date-fns/locale';
 import { fetchCompanyConfig } from '@/services/configService';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 export const EmpresaStep: React.FC = () => {
   const { cotizacion, updateEmpresaEmisor, updateFechaVencimiento } = useCotizacion();
   const { empresaEmisor, fechaEmision, fechaVencimiento } = cotizacion;
   const [isLoading, setIsLoading] = useState(true);
-  const [hasLoadedData, setHasLoadedData] = useState(false); // Flag para controlar la carga única
+  const [hasLoadedData, setHasLoadedData] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
   useEffect(() => {
     // Solo cargar los datos si no se han cargado previamente
     if (!hasLoadedData) {
       const loadCompanyData = async () => {
         setIsLoading(true);
+        setLoadError(null);
         try {
           const config = await fetchCompanyConfig();
+          console.log("Company config fetched:", config);
+          
           if (config) {
             updateEmpresaEmisor({
               nombre: config.razon_social,
@@ -30,14 +37,17 @@ export const EmpresaStep: React.FC = () => {
               telefono: config.telefono,
               direccion: config.direccion,
               logo: config.logo_path,
-              email: ''  // Added missing email field
+              email: config.email || ''
             });
+          } else {
+            setLoadError('No se encontró configuración de empresa. Por favor, configure los datos de su empresa en la sección de Configuración.');
           }
         } catch (error) {
           console.error('Error loading company config:', error);
+          setLoadError('Error al cargar la configuración de la empresa. Intente nuevamente.');
         } finally {
           setIsLoading(false);
-          setHasLoadedData(true); // Marcar que los datos ya se cargaron
+          setHasLoadedData(true);
         }
       };
 
@@ -60,6 +70,23 @@ export const EmpresaStep: React.FC = () => {
         Esta información aparecerá en el encabezado de la cotización.
       </p>
 
+      {loadError && (
+        <Alert className="bg-red-50 border-red-200">
+          <AlertDescription className="text-red-700">
+            {loadError}
+          </AlertDescription>
+        </Alert>
+      )}
+
+      {!empresaEmisor.email && (
+        <Alert className="bg-amber-50 border-amber-200">
+          <AlertDescription className="text-amber-700">
+            No hay correo electrónico configurado para la empresa. Esto es necesario para enviar cotizaciones por email.
+            Configure un correo electrónico en la sección de Configuración.
+          </AlertDescription>
+        </Alert>
+      )}
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-4">
           <div className="space-y-2">
@@ -67,7 +94,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="nombre"
               name="nombre"
-              value={empresaEmisor.nombre}
+              value={empresaEmisor.nombre || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -79,7 +106,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="nit"
               name="nit"
-              value={empresaEmisor.nit}
+              value={empresaEmisor.nit || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -91,7 +118,7 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="telefono"
               name="telefono"
-              value={empresaEmisor.telefono}
+              value={empresaEmisor.telefono || ''}
               readOnly
               disabled
               className="bg-gray-100"
@@ -103,11 +130,38 @@ export const EmpresaStep: React.FC = () => {
             <Input
               id="direccion"
               name="direccion"
-              value={empresaEmisor.direccion}
+              value={empresaEmisor.direccion || ''}
               readOnly
               disabled
               className="bg-gray-100"
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email" className="flex items-center gap-1">
+              Correo Electrónico
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Info className="h-4 w-4 text-primary cursor-help" />
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p className="max-w-xs">Necesario para enviar cotizaciones por email</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </Label>
+            <Input
+              id="email"
+              name="email"
+              value={empresaEmisor.email || ''}
+              readOnly
+              disabled
+              className={`bg-gray-100 ${!empresaEmisor.email ? 'border-amber-300' : ''}`}
+            />
+            {!empresaEmisor.email && (
+              <p className="text-sm text-amber-600">No configurado</p>
+            )}
           </div>
 
           <div className="space-y-2">

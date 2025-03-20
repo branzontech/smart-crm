@@ -122,15 +122,15 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Logout button */}
+          {/* Logout button - Updated to match green theme and smaller size */}
           <Button
             variant="outline"
             size="sm"
             onClick={handleLogout}
-            className="text-red-500 border-red-200 hover:bg-red-50"
+            className="text-teal-700 border-teal-200 hover:bg-teal-50 hover:text-teal-800"
           >
-            <LogOut className="h-4 w-4 mr-2" />
-            Salir
+            <LogOut className="h-4 w-4 mr-1" />
+            <span className="text-xs font-medium">Salir</span>
           </Button>
 
           {/* Configuraciones */}

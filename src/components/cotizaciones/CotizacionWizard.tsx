@@ -23,13 +23,16 @@ import {
 import { toast } from 'sonner';
 import { Progress } from '@/components/ui/progress';
 import { saveCotizacion } from '@/services/cotizacionService';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { emailService } from '@/services/emailService';
 
 export const CotizacionWizard: React.FC = () => {
   const { cotizacion, currentStep, setCurrentStep } = useCotizacion();
   const [isSaving, setIsSaving] = useState(false);
+  const [isSendingEmail, setIsSendingEmail] = useState(false);
   const navigate = useNavigate();
+  const cotizacionRef = useRef<HTMLDivElement>(null);
 
   const handlePrevious = () => {
     if (currentStep === 'cliente') setCurrentStep('empresa');
@@ -104,6 +107,36 @@ export const CotizacionWizard: React.FC = () => {
     }
   };
 
+  const handleSendEmail = async () => {
+    if (!cotizacion.cliente.email) {
+      toast.error("No se puede enviar el correo: el cliente no tiene dirección de correo electrónico");
+      return;
+    }
+
+    try {
+      setIsSendingEmail(true);
+      toast("Preparando el envío de la cotización...");
+
+      const htmlContent = cotizacionRef.current?.outerHTML || "";
+      if (!htmlContent) {
+        throw new Error("No se pudo obtener el contenido de la cotización");
+      }
+
+      const result = await emailService.sendQuotationEmail(cotizacion, htmlContent);
+
+      if (result.success) {
+        toast.success(result.message);
+      } else {
+        toast.error(result.message);
+      }
+    } catch (error) {
+      console.error("Error sending email:", error);
+      toast.error(`Error al enviar el correo: ${error.message || "Error desconocido"}`);
+    } finally {
+      setIsSendingEmail(false);
+    }
+  };
+
   const renderStep = () => {
     switch (currentStep) {
       case 'empresa':
@@ -113,13 +146,12 @@ export const CotizacionWizard: React.FC = () => {
       case 'productos':
         return <ProductosStep />;
       case 'preview':
-        return <PreviewStep />;
+        return <PreviewStep cotizacionRef={cotizacionRef} />;
       default:
         return <EmpresaStep />;
     }
   };
 
-  // Calculate progress percentage
   const getProgressPercentage = () => {
     switch (currentStep) {
       case 'empresa': return 25;
@@ -130,7 +162,6 @@ export const CotizacionWizard: React.FC = () => {
     }
   };
 
-  // Get step status: completed, current, or upcoming
   const getStepStatus = (step: string) => {
     const steps = ['empresa', 'cliente', 'productos', 'preview'];
     const currentIndex = steps.indexOf(currentStep);
@@ -200,12 +231,10 @@ export const CotizacionWizard: React.FC = () => {
                     </div>
                     <span className="text-xs sm:text-sm font-medium">{step.label}</span>
                     
-                    {/* Connecting line */}
                     {step.id !== 'preview' && (
                       <div className="hidden md:block absolute left-full top-1/2 w-8 h-0.5 -translate-y-1/2 -ml-1 -mr-1" style={{ background: status === 'completed' ? '#10b981' : '#e5e7eb' }}></div>
                     )}
                     
-                    {/* Tooltip for small screens */}
                     <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-800 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 pointer-events-none whitespace-nowrap">
                       {step.label}
                     </div>
@@ -255,10 +284,16 @@ export const CotizacionWizard: React.FC = () => {
                   {isSaving ? "Guardando..." : "Guardar y finalizar"}
                 </Button>
                 <Button
-                  onClick={() => toast.success("Cotización enviada por correo electrónico")}
+                  onClick={handleSendEmail}
+                  disabled={isSendingEmail || !cotizacion.cliente.email || !cotizacion.empresaEmisor.email}
                   className="flex items-center gap-2 bg-primary text-primary-foreground hover:bg-primary/90 transition-all"
                 >
-                  <Send className="h-4 w-4" /> Enviar
+                  {isSendingEmail ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Send className="h-4 w-4" />
+                  )}
+                  {isSendingEmail ? "Enviando..." : "Enviar por correo"}
                 </Button>
               </>
             ) : (

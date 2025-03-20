@@ -2,6 +2,7 @@
 import React, { createContext, useState, useContext, ReactNode, useEffect } from "react";
 import { supabase } from "@/integrations/supabase/client";
 import { Session } from "@supabase/supabase-js";
+import { toast } from "sonner";
 
 // Define user types
 type User = {
@@ -53,14 +54,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Check for active session on component mount
     const checkSession = async () => {
       try {
-        const { data: { session: activeSession } } = await supabase.auth.getSession();
+        console.log("Checking session...");
+        const { data: { session: activeSession }, error } = await supabase.auth.getSession();
+        
+        if (error) {
+          console.error("Error checking session:", error);
+          return;
+        }
+        
+        console.log("Session check result:", activeSession ? "Session found" : "No session");
         setSession(activeSession);
         
         if (activeSession) {
           await fetchUserProfile(activeSession.user.id);
         }
       } catch (error) {
-        console.error("Error checking session:", error);
+        console.error("Error in checkSession:", error);
       } finally {
         setIsLoading(false);
       }
@@ -75,8 +84,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         setSession(newSession);
         
         if (event === "SIGNED_IN" && newSession) {
+          console.log("User signed in, fetching profile...");
           await fetchUserProfile(newSession.user.id);
         } else if (event === "SIGNED_OUT") {
+          console.log("User signed out");
           setUser(null);
         }
       }
@@ -84,6 +95,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Cleanup subscription
     return () => {
+      console.log("Cleaning up auth subscription");
       subscription.unsubscribe();
     };
   }, []);
@@ -91,6 +103,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   // Fetch user profile
   const fetchUserProfile = async (userId: string) => {
     try {
+      console.log("Fetching user profile for ID:", userId);
       const { data, error } = await supabase
         .from("profiles")
         .select("*")
@@ -98,14 +111,18 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         .single();
 
       if (error) {
-        throw error;
+        console.error("Error fetching user profile:", error);
+        return;
       }
 
       if (data) {
+        console.log("User profile found:", data);
         setUser(data as User);
+      } else {
+        console.log("No user profile found");
       }
     } catch (error) {
-      console.error("Error fetching user profile:", error);
+      console.error("Error in fetchUserProfile:", error);
     }
   };
 
@@ -114,16 +131,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting login for email:", email);
       const { data, error } = await supabase.auth.signInWithPassword({
         email,
         password,
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Login error:", error);
+        toast.error(`Error de inicio de sesión: ${error.message}`);
+        throw error;
+      }
       
+      console.log("Login successful");
+      toast.success("Inicio de sesión exitoso");
       // Session and user will be updated via the auth state change listener
     } catch (error) {
-      console.error("Error de inicio de sesión:", error);
+      console.error("Error during login:", error);
+      if (error instanceof Error) {
+        toast.error(`Error de inicio de sesión: ${error.message}`);
+      } else {
+        toast.error("Error de inicio de sesión desconocido");
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -135,6 +164,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting signup for email:", email);
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -143,11 +173,22 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         },
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error("Signup error:", error);
+        toast.error(`Error de registro: ${error.message}`);
+        throw error;
+      }
       
+      console.log("Signup successful");
+      toast.success("Registro exitoso");
       // Session and user will be updated via the auth state change listener
     } catch (error) {
-      console.error("Error de registro:", error);
+      console.error("Error during signup:", error);
+      if (error instanceof Error) {
+        toast.error(`Error de registro: ${error.message}`);
+      } else {
+        toast.error("Error de registro desconocido");
+      }
       throw error;
     } finally {
       setIsLoading(false);
@@ -159,13 +200,25 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(true);
     
     try {
+      console.log("Attempting logout");
       const { error } = await supabase.auth.signOut();
       
-      if (error) throw error;
+      if (error) {
+        console.error("Logout error:", error);
+        toast.error(`Error al cerrar sesión: ${error.message}`);
+        throw error;
+      }
       
+      console.log("Logout successful");
+      toast.success("Sesión cerrada exitosamente");
       // Session and user will be updated via the auth state change listener
     } catch (error) {
-      console.error("Error al cerrar sesión:", error);
+      console.error("Error during logout:", error);
+      if (error instanceof Error) {
+        toast.error(`Error al cerrar sesión: ${error.message}`);
+      } else {
+        toast.error("Error al cerrar sesión");
+      }
     } finally {
       setIsLoading(false);
     }

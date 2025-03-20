@@ -1,4 +1,3 @@
-
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,7 +24,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { fetchSectores, fetchPaises, fetchCiudades, fetchTiposServicios, fetchOrigenesCliente } from "@/services/maestrosService";
-import { Sector, Pais, Ciudad, TipoServicio, OrigenCliente } from "@/types/maestros";
+import { Sector, Pais, Ciudad, TipoServicio, OrigenCliente, Cliente } from "@/types/maestros";
 import { createCliente, ClienteForm } from "@/services/clientesService";
 import { fetchEmpresas, Empresa } from "@/services/empresaService";
 
@@ -51,9 +50,18 @@ type ClienteSimpleForm = z.infer<typeof clienteSimpleSchema>;
 interface EmbeddedClienteFormProps {
   onClienteCreated?: (cliente: { id: number; nombre: string }) => void;
   onCancel?: () => void;
+  cliente?: Cliente;
+  onSubmit?: (formData: ClienteForm) => void;
+  submitButtonText?: string;
 }
 
-export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClienteFormProps) {
+export function EmbeddedClienteForm({ 
+  onClienteCreated, 
+  onCancel, 
+  cliente, 
+  onSubmit,
+  submitButtonText = "Guardar Cliente"
+}: EmbeddedClienteFormProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [sectores, setSectores] = useState<Sector[]>([]);
   const [paises, setPaises] = useState<Pais[]>([]);
@@ -65,9 +73,27 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
   const [isLoadingMaestros, setIsLoadingMaestros] = useState(false);
   const navigate = useNavigate();
 
-  const form = useForm<ClienteSimpleForm>({
-    resolver: zodResolver(clienteSimpleSchema),
-    defaultValues: {
+  const getDefaultValues = () => {
+    if (cliente) {
+      return {
+        nombre: cliente.nombre || "",
+        documento: cliente.documento || "",
+        email: cliente.email || "",
+        telefono: cliente.telefono || "",
+        sector: cliente.sector_id || "",
+        pais: cliente.pais_id || "",
+        ciudad: cliente.ciudad_id || "",
+        direccion: cliente.direccion || "Por definir",
+        tipoServicio: cliente.tipo_servicio_id || "",
+        origen: cliente.origen_id || "",
+        empresa: cliente.empresa || "",
+        tipoPersona: (cliente.tipo_persona || "natural") as "natural" | "juridica",
+        tipoDocumento: (cliente.tipo_documento || "CC") as "CC" | "NIT" | "CE" | "pasaporte",
+        tipo: (cliente.tipo || "potencial") as "potencial" | "activo" | "inactivo" | "recurrente" | "referido" | "suspendido" | "corporativo",
+      };
+    }
+    
+    return {
       nombre: "",
       documento: "",
       email: "",
@@ -79,13 +105,26 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
       tipoServicio: "",
       origen: "",
       empresa: "",
-      tipoPersona: "natural",
-      tipoDocumento: "CC",
-      tipo: "potencial",
-    },
+      tipoPersona: "natural" as const,
+      tipoDocumento: "CC" as const,
+      tipo: "potencial" as const,
+    };
+  };
+
+  const form = useForm<ClienteSimpleForm>({
+    resolver: zodResolver(clienteSimpleSchema),
+    defaultValues: getDefaultValues(),
   });
 
-  // Cargar datos maestros al montar el componente
+  useEffect(() => {
+    if (cliente) {
+      const defaultValues = getDefaultValues();
+      Object.keys(defaultValues).forEach((key) => {
+        form.setValue(key as any, (defaultValues as any)[key]);
+      });
+    }
+  }, [cliente, form]);
+
   useEffect(() => {
     const loadMaestros = async () => {
       setIsLoadingMaestros(true);
@@ -116,16 +155,13 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
     loadMaestros();
   }, []);
 
-  // Filtrar ciudades cuando cambia el país seleccionado
   const paisId = form.watch("pais");
   useEffect(() => {
     if (paisId && ciudades.length > 0) {
       const filtradas = ciudades.filter(ciudad => ciudad.pais_id === paisId);
       setCiudadesFiltradas(filtradas);
       
-      // Si ya hay una ciudad seleccionada y no está en el país actual, limpiar el campo
-      const ciudadActual = form.getValues("ciudad");
-      if (ciudadActual && !filtradas.some(c => c.id === ciudadActual)) {
+      if (form.getValues("ciudad") && !filtradas.some(c => c.id === form.getValues("ciudad"))) {
         form.setValue("ciudad", "");
       }
     } else {
@@ -141,7 +177,6 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
   const handleSubmit = async (data: ClienteSimpleForm) => {
     setIsLoading(true);
     try {
-      // Convertir a formato completo para la API
       const clienteCompleto: ClienteForm = {
         tipoPersona: data.tipoPersona,
         tipoDocumento: data.tipoDocumento,
@@ -152,30 +187,34 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
         tipo: data.tipo,
         sector: data.sector,
         pais: data.pais,
-        ciudad: data.ciudad || data.pais, // Usamos el mismo país como ciudad si no se seleccionó
-        tipoServicio: data.tipoServicio || "", 
+        ciudad: data.ciudad || data.pais,
+        tipoServicio: data.tipoServicio || "",
         direccion: data.direccion || "Por definir",
-        origen: data.origen || data.sector, // Usamos el sector como origen si no se seleccionó
-        empresa: data.empresa || "", // Empresa seleccionada
+        origen: data.origen || data.sector,
+        empresa: data.empresa || "",
       };
 
-      const result = await createCliente(clienteCompleto);
-      
-      if (result.error) {
-        throw result.error;
-      }
+      if (onSubmit) {
+        await onSubmit(clienteCompleto);
+      } else {
+        const result = await createCliente(clienteCompleto);
+        
+        if (result.error) {
+          throw result.error;
+        }
 
-      if (result.data && onClienteCreated) {
-        onClienteCreated({
-          id: Number(result.data.id),
-          nombre: result.data.nombre,
-        });
+        if (result.data && onClienteCreated) {
+          onClienteCreated({
+            id: Number(result.data.id),
+            nombre: result.data.nombre,
+          });
+        }
+        
+        toast.success("Cliente creado exitosamente");
+        form.reset();
       }
-      
-      toast.success("Cliente creado exitosamente");
-      form.reset();
     } catch (error: any) {
-      toast.error("Error al crear el cliente: " + error.message);
+      toast.error(cliente ? "Error al actualizar el cliente: " : "Error al crear el cliente: " + error.message);
     } finally {
       setIsLoading(false);
     }
@@ -508,14 +547,16 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
               />
             </div>
             <div className="flex flex-col space-y-2">
-              <Button
-                type="button"
-                variant="link"
-                className="text-teal hover:text-sage"
-                onClick={goToFullClientForm}
-              >
-                Ir al formulario completo
-              </Button>
+              {!cliente && (
+                <Button
+                  type="button"
+                  variant="link"
+                  className="text-teal hover:text-sage"
+                  onClick={goToFullClientForm}
+                >
+                  Ir al formulario completo
+                </Button>
+              )}
             </div>
             <div className="flex justify-end space-x-2">
               <Button
@@ -531,7 +572,7 @@ export function EmbeddedClienteForm({ onClienteCreated, onCancel }: EmbeddedClie
                 disabled={isLoading}
               >
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                Guardar Cliente
+                {submitButtonText}
               </Button>
             </div>
           </form>

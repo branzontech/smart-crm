@@ -56,7 +56,8 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase.auth.signUp({
+      // Sign up the user
+      const { data: authData, error: authError } = await supabase.auth.signUp({
         email: values.email,
         password: values.password,
         options: {
@@ -67,10 +68,27 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
         },
       });
 
-      if (error) throw error;
+      if (authError) throw authError;
 
       // Check if we have user data to confirm success
-      if (data && data.user) {
+      if (authData && authData.user) {
+        // Manually insert the user into the profiles table
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .insert({
+            id: authData.user.id,
+            email: values.email,
+            nombre: values.nombre,
+            apellido: values.apellido,
+            rol: 'user',
+            username: values.email.split('@')[0], // Create a simple username from email
+          });
+
+        if (profileError) {
+          console.error("Error inserting profile:", profileError);
+          // Continue anyway as the user was created in auth
+        }
+
         setOpen(false);
         form.reset();
         toast({

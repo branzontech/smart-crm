@@ -5,7 +5,6 @@ import { UsersTable } from "@/components/usuarios/UsersTable";
 import { CreateUserDialog } from "@/components/usuarios/CreateUserDialog";
 import { useToast } from "@/components/ui/use-toast";
 import { supabase } from "@/integrations/supabase/client";
-import { Users } from "lucide-react";
 
 const UsuariosPage = () => {
   const [users, setUsers] = useState<any[]>([]);
@@ -43,10 +42,7 @@ const UsuariosPage = () => {
 
   const handleUserCreated = () => {
     fetchUsers();
-    toast({
-      title: "Usuario creado",
-      description: "El usuario ha sido creado exitosamente.",
-    });
+    // This toast is now handled in the CreateUserDialog component
   };
 
   return (

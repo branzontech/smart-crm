@@ -69,9 +69,25 @@ export const CreateUserDialog = ({ onUserCreated }: CreateUserDialogProps) => {
 
       if (error) throw error;
 
-      setOpen(false);
-      form.reset();
-      onUserCreated();
+      // Check if we have user data to confirm success
+      if (data && data.user) {
+        setOpen(false);
+        form.reset();
+        toast({
+          title: "Usuario creado con éxito",
+          description: "El usuario ha sido registrado correctamente.",
+        });
+        onUserCreated();
+      } else {
+        // Sometimes Supabase returns success but without user data
+        toast({
+          title: "Usuario pendiente de confirmación",
+          description: "Se ha enviado un correo de confirmación al usuario.",
+        });
+        setOpen(false);
+        form.reset();
+        onUserCreated();
+      }
     } catch (error: any) {
       console.error("Error creating user:", error.message);
       toast({

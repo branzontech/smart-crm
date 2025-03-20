@@ -103,6 +103,7 @@ export const ListaTareas = ({
                   getNombreUsuario={getNombreUsuario}
                   getColorUsuario={getColorUsuario}
                   formatoHora={formatoHora}
+                  mostrarFecha={!fecha}
                 />
               ))}
             </div>
@@ -126,6 +127,7 @@ export const ListaTareas = ({
                   getNombreUsuario={getNombreUsuario}
                   getColorUsuario={getColorUsuario}
                   formatoHora={formatoHora}
+                  mostrarFecha={!fecha}
                 />
               ))}
             </div>
@@ -148,6 +150,7 @@ interface TareaItemProps {
   getNombreUsuario?: (id: string) => string;
   getColorUsuario?: (id: string) => string;
   formatoHora: (date: Date) => string;
+  mostrarFecha: boolean;
 }
 
 const TareaItem = ({
@@ -156,7 +159,8 @@ const TareaItem = ({
   onCambiarEstado,
   getNombreUsuario,
   getColorUsuario,
-  formatoHora
+  formatoHora,
+  mostrarFecha
 }: TareaItemProps) => {
   // Asegurar que las fechas son objetos Date
   const fechaInicio = tarea.fechaInicio instanceof Date ? tarea.fechaInicio : new Date(tarea.fechaInicio);
@@ -229,7 +233,7 @@ const TareaItem = ({
         </div>
 
         {/* Mostrar fecha completa para tareas que no son del día seleccionado */}
-        {!fecha && (
+        {mostrarFecha && (
           <div className="text-xs text-gray-500 mt-1">
             {format(fechaInicio, "d MMM yyyy", { locale: es })}
           </div>

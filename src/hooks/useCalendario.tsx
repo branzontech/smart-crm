@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { CalendarioTarea, UsuarioCalendario } from '@/types/calendario';
+import { CalendarioTarea, CalendarioSubtarea, UsuarioCalendario } from '@/types/calendario';
 import { calendarioServiceDB } from '@/services/calendarioServiceDB';
 import { useToast } from '@/components/ui/use-toast';
 
@@ -20,7 +19,16 @@ export function useCalendario() {
         calendarioServiceDB.getTareas(),
         calendarioServiceDB.getUsuarios()
       ]);
-      setTareas(tareasData);
+      
+      // Cargar subtareas para cada tarea
+      const tareasConSubtareas = await Promise.all(
+        tareasData.map(async (tarea) => {
+          const subtareas = await calendarioServiceDB.getSubtareasByTareaId(tarea.id);
+          return { ...tarea, subtareas };
+        })
+      );
+      
+      setTareas(tareasConSubtareas);
       setUsuarios(usuariosData);
     } catch (error) {
       console.error('Error al cargar datos del calendario:', error);
@@ -39,17 +47,33 @@ export function useCalendario() {
     cargarDatos();
   }, []);
 
+  // Recargar subtareas cuando se selecciona una tarea
+  useEffect(() => {
+    if (tareaSeleccionada) {
+      const cargarSubtareas = async () => {
+        const subtareas = await calendarioServiceDB.getSubtareasByTareaId(tareaSeleccionada.id);
+        setTareaSeleccionada(prev => prev ? { ...prev, subtareas } : null);
+      };
+      
+      cargarSubtareas();
+    }
+  }, [tareaSeleccionada?.id]);
+
   // Operaciones CRUD para tareas
   const crearTarea = async (tarea: Omit<CalendarioTarea, 'id'>) => {
     try {
       const nuevaTarea = await calendarioServiceDB.crearTarea(tarea);
       if (nuevaTarea) {
-        setTareas(prev => [...prev, nuevaTarea]);
+        // Asegurarse de incluir las subtareas en la tarea creada
+        const subtareas = tarea.subtareas || [];
+        const tareaConSubtareas = { ...nuevaTarea, subtareas };
+        
+        setTareas(prev => [...prev, tareaConSubtareas]);
         toast({
           title: "Tarea creada",
           description: "La tarea se ha creado correctamente.",
         });
-        return nuevaTarea;
+        return tareaConSubtareas;
       }
       throw new Error('No se pudo crear la tarea');
     } catch (error) {
@@ -67,15 +91,20 @@ export function useCalendario() {
     try {
       const tareaActualizada = await calendarioServiceDB.actualizarTarea(id, datos);
       if (tareaActualizada) {
-        setTareas(prev => prev.map(t => t.id === id ? tareaActualizada : t));
+        // Asegurarse de preservar las subtareas en la tarea actualizada
+        const subtareas = datos.subtareas || 
+                         (tareaSeleccionada?.id === id ? tareaSeleccionada.subtareas : []);
+        const tareaConSubtareas = { ...tareaActualizada, subtareas };
+        
+        setTareas(prev => prev.map(t => t.id === id ? tareaConSubtareas : t));
         if (tareaSeleccionada && tareaSeleccionada.id === id) {
-          setTareaSeleccionada(tareaActualizada);
+          setTareaSeleccionada(tareaConSubtareas);
         }
         toast({
           title: "Tarea actualizada",
           description: "La tarea se ha actualizado correctamente.",
         });
-        return tareaActualizada;
+        return tareaConSubtareas;
       }
       throw new Error('No se pudo actualizar la tarea');
     } catch (error) {
@@ -137,6 +166,39 @@ export function useCalendario() {
     }
   };
 
+  // Nuevas operaciones para subtareas
+  const cambiarEstadoSubtarea = async (subtareaId: string, completada: boolean) => {
+    try {
+      const subtareaActualizada = await calendarioServiceDB.cambiarEstadoSubtarea(subtareaId, completada);
+      if (subtareaActualizada && tareaSeleccionada) {
+        // Actualizar la subtarea en la tarea seleccionada
+        const subtareasActualizadas = tareaSeleccionada.subtareas?.map(st => 
+          st.id === subtareaId ? subtareaActualizada : st
+        ) || [];
+        
+        // Actualizar la tarea seleccionada
+        const tareaActualizada = { ...tareaSeleccionada, subtareas: subtareasActualizadas };
+        setTareaSeleccionada(tareaActualizada);
+        
+        // Actualizar la tarea en la lista de tareas
+        setTareas(prev => prev.map(t => 
+          t.id === tareaSeleccionada.id ? tareaActualizada : t
+        ));
+        
+        return subtareaActualizada;
+      }
+      throw new Error('No se pudo cambiar el estado de la subtarea');
+    } catch (error) {
+      console.error(`Error al cambiar estado de subtarea ${subtareaId}:`, error);
+      toast({
+        variant: "destructive",
+        title: "Error",
+        description: "No se pudo cambiar el estado de la subtarea.",
+      });
+      return null;
+    }
+  };
+
   // Obtener el nombre completo de un usuario
   const getNombreUsuario = (id: string): string => {
     const usuario = usuarios.find(u => u.id === id);
@@ -163,6 +225,7 @@ export function useCalendario() {
     actualizarTarea,
     cambiarEstadoTarea,
     eliminarTarea,
+    cambiarEstadoSubtarea,
     getNombreUsuario,
     getColorUsuario,
     getColorCategoria: calendarioServiceDB.getColorCategoria,

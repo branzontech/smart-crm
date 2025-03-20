@@ -40,6 +40,7 @@ const CalendarioPage = () => {
     crearTarea,
     actualizarTarea,
     cambiarEstadoTarea,
+    cambiarEstadoSubtarea,
     eliminarTarea,
     getNombreUsuario,
     getColorUsuario
@@ -78,6 +79,12 @@ const CalendarioPage = () => {
 
   const handleCambiarEstado = async (tarea: CalendarioTarea, completada: boolean) => {
     await cambiarEstadoTarea(tarea, completada);
+  };
+
+  const handleCambiarEstadoSubtarea = async (subtareaId: string, completada: boolean) => {
+    if (tareaSeleccionada) {
+      await cambiarEstadoSubtarea(subtareaId, completada);
+    }
   };
 
   const handleEliminarTarea = async () => {
@@ -185,6 +192,7 @@ const CalendarioPage = () => {
                 onToggleCompletada={() => 
                   handleCambiarEstado(tareaSeleccionada, !tareaSeleccionada.completada)
                 }
+                onToggleSubtarea={handleCambiarEstadoSubtarea}
                 getNombreUsuario={getNombreUsuario}
                 getColorUsuario={getColorUsuario}
               />

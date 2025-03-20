@@ -104,6 +104,47 @@ export type Database = {
           },
         ]
       }
+      calendario_subtareas: {
+        Row: {
+          completada: boolean
+          created_at: string
+          descripcion: string | null
+          fecha_cumplimiento: string | null
+          id: string
+          tarea_id: string
+          titulo: string
+          updated_at: string
+        }
+        Insert: {
+          completada?: boolean
+          created_at?: string
+          descripcion?: string | null
+          fecha_cumplimiento?: string | null
+          id?: string
+          tarea_id: string
+          titulo: string
+          updated_at?: string
+        }
+        Update: {
+          completada?: boolean
+          created_at?: string
+          descripcion?: string | null
+          fecha_cumplimiento?: string | null
+          id?: string
+          tarea_id?: string
+          titulo?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "calendario_subtareas_tarea_id_fkey"
+            columns: ["tarea_id"]
+            isOneToOne: false
+            referencedRelation: "calendario_tareas"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       calendario_tareas: {
         Row: {
           categoria: Database["public"]["Enums"]["task_category"]

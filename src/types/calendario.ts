@@ -19,6 +19,16 @@ export interface CalendarioTarea {
   categoria: 'reunion' | 'entrega' | 'seguimiento' | 'otro';
   color?: string;
   creadoPor?: string;
+  subtareas?: CalendarioSubtarea[];
+}
+
+export interface CalendarioSubtarea {
+  id: string;
+  tareaId: string;
+  titulo: string;
+  descripcion?: string;
+  fechaCumplimiento?: Date;
+  completada: boolean;
 }
 
 export interface UsuarioCalendario {
